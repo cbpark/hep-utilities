@@ -5,6 +5,7 @@
 
 module HEP.Vector.FourVector
     ( FourVector(..)
+    , null4
     , add
     , multiply
     , subtract
@@ -24,6 +25,9 @@ data FourVector = FourVector
     , vx :: Double
     , vy :: Double
     , vz :: Double } deriving (Show, Eq)
+
+null4 :: FourVector
+null4 = FourVector { vt = 0, vx = 0, vy = 0, vz = 0 }
 
 add :: FourVector -> FourVector -> FourVector
 v `add` v' = FourVector { vt = vt v + vt v'
@@ -52,11 +56,8 @@ v `dot` v' = vt v * vt v' -
              vy v * vy v' -
              vz v * vz v'
 
-normSq :: FourVector -> Double
-normSq v =  v `dot` v
-
-invariantMass :: FourVector -> FourVector -> Double
-invariantMass v v' = (sqrt . normSq) (v `add` v')
+invariantMass :: FourVector -> Double
+invariantMass v = sqrt (v `dot` v)
 
 spatialVector :: FourVector -> TV.ThreeVector
 spatialVector v = TV.ThreeVector { TV.vx = vx v
