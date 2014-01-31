@@ -5,53 +5,60 @@
 
 module HEP.Vector.ThreeVector
     ( ThreeVector(..)
-    , add
-    , multiply
-    , dot
     , cosTheta
     , pseudoRapidity
     , phi
-    ) where
+    )  where
 
-data ThreeVector = ThreeVector
-    { vx :: Double
-    , vy :: Double
-    , vz :: Double
-    } deriving (Show, Eq)
+import Control.Applicative
+import Linear.Vector
+import Linear.Metric
 
-add :: ThreeVector -> ThreeVector -> ThreeVector
-v `add` v' = ThreeVector { vx = vx v + vx v'
-                         , vy = vy v + vy v'
-                         , vz = vz v + vz v'
-                         }
+data ThreeVector a = ThreeVector !a !a !a deriving (Eq, Show, Ord, Read)
 
-infixl 6 `add`
+instance Functor ThreeVector where
+    fmap f (ThreeVector a b c) = ThreeVector (f a) (f b) (f c)
 
-multiply :: Double -> ThreeVector -> ThreeVector
-d `multiply` (ThreeVector {vx=vx', vy=vy', vz=vz'}) =
-    ThreeVector { vx = d * vx', vy = d * vy', vz = d * vz' }
+instance Applicative ThreeVector where
+    pure a = ThreeVector a a a
+    ThreeVector a b c <*> ThreeVector d e f = ThreeVector (a d) (b e) (c f)
 
-infixl 7 `multiply`
+instance Num a => Num (ThreeVector a) where
+    (+) = liftA2 (+)
+    (-) = liftA2 (-)
+    (*) = liftA2 (*)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
-dot :: ThreeVector -> ThreeVector -> Double
-v `dot` v' = vx v * vx v' + vy v * vy v' + vz v * vz v'
+instance Fractional a => Fractional (ThreeVector a) where
+    recip = fmap recip
+    (/) = liftA2 (/)
+    fromRational = pure . fromRational
 
-cosTheta :: ThreeVector -> Double
-cosTheta v = case ptot of
-               0.0 -> 1.0
-               _   -> vz v / ptot
-    where ptot = sqrt $ v `dot` v
+instance Metric ThreeVector where
+    (ThreeVector a b c) `dot` (ThreeVector d e f) = a * d + b * e + c * f
 
-pseudoRapidity :: ThreeVector -> Double
-pseudoRapidity v
+instance Additive ThreeVector where
+    zero = pure 0
+    liftU2 = liftA2
+    liftI2 = liftA2
+
+cosTheta :: ThreeVector Double -> Double
+cosTheta v3@(ThreeVector _ _ z) = case ptot of
+                                    0 -> 1
+                                    _   -> z / ptot
+    where ptot = norm v3
+
+pseudoRapidity :: ThreeVector Double -> Double
+pseudoRapidity v3@(ThreeVector _ _ z)
     | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
-    | vz v > 0    =  1.0e10
+    | z > 0       = 1.0e10
     | otherwise   = -1.0e10
-    where ct = cosTheta v
+    where ct = cosTheta v3
 
 -- | returns the azimuthal angle from -pi to pi.
-phi :: ThreeVector -> Double
-phi v | fx == 0.0 && fy == 0.0 = 0.0
-      | otherwise              = atan2 fx fy
-      where fx = vx v
-            fy = vy v
+phi :: ThreeVector Double -> Double
+phi (ThreeVector x y _) | x == 0 && y == 0 = 0
+                        | otherwise        = atan2 x y

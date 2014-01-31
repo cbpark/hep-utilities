@@ -5,73 +5,63 @@
 
 module HEP.Vector.FourVector
     ( FourVector(..)
-    , null4
-    , add
-    , multiply
-    , subtract
-    , dot
     , invariantMass
-    , boostVector
     , pseudoRapidity
     , eta
     , phi
     ) where
 
-import Prelude hiding (negate, subtract)
+import Control.Applicative
+import Linear.Vector
+import Linear.Metric
+
 import qualified HEP.Vector.ThreeVector as TV
 
-data FourVector = FourVector
-    { vt :: Double
-    , vx :: Double
-    , vy :: Double
-    , vz :: Double } deriving (Show, Eq)
+data FourVector a = FourVector !a !a !a !a
+                    deriving (Eq, Show, Ord, Read)
 
-null4 :: FourVector
-null4 = FourVector { vt = 0, vx = 0, vy = 0, vz = 0 }
+instance Functor FourVector where
+    fmap f (FourVector a b c d) = FourVector (f a) (f b) (f c) (f d)
 
-add :: FourVector -> FourVector -> FourVector
-v `add` v' = FourVector { vt = vt v + vt v'
-                        , vx = vx v + vx v'
-                        , vy = vy v + vy v'
-                        , vz = vz v + vz v'
-                        }
+instance Applicative FourVector where
+    pure a = FourVector a a a a
+    FourVector a b c d <*> FourVector e f g h =
+        FourVector (a e) (b f) (c g) (d h)
 
-infixl 6 `add`
+instance Num a => Num (FourVector a) where
+    (+) = liftA2 (+)
+    (*) = liftA2 (*)
+    (-) = liftA2 (-)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
-multiply :: Double -> FourVector -> FourVector
-d `multiply` (FourVector {vt=vt', vx=vx', vy=vy', vz=vz'}) =
-    FourVector { vt = d * vt', vx = d * vx', vy = d * vy', vz = d * vz' }
+instance Fractional a => Fractional (FourVector a) where
+    recip = fmap recip
+    (/) = liftA2 (/)
+    fromRational = pure . fromRational
 
-infixl 7 `multiply`
+instance Metric FourVector where
+    (FourVector a b c d) `dot` (FourVector e f g h) =
+        a * e - b * f - c * g - d * h
 
-negate :: FourVector -> FourVector
-negate = ((-1) `multiply`)
+instance Additive FourVector where
+    zero = pure 0
+    liftU2 = liftA2
+    liftI2 = liftA2
 
-subtract :: FourVector -> FourVector -> FourVector
-v `subtract` v' = v `add` negate v'
+invariantMass :: FourVector Double -> Double
+invariantMass = norm
 
-dot :: FourVector -> FourVector -> Double
-v `dot` v' = vt v * vt v' -
-             vx v * vx v' -
-             vy v * vy v' -
-             vz v * vz v'
+spatialVector :: Num a => FourVector a -> TV.ThreeVector a
+spatialVector (FourVector _ x y z) = TV.ThreeVector x y z
 
-invariantMass :: FourVector -> Double
-invariantMass v = sqrt (v `dot` v)
-
-spatialVector :: FourVector -> TV.ThreeVector
-spatialVector v = TV.ThreeVector { TV.vx = vx v
-                                 , TV.vy = vy v
-                                 , TV.vz = vz v}
-
-boostVector :: FourVector -> TV.ThreeVector
-boostVector v = (1 / vt v) `TV.multiply` spatialVector v
-
-pseudoRapidity :: FourVector -> Double
+pseudoRapidity :: FourVector Double -> Double
 pseudoRapidity = TV.pseudoRapidity . spatialVector
 
-eta :: FourVector -> Double
+eta :: FourVector Double -> Double
 eta = pseudoRapidity
 
-phi :: FourVector -> Double
+phi :: FourVector Double -> Double
 phi = TV.phi . spatialVector
