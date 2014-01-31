@@ -1,7 +1,7 @@
 -- | These modules are intended to be imported qualified, to avoid name clashes,
 -- e.g.
 --
--- > import qualified HEP.Vector.FourVector as FV
+-- > import qualified HEP.Vector.FourVector as V4
 
 module HEP.Vector.FourVector
     ( FourVector(..)
@@ -9,13 +9,15 @@ module HEP.Vector.FourVector
     , pseudoRapidity
     , eta
     , phi
+    , deltaPhi
     ) where
 
 import Control.Applicative
 import Linear.Vector
 import Linear.Metric
 
-import qualified HEP.Vector.ThreeVector as TV
+import qualified HEP.Vector.TwoVector as V2
+import qualified HEP.Vector.ThreeVector as V3
 
 data FourVector a = FourVector !a !a !a !a
                     deriving (Eq, Show, Ord, Read)
@@ -54,14 +56,17 @@ instance Additive FourVector where
 invariantMass :: FourVector Double -> Double
 invariantMass = norm
 
-spatialVector :: Num a => FourVector a -> TV.ThreeVector a
-spatialVector (FourVector _ x y z) = TV.ThreeVector x y z
+spatialVector :: Num a => FourVector a -> V3.ThreeVector a
+spatialVector (FourVector _ x y z) = V3.ThreeVector x y z
 
 pseudoRapidity :: FourVector Double -> Double
-pseudoRapidity = TV.pseudoRapidity . spatialVector
+pseudoRapidity = V3.pseudoRapidity . spatialVector
 
 eta :: FourVector Double -> Double
 eta = pseudoRapidity
 
 phi :: FourVector Double -> Double
-phi = TV.phi . spatialVector
+phi = V3.phi . spatialVector
+
+deltaPhi :: FourVector Double -> FourVector Double -> Double
+v `deltaPhi` v' = V2.phi2MPiPi $ phi v - phi v'

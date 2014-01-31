@@ -17,3 +17,4 @@ library
                        linear >= 1.4
   exposed-modules:     HEP.Vector.FourVector
                        HEP.Vector.ThreeVector
+                       HEP.Vector.TwoVector

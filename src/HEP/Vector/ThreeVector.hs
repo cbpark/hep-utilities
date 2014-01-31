@@ -1,7 +1,7 @@
 -- | These modules are intended to be imported qualified, to avoid name clashes,
 -- e.g.
 --
--- > import qualified HEP.Vector.ThreeVector as TV
+-- > import qualified HEP.Vector.ThreeVector as V3
 
 module HEP.Vector.ThreeVector
     ( ThreeVector(..)
