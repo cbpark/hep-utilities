@@ -10,6 +10,7 @@ module HEP.Vector.FourVector
     , eta
     , phi
     , deltaPhi
+    , deltaR
     ) where
 
 import Control.Applicative
@@ -23,12 +24,12 @@ data FourVector a = FourVector !a !a !a !a
                     deriving (Eq, Show, Ord, Read)
 
 instance Functor FourVector where
-    fmap f (FourVector a b c d) = FourVector (f a) (f b) (f c) (f d)
+    fmap f (FourVector t x y z) = FourVector (f t) (f x) (f y) (f z)
 
 instance Applicative FourVector where
     pure a = FourVector a a a a
-    FourVector a b c d <*> FourVector e f g h =
-        FourVector (a e) (b f) (c g) (d h)
+    FourVector t x y z <*> FourVector t' x' y' z' =
+        FourVector (t t') (x x') (y y') (z z')
 
 instance Num a => Num (FourVector a) where
     (+) = liftA2 (+)
@@ -45,8 +46,8 @@ instance Fractional a => Fractional (FourVector a) where
     fromRational = pure . fromRational
 
 instance Metric FourVector where
-    (FourVector a b c d) `dot` (FourVector e f g h) =
-        a * e - b * f - c * g - d * h
+    (FourVector t x y z) `dot` (FourVector t' x' y' z') =
+        t * t' - x * x' - y * y' - z * z'
 
 instance Additive FourVector where
     zero = pure 0
@@ -69,4 +70,9 @@ phi :: FourVector Double -> Double
 phi = V3.phi . spatialVector
 
 deltaPhi :: FourVector Double -> FourVector Double -> Double
-v `deltaPhi` v' = V2.phi2MPiPi $ phi v - phi v'
+deltaPhi v v' = V2.phi2MPiPi $ phi v - phi v'
+
+deltaR :: FourVector Double -> FourVector Double -> Double
+deltaR v v' = sqrt $ deta * deta + dphi * dphi
+    where deta = eta v - eta v'
+          dphi = deltaPhi v v'

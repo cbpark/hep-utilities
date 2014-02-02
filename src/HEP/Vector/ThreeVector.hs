@@ -14,14 +14,16 @@ import Control.Applicative
 import Linear.Vector
 import Linear.Metric
 
-data ThreeVector a = ThreeVector !a !a !a deriving (Eq, Show, Ord, Read)
+data ThreeVector a = ThreeVector !a !a !a
+                     deriving (Eq, Show, Ord, Read)
 
 instance Functor ThreeVector where
-    fmap f (ThreeVector a b c) = ThreeVector (f a) (f b) (f c)
+    fmap f (ThreeVector x y z) = ThreeVector (f x) (f y) (f z)
 
 instance Applicative ThreeVector where
     pure a = ThreeVector a a a
-    ThreeVector a b c <*> ThreeVector d e f = ThreeVector (a d) (b e) (c f)
+    ThreeVector x y z <*> ThreeVector x' y' z' =
+        ThreeVector (x x') (y y') (z z')
 
 instance Num a => Num (ThreeVector a) where
     (+) = liftA2 (+)
@@ -38,7 +40,7 @@ instance Fractional a => Fractional (ThreeVector a) where
     fromRational = pure . fromRational
 
 instance Metric ThreeVector where
-    (ThreeVector a b c) `dot` (ThreeVector d e f) = a * d + b * e + c * f
+    (ThreeVector x y z) `dot` (ThreeVector x' y' z') = x * x' + y * y' + z * z'
 
 instance Additive ThreeVector where
     zero = pure 0
@@ -48,7 +50,7 @@ instance Additive ThreeVector where
 cosTheta :: ThreeVector Double -> Double
 cosTheta v3@(ThreeVector _ _ z) = case ptot of
                                     0 -> 1
-                                    _   -> z / ptot
+                                    _ -> z / ptot
     where ptot = norm v3
 
 pseudoRapidity :: ThreeVector Double -> Double
