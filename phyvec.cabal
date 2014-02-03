@@ -17,5 +17,6 @@ library
   build-depends:       base >= 4.6,
                        linear >= 1.4
   exposed-modules:     HEP.Vector.LorentzVector
+                       HEP.Vector.LorentzTransverseVector
                        HEP.Vector.ThreeVector
                        HEP.Vector.TwoVector
