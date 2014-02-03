@@ -64,7 +64,7 @@ lorentzTVector (LorentzVector t x y z) =
     TV.LorentzTransverseVector (sqrt $ t*t - z*z) x y
 
 transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
-transverseMass v v' = TV.transverseMass (lorentzTVector v) (lorentzTVector v')
+transverseMass v v' = TV.invariantMass (lorentzTVector v) (lorentzTVector v')
 
 spatialVector :: Num a => LorentzVector a -> V3.ThreeVector a
 spatialVector (LorentzVector _ x y z) = V3.ThreeVector x y z

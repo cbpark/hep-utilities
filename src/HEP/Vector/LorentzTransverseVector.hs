@@ -5,7 +5,7 @@
 
 module HEP.Vector.LorentzTransverseVector
     ( LorentzTransverseVector(..)
-    , transverseMass
+    , invariantMass
     ) where
 
 import Control.Applicative
@@ -47,8 +47,8 @@ instance Additive LorentzTransverseVector where
     liftU2 = liftA2
     liftI2 = liftA2
 
-transverseMass :: Floating a =>
+invariantMass :: Floating a =>
                   LorentzTransverseVector a
                -> LorentzTransverseVector a
                -> a
-transverseMass v v' = norm $ v ^+^ v'
+invariantMass v v' = norm $ v ^+^ v'
