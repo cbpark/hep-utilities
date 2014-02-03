@@ -47,13 +47,13 @@ instance Additive ThreeVector where
     liftU2 = liftA2
     liftI2 = liftA2
 
-cosTheta :: ThreeVector Double -> Double
+cosTheta :: (Floating a, Eq a) => ThreeVector a -> a
 cosTheta v3@(ThreeVector _ _ z) = case ptot of
                                     0 -> 1
                                     _ -> z / ptot
     where ptot = norm v3
 
-pseudoRapidity :: ThreeVector Double -> Double
+pseudoRapidity :: (Floating a, Ord a) => ThreeVector a -> a
 pseudoRapidity v3@(ThreeVector _ _ z)
     | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
     | z > 0       = 1.0e10
@@ -61,6 +61,6 @@ pseudoRapidity v3@(ThreeVector _ _ z)
     where ct = cosTheta v3
 
 -- | returns the azimuthal angle from -pi to pi.
-phi :: ThreeVector Double -> Double
+phi :: (RealFloat a) => ThreeVector a -> a
 phi (ThreeVector x y _) | x == 0 && y == 0 = 0
                         | otherwise        = atan2 x y

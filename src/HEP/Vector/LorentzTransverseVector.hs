@@ -1,7 +1,7 @@
 -- | These modules are intended to be imported qualified, to avoid name clashes,
 -- e.g.
 --
--- > import qualified HEP.Vector.LorentzTransverseVector as TV3
+-- > import qualified HEP.Vector.LorentzTransverseVector as TV
 
 module HEP.Vector.LorentzTransverseVector
     ( LorentzTransverseVector(..)
@@ -47,5 +47,8 @@ instance Additive LorentzTransverseVector where
     liftU2 = liftA2
     liftI2 = liftA2
 
-transverseMass :: LorentzTransverseVector Double -> LorentzTransverseVector Double -> Double
+transverseMass :: Floating a =>
+                  LorentzTransverseVector a
+               -> LorentzTransverseVector a
+               -> a
 transverseMass v v' = norm $ v ^+^ v'

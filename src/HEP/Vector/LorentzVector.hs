@@ -6,6 +6,7 @@
 module HEP.Vector.LorentzVector
     ( LorentzVector(..)
     , invariantMass
+    , transverseMass
     , pseudoRapidity
     , eta
     , phi
@@ -19,6 +20,7 @@ import Linear.Metric
 
 import qualified HEP.Vector.TwoVector as V2
 import qualified HEP.Vector.ThreeVector as V3
+import qualified HEP.Vector.LorentzTransverseVector as TV
 
 data LorentzVector a = LorentzVector !a !a !a !a
                     deriving (Eq, Show, Ord, Read)
@@ -54,25 +56,32 @@ instance Additive LorentzVector where
     liftU2 = liftA2
     liftI2 = liftA2
 
-invariantMass :: LorentzVector Double -> Double
+invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
+
+lorentzTVector :: Floating a => LorentzVector a -> TV.LorentzTransverseVector a
+lorentzTVector (LorentzVector t x y z) =
+    TV.LorentzTransverseVector (sqrt $ t*t - z*z) x y
+
+transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
+transverseMass v v' = TV.transverseMass (lorentzTVector v) (lorentzTVector v')
 
 spatialVector :: Num a => LorentzVector a -> V3.ThreeVector a
 spatialVector (LorentzVector _ x y z) = V3.ThreeVector x y z
 
-pseudoRapidity :: LorentzVector Double -> Double
+pseudoRapidity :: (Floating a, Ord a) => LorentzVector a -> a
 pseudoRapidity = V3.pseudoRapidity . spatialVector
 
-eta :: LorentzVector Double -> Double
+eta :: (Floating a, Ord a) => LorentzVector a -> a
 eta = pseudoRapidity
 
-phi :: LorentzVector Double -> Double
+phi :: RealFloat a => LorentzVector a -> a
 phi = V3.phi . spatialVector
 
-deltaPhi :: LorentzVector Double -> LorentzVector Double -> Double
+deltaPhi :: RealFloat a => LorentzVector a -> LorentzVector a -> a
 deltaPhi v v' = V2.phi2MPiPi $ phi v - phi v'
 
-deltaR :: LorentzVector Double -> LorentzVector Double -> Double
+deltaR :: RealFloat a => LorentzVector a -> LorentzVector a -> a
 deltaR v v' = sqrt $ deta * deta + dphi * dphi
     where deta = eta v - eta v'
           dphi = deltaPhi v v'
