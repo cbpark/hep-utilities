@@ -16,6 +16,6 @@ library
   ghc-options:         -Wall -O2 -threaded -funbox-strict-fields -fwarn-unused-do-bind -fwarn-incomplete-patterns
   build-depends:       base >= 4.6,
                        linear >= 1.4
-  exposed-modules:     HEP.Vector.FourVector
+  exposed-modules:     HEP.Vector.LorentzVector
                        HEP.Vector.ThreeVector
                        HEP.Vector.TwoVector
