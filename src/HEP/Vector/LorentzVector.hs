@@ -12,6 +12,7 @@ module HEP.Vector.LorentzVector
     , phi
     , deltaPhi
     , deltaR
+    , boostVector
     ) where
 
 import Control.Applicative
@@ -85,3 +86,6 @@ deltaR :: RealFloat a => LorentzVector a -> LorentzVector a -> a
 deltaR v v' = sqrt $ deta * deta + dphi * dphi
     where deta = eta v - eta v'
           dphi = deltaPhi v v'
+
+boostVector :: Fractional a => LorentzVector a -> V3.ThreeVector a
+boostVector v@(LorentzVector t _ _ _) = spatialVector v ^/ t
