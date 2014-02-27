@@ -1,8 +1,3 @@
--- | These modules are intended to be imported qualified, to avoid name clashes,
--- e.g.
---
--- > import qualified HEP.Vector.LorentzVector as V4
-
 module HEP.Vector.LorentzVector
     ( LorentzVector(..)
     , invariantMass
@@ -15,16 +10,14 @@ module HEP.Vector.LorentzVector
     , boostVector
     ) where
 
-import Control.Applicative
-import Linear.Vector
-import Linear.Metric
-
+import           HEP.Vector
 import qualified HEP.Vector.TwoVector as V2
 import qualified HEP.Vector.ThreeVector as V3
 import qualified HEP.Vector.LorentzTransverseVector as TV
 
-data LorentzVector a = LorentzVector !a !a !a !a
-                    deriving (Eq, Show, Ord, Read)
+import           Control.Applicative
+
+data LorentzVector a = LorentzVector !a !a !a !a deriving (Eq, Show)
 
 instance Functor LorentzVector where
     fmap f (LorentzVector t x y z) = LorentzVector (f t) (f x) (f y) (f z)
@@ -35,27 +28,25 @@ instance Applicative LorentzVector where
         LorentzVector (t t') (x x') (y y') (z z')
 
 instance Num a => Num (LorentzVector a) where
-    (+) = liftA2 (+)
-    (*) = liftA2 (*)
-    (-) = liftA2 (-)
-    negate = fmap negate
-    abs = fmap abs
-    signum = fmap signum
+    (+)         = liftA2 (+)
+    (*)         = liftA2 (*)
+    (-)         = liftA2 (-)
+    negate      = fmap negate
+    abs         = fmap abs
+    signum      = fmap signum
     fromInteger = pure . fromInteger
 
 instance Fractional a => Fractional (LorentzVector a) where
-    recip = fmap recip
-    (/) = liftA2 (/)
+    recip        = fmap recip
+    (/)          = liftA2 (/)
     fromRational = pure . fromRational
 
 instance Metric LorentzVector where
     (LorentzVector t x y z) `dot` (LorentzVector t' x' y' z') =
         t * t' - x * x' - y * y' - z * z'
 
-instance Additive LorentzVector where
+instance Vector LorentzVector where
     zero = pure 0
-    liftU2 = liftA2
-    liftI2 = liftA2
 
 invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
@@ -88,4 +79,4 @@ deltaR v v' = sqrt $ deta * deta + dphi * dphi
           dphi = deltaPhi v v'
 
 boostVector :: Fractional a => LorentzVector a -> V3.ThreeVector a
-boostVector v@(LorentzVector t _ _ _) = spatialVector v ^/ t
+boostVector v@(LorentzVector t _ _ _) = spatialVector v ./ t
