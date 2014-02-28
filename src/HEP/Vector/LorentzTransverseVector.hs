@@ -19,6 +19,13 @@ instance Applicative LorentzTransverseVector where
     LorentzTransverseVector t x y <*> LorentzTransverseVector t' x' y' =
         LorentzTransverseVector (t t') (x x') (y y')
 
+instance Monad LorentzTransverseVector where
+    return a = LorentzTransverseVector a a a
+    LorentzTransverseVector t x y >>= f = LorentzTransverseVector t' x' y'
+        where LorentzTransverseVector t' _  _  = f t
+              LorentzTransverseVector _  x' _  = f x
+              LorentzTransverseVector _  _  y' = f y
+
 instance Num a => Num (LorentzTransverseVector a) where
     (+)         = liftA2 (+)
     (*)         = liftA2 (*)

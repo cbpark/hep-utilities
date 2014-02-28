@@ -16,6 +16,12 @@ instance Applicative TwoVector where
     pure a = TwoVector a a
     TwoVector x y <*> TwoVector x' y' = TwoVector (x x') (y y')
 
+instance Monad TwoVector where
+    return a = TwoVector a a
+    TwoVector x y >>= f = TwoVector x' y'
+        where TwoVector x' _  = f x
+              TwoVector _  y' = f y
+
 instance Num a => Num (TwoVector a) where
     (+)         = liftA2 (+)
     (-)         = liftA2 (-)

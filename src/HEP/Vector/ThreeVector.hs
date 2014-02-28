@@ -19,6 +19,13 @@ instance Applicative ThreeVector where
     ThreeVector x y z <*> ThreeVector x' y' z' =
         ThreeVector (x x') (y y') (z z')
 
+instance Monad ThreeVector where
+    return a = ThreeVector a a a
+    ThreeVector x y z >>= f = ThreeVector x' y' z'
+        where ThreeVector x' _  _  = f x
+              ThreeVector _  y' _  = f y
+              ThreeVector _  _  z' = f z
+
 instance Num a => Num (ThreeVector a) where
     (+)         = liftA2 (+)
     (-)         = liftA2 (-)
