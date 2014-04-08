@@ -1,8 +1,9 @@
+{-# LANGUAGE DeriveFunctor  #-}
+
 module HEP.Vector.LorentzVector
     ( LorentzVector(..)
     , invariantMass
     , transverseMass
-    , pseudoRapidity
     , eta
     , phi
     , deltaPhi
@@ -10,44 +11,20 @@ module HEP.Vector.LorentzVector
     , boostVector
     ) where
 
-import           HEP.Vector
-import qualified HEP.Vector.TwoVector as V2
-import qualified HEP.Vector.ThreeVector as V3
-import qualified HEP.Vector.LorentzTransverseVector as TV
+import           HEP.Vector                (Metric (..), Vector (..))
+import qualified HEP.Vector.LorentzTVector as TV
+import qualified HEP.Vector.ThreeVector    as V3
+import qualified HEP.Vector.TwoVector      as V2
 
-import           Control.Applicative
+import           Control.Applicative       (Applicative (..))
 
-data LorentzVector a = LorentzVector !a !a !a !a deriving (Eq, Show)
-
-instance Functor LorentzVector where
-    fmap f (LorentzVector t x y z) = LorentzVector (f t) (f x) (f y) (f z)
+data LorentzVector a = LorentzVector !a !a !a !a
+                       deriving (Eq, Show, Functor)
 
 instance Applicative LorentzVector where
     pure a = LorentzVector a a a a
     LorentzVector t x y z <*> LorentzVector t' x' y' z' =
         LorentzVector (t t') (x x') (y y') (z z')
-
-instance Monad LorentzVector where
-    return a = LorentzVector a a a a
-    LorentzVector t x y z >>= f = LorentzVector t' x' y' z'
-        where LorentzVector t' _  _  _  = f t
-              LorentzVector _  x' _  _  = f x
-              LorentzVector _  _  y' _  = f y
-              LorentzVector _  _  _  z' = f z
-
-instance Num a => Num (LorentzVector a) where
-    (+)         = liftA2 (+)
-    (*)         = liftA2 (*)
-    (-)         = liftA2 (-)
-    negate      = fmap negate
-    abs         = fmap abs
-    signum      = fmap signum
-    fromInteger = pure . fromInteger
-
-instance Fractional a => Fractional (LorentzVector a) where
-    recip        = fmap recip
-    (/)          = liftA2 (/)
-    fromRational = pure . fromRational
 
 instance Metric LorentzVector where
     (LorentzVector t x y z) `dot` (LorentzVector t' x' y' z') =
@@ -59,24 +36,19 @@ instance Vector LorentzVector where
 invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
 
-lorentzTVector :: Floating a => LorentzVector a -> TV.LorentzTransverseVector a
-lorentzTVector (LorentzVector t x y z) =
-    TV.LorentzTransverseVector (sqrt $ t*t - z*z) x y
-
 transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
-transverseMass v v' = TV.invariantMass (lorentzTVector v) (lorentzTVector v')
+transverseMass v v' = TV.invariantMass (transverseV v) (transverseV v')
+    where transverseV (LorentzVector t x y z) =
+              TV.LorentzTVector (sqrt $ t*t - z*z) x y
 
-spatialVector :: Num a => LorentzVector a -> V3.ThreeVector a
-spatialVector (LorentzVector _ x y z) = V3.ThreeVector x y z
-
-pseudoRapidity :: (Floating a, Ord a) => LorentzVector a -> a
-pseudoRapidity = V3.pseudoRapidity . spatialVector
+spatialV :: Num a => LorentzVector a -> V3.ThreeVector a
+spatialV (LorentzVector _ x y z) = V3.ThreeVector x y z
 
 eta :: (Floating a, Ord a) => LorentzVector a -> a
-eta = pseudoRapidity
+eta = V3.pseudoRapidity . spatialV
 
 phi :: RealFloat a => LorentzVector a -> a
-phi = V3.phi . spatialVector
+phi = V3.phi . spatialV
 
 deltaPhi :: RealFloat a => LorentzVector a -> LorentzVector a -> a
 deltaPhi v v' = V2.phi2MPiPi $ phi v - phi v'
@@ -87,4 +59,4 @@ deltaR v v' = sqrt $ deta * deta + dphi * dphi
           dphi = deltaPhi v v'
 
 boostVector :: Fractional a => LorentzVector a -> V3.ThreeVector a
-boostVector v@(LorentzVector t _ _ _) = spatialVector v ./ t
+boostVector v@(LorentzVector t _ _ _) = spatialV v ./ t

@@ -1,11 +1,9 @@
 module HEP.Vector
     ( Vector(..)
     , Metric(..)
-    , vecSum
     ) where
 
-import Control.Applicative
-import Data.Foldable as Foldable (Foldable, foldl')
+import           Control.Applicative (Applicative, liftA, liftA2)
 
 infixl 6 .+., .-.
 infixl 7 .*, *., ./
@@ -39,6 +37,3 @@ class Vector f => Metric f where
 
     distance :: Floating a => f a -> f a -> a
     distance u v = norm (u .-. v)
-
-vecSum :: (Foldable f, Vector v, Num a) => f (v a) -> v a
-vecSum = Foldable.foldl' (.+.) zero

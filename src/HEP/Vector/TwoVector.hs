@@ -1,40 +1,20 @@
+{-# LANGUAGE DeriveFunctor #-}
+
 module HEP.Vector.TwoVector
     ( TwoVector(..)
     , phi2MPiPi
     ) where
 
-import HEP.Vector
+import           HEP.Vector          (Metric (..), Vector (..))
 
-import Control.Applicative
+import           Control.Applicative (Applicative (..))
 
-data TwoVector a = TwoVector !a !a deriving (Eq, Show)
-
-instance Functor TwoVector where
-    fmap f (TwoVector x y) = TwoVector (f x) (f y)
+data TwoVector a = TwoVector !a !a
+                   deriving (Eq, Show, Functor)
 
 instance Applicative TwoVector where
     pure a = TwoVector a a
     TwoVector x y <*> TwoVector x' y' = TwoVector (x x') (y y')
-
-instance Monad TwoVector where
-    return a = TwoVector a a
-    TwoVector x y >>= f = TwoVector x' y'
-        where TwoVector x' _  = f x
-              TwoVector _  y' = f y
-
-instance Num a => Num (TwoVector a) where
-    (+)         = liftA2 (+)
-    (-)         = liftA2 (-)
-    (*)         = liftA2 (*)
-    negate      = fmap negate
-    abs         = fmap abs
-    signum      = fmap signum
-    fromInteger = pure . fromInteger
-
-instance Fractional a => Fractional (TwoVector a) where
-    recip        = fmap recip
-    (/)          = liftA2 (/)
-    fromRational = pure . fromRational
 
 instance Vector TwoVector where
     zero = pure 0
