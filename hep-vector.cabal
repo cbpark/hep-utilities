@@ -2,6 +2,7 @@ name:                hep-vector
 version:             0.1.0.0
 synopsis:            Vectors in physics
 description:         Various vectors for utiliting in the high energy physics studies and analyses
+homepage:            https://github.com/cbpark/hep-vector
 license:             BSD3
 license-file:        LICENSE
 author:              Chan Beom Park
