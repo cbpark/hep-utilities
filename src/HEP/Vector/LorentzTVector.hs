@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module HEP.Vector.LorentzTVector
-    ( LorentzTVector(..)
+    (
+      LorentzTVector(..)
+
     , invariantMass
     ) where
 

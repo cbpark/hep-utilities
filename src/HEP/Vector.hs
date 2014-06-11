@@ -1,5 +1,6 @@
 module HEP.Vector
-    ( Vector(..)
+    (
+      Vector(..)
     , Metric(..)
     ) where
 

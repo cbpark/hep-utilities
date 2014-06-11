@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
 
 module HEP.Vector.TwoVector
-    ( TwoVector(..)
+    (
+      TwoVector(..)
+
     , phi2MPiPi
     ) where
 
