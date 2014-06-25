@@ -46,6 +46,7 @@ angle v v' = let !ptot2 = (v `dot` v) * (v' `dot` v')
 pseudoRapidity :: (Floating a, Ord a) => ThreeVector a -> a
 pseudoRapidity v3@(ThreeVector _ _ z)
     | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
+    | z == 0      =  0
     | z > 0       =  1.0e10
     | otherwise   = -1.0e10
     where !ct = cosTheta v3
