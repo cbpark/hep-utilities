@@ -43,7 +43,7 @@ invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
 
 transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
-transverseMass v v' = TV.invariantMass (transverseV v) (transverseV v')
+transverseMass = TV.invariantMass `on` transverseV
     where transverseV (LorentzVector t x y z) =
               TV.LorentzTVector (sqrt $ t*t - z*z) x y
 
