@@ -1,10 +1,8 @@
-{-# LANGUAGE BangPatterns  #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE MultiWayIf    #-}
+{-# LANGUAGE MultiWayIf #-}
 
 module HEP.Vector.ThreeVector
     (
-      ThreeVector(..)
+      ThreeVector (..)
 
     , angle
     , cosTheta
@@ -12,46 +10,39 @@ module HEP.Vector.ThreeVector
     , phi
     )  where
 
-import           HEP.Vector          (Metric (..), Vector (..))
+import           Control.Lens
+import           Data.Function (on)
+import           Linear.Metric
+import           Linear.V3
 
-import           Control.Applicative (Applicative (..))
-
-data ThreeVector a = ThreeVector !a !a !a
-                     deriving (Eq, Show, Functor)
-
-instance Applicative ThreeVector where
-    pure a = ThreeVector a a a
-    ThreeVector x y z <*> ThreeVector x' y' z' = ThreeVector (x x') (y y') (z z')
-
-instance Vector ThreeVector where
-    zero = pure 0
-
-instance Metric ThreeVector where
-    (ThreeVector x y z) `dot` (ThreeVector x' y' z') = x * x' + y * y' + z * z'
+newtype ThreeVector a = ThreeVector { getVector :: V3 a }
+                      deriving (Eq, Ord, Show)
 
 cosTheta :: (Floating a, Ord a) => ThreeVector a -> a
-cosTheta v3@(ThreeVector _ _ z) = let !ptot = norm v3
-                                  in if ptot > 0 then z / ptot else 1
+cosTheta v = let ptot = (norm . getVector) v
+             in if ptot > 0 then view _z (getVector v) / ptot else 1
 
 -- | returns the angle of the 3-vector with respect to another 3-vector.
 angle :: (Floating a, Ord a) => ThreeVector a -> ThreeVector a -> a
-angle v v' = let !ptot2 = (v `dot` v) * (v' `dot` v')
+angle v v' = let ptot2 = ((*) `on` (quadrance . getVector)) v v'
              in if ptot2 <= 0
                 then 0
-                else let !arg = (v `dot` v') / sqrt ptot2
+                else let arg = (dot `on` getVector) v v' / sqrt ptot2
                      in if | arg >  1  -> 0
                            | arg < -1  -> pi
                            | otherwise -> acos arg
 
 pseudoRapidity :: (Floating a, Ord a) => ThreeVector a -> a
-pseudoRapidity v3@(ThreeVector _ _ z)
-    | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
-    | z == 0      =  0
-    | z > 0       =  1.0e10
-    | otherwise   = -1.0e10
-    where !ct = cosTheta v3
+pseudoRapidity v | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
+                 | pz == 0     =  0
+                 | pz > 0      =  1.0e10
+                 | otherwise   = -1.0e10
+  where ct = cosTheta v
+        pz = view _z (getVector v)
 
 -- | returns the azimuthal angle from -pi to pi.
 phi :: RealFloat a => ThreeVector a -> a
-phi (ThreeVector x y _) | x == 0 && y == 0 = 0
-                        | otherwise        = atan2 x y
+phi v | px == 0 && py == 0 = 0
+      | otherwise          = atan2 px py
+  where px = view _x (getVector v)
+        py = view _y (getVector v)

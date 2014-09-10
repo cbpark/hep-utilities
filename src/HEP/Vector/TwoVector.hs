@@ -1,28 +1,14 @@
-{-# LANGUAGE DeriveFunctor #-}
-
 module HEP.Vector.TwoVector
     (
-      TwoVector(..)
+      TwoVector (..)
 
     , phi2MPiPi
     ) where
 
-import           HEP.Vector          (Metric (..), Vector (..))
+import           Linear.V2
 
-import           Control.Applicative (Applicative (..))
-
-data TwoVector a = TwoVector !a !a
-                   deriving (Eq, Show, Functor)
-
-instance Applicative TwoVector where
-    pure a = TwoVector a a
-    TwoVector x y <*> TwoVector x' y' = TwoVector (x x') (y y')
-
-instance Vector TwoVector where
-    zero = pure 0
-
-instance Metric TwoVector where
-    (TwoVector x y) `dot` (TwoVector x' y') = x * x' + y * y'
+newtype TwoVector a = TwoVector { getVector :: V2 a }
+                    deriving (Eq, Ord, Show)
 
 -- | returns phi angle in the interval [-PI,PI).
 phi2MPiPi :: (Floating a, Ord a) => a -> a
