@@ -5,7 +5,7 @@ module HEP.Vector.TwoVector
     , phi2MPiPi
     ) where
 
-import           Linear.V2
+import           Linear.V2 (V2 (..))
 
 newtype TwoVector a = TwoVector { getVector :: V2 a }
                     deriving (Eq, Ord, Show)

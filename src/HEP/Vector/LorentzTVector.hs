@@ -5,11 +5,11 @@ module HEP.Vector.LorentzTVector
     , invariantMass
     ) where
 
-import           Control.Applicative
-import           Control.Lens
-import           Linear.Metric
-import           Linear.V3
-import           Linear.Vector
+import           Control.Applicative (Applicative (..))
+import           Control.Lens        (view)
+import           Linear.Metric       (Metric (..))
+import           Linear.V3           (V3 (..), _x, _y, _z)
+import           Linear.Vector       (Additive (..), (^+^))
 
 newtype LorentzTVector a = LorentzTVector { getVector :: V3 a }
                          deriving (Eq, Ord, Show)

@@ -3,6 +3,7 @@ module HEP.Vector.LorentzVector
       LorentzVector (..)
 
     , lorentzVectorXYZT
+    , vectorSum
     , invariantMass
     , transverseMass
     , eta
@@ -14,14 +15,15 @@ module HEP.Vector.LorentzVector
     , boostVector
     ) where
 
-import           Control.Applicative
-import           Control.Lens
+import           Control.Applicative       (Applicative (..))
+import           Control.Lens              (view)
+import           Data.Foldable             (Foldable (..))
 import           Data.Function             (on)
-import           Linear.Metric
-import           Linear.V2
-import           Linear.V3
-import           Linear.V4
-import           Linear.Vector
+import           Linear.Metric             (Metric (..))
+import           Linear.V2                 (V2 (..))
+import           Linear.V3                 (V3 (..))
+import           Linear.V4                 (V4 (..), _w, _x, _y, _z)
+import           Linear.Vector             (Additive (..), sumV, (^/))
 
 import qualified HEP.Vector.LorentzTVector as TV
 import qualified HEP.Vector.ThreeVector    as V3
@@ -57,6 +59,10 @@ instance Metric LorentzVector where
   v `dot` v' = let (t , x , y , z ) = components v
                    (t', x', y', z') = components v'
                in t * t' - x * x' - y * y' - z * z'
+
+vectorSum :: (Foldable f, Functor f, Num a)
+             => f (LorentzVector a) -> LorentzVector a
+vectorSum = LorentzVector . sumV . fmap getVector
 
 invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm

@@ -10,17 +10,17 @@ module HEP.Vector.ThreeVector
     , phi
     )  where
 
-import           Control.Lens
+import           Control.Lens  ((^.))
 import           Data.Function (on)
-import           Linear.Metric
-import           Linear.V3
+import           Linear.Metric (Metric (..))
+import           Linear.V3     (V3 (..), R1 (..), R2 (..), R3 (..))
 
 newtype ThreeVector a = ThreeVector { getVector :: V3 a }
                       deriving (Eq, Ord, Show)
 
 cosTheta :: (Floating a, Ord a) => ThreeVector a -> a
 cosTheta v = let ptot = (norm . getVector) v
-             in if ptot > 0 then view _z (getVector v) / ptot else 1
+             in if ptot > 0 then getVector v ^. _z / ptot else 1
 
 -- | returns the angle of the 3-vector with respect to another 3-vector.
 angle :: (Floating a, Ord a) => ThreeVector a -> ThreeVector a -> a
@@ -38,11 +38,10 @@ pseudoRapidity v | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
                  | pz > 0      =  1.0e10
                  | otherwise   = -1.0e10
   where ct = cosTheta v
-        pz = view _z (getVector v)
+        pz = getVector v ^. _z
 
 -- | returns the azimuthal angle from -pi to pi.
 phi :: RealFloat a => ThreeVector a -> a
 phi v | px == 0 && py == 0 = 0
       | otherwise          = atan2 px py
-  where px = view _x (getVector v)
-        py = view _y (getVector v)
+  where (px, py) = (getVector v ^. _x, getVector v ^. _y)
