@@ -2,6 +2,7 @@ module HEP.Vector.LorentzVector
     (
       LorentzVector (..)
 
+    , lorentzVectorXYZT
     , invariantMass
     , transverseMass
     , eta
@@ -28,6 +29,9 @@ import qualified HEP.Vector.TwoVector      as V2
 
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
+
+lorentzVectorXYZT :: (a, a, a, a) -> LorentzVector a
+lorentzVectorXYZT (px, py, pz, e) = LorentzVector (V4 e px py pz)
 
 components :: LorentzVector a -> (a, a, a, a)
 components v = (t v, x v, y v, z v)
