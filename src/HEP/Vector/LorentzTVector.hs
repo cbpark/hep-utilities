@@ -26,7 +26,7 @@ instance Functor LorentzTVector where
 
 instance Applicative LorentzTVector where
   pure a = LorentzTVector (V3 a a a)
-  v <*> v' = let (t, x, y)    = components v
+  v <*> v' = let (t , x , y ) = components v
                  (t', x', y') = components v'
              in LorentzTVector (V3 (t t') (x x') (y y'))
 
@@ -34,7 +34,7 @@ instance Additive LorentzTVector where
   zero = pure 0
 
 instance Metric LorentzTVector where
-  v `dot` v' = let (t, x, y)    = components v
+  v `dot` v' = let (t , x , y ) = components v
                    (t', x', y') = components v'
                in t * t' - x * x' - y * y'
 

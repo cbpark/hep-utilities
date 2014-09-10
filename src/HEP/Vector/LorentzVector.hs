@@ -42,7 +42,7 @@ instance Functor LorentzVector where
 
 instance Applicative LorentzVector where
   pure a = LorentzVector (V4 a a a a)
-  v <*> v' = let (t, x, y, z)     = components v
+  v <*> v' = let (t , x , y , z ) = components v
                  (t', x', y', z') = components v'
              in LorentzVector (V4 (t t') (x x') (y y') (z z'))
 
@@ -50,7 +50,7 @@ instance Additive LorentzVector where
   zero = pure 0
 
 instance Metric LorentzVector where
-  v `dot` v' = let (t, x, y, z)     = components v
+  v `dot` v' = let (t , x , y , z ) = components v
                    (t', x', y', z') = components v'
                in t * t' - x * x' - y * y' - z * z'
 
