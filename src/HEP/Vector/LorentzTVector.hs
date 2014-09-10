@@ -8,7 +8,7 @@ module HEP.Vector.LorentzTVector
 import           Control.Applicative (Applicative (..))
 import           Control.Lens        (view)
 import           Linear.Metric       (Metric (..))
-import           Linear.V3           (V3 (..), _x, _y, _z)
+import           Linear.V3           (R1 (..), R2 (..), R3 (..), V3 (..))
 import           Linear.Vector       (Additive (..), (^+^))
 
 newtype LorentzTVector a = LorentzTVector { getVector :: V3 a }

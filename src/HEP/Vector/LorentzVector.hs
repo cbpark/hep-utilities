@@ -22,7 +22,8 @@ import           Data.Function             (on)
 import           Linear.Metric             (Metric (..))
 import           Linear.V2                 (V2 (..))
 import           Linear.V3                 (V3 (..))
-import           Linear.V4                 (V4 (..), _w, _x, _y, _z)
+import           Linear.V4                 (R1 (..), R2 (..), R3 (..), R4 (..),
+                                            V4 (..))
 import           Linear.Vector             (Additive (..), sumV, (^/))
 
 import qualified HEP.Vector.LorentzTVector as TV
