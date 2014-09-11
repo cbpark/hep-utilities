@@ -2,7 +2,8 @@ module HEP.Vector.LorentzVector
     (
       LorentzVector (..)
 
-    , lorentzVectorXYZT
+    , setXYZT
+    , setEtaPhiPtM
     , vectorSum
     , invariantMass
     , transverseMass
@@ -33,8 +34,15 @@ import qualified HEP.Vector.TwoVector      as V2
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
 
-lorentzVectorXYZT :: (a, a, a, a) -> LorentzVector a
-lorentzVectorXYZT (px, py, pz, e) = LorentzVector (V4 e px py pz)
+setXYZT :: a -> a -> a -> a -> LorentzVector a
+setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
+
+setEtaPhiPtM :: Floating a => a -> a -> a -> a -> LorentzVector a
+setEtaPhiPtM eta' phi' pt' m' = LorentzVector (V4 e px py pz)
+  where e = sqrt $ px * px + py * py + pz * pz + m' * m'
+        px = pt' * cos phi'
+        py = pt' * sin phi'
+        pz = pt' * sinh eta'
 
 components :: LorentzVector a -> (a, a, a, a)
 components v = (t v, x v, y v, z v)
