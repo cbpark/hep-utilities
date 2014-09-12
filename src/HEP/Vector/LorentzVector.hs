@@ -17,18 +17,18 @@ module HEP.Vector.LorentzVector
     ) where
 
 import           Control.Applicative       (Applicative (..))
-import           Control.Lens              (view)
 import           Data.Foldable             (Foldable (..))
 import           Data.Function             (on)
 import           Linear.Metric             (Metric (..))
 import           Linear.V2                 (V2 (..))
 import           Linear.V3                 (V3 (..))
-import           Linear.V4                 (R1 (..), R2 (..), R3 (..), R4 (..),
-                                            V4 (..))
+import           Linear.V4                 (V4 (..))
 import           Linear.Vector             (Additive (..), sumV, (^/))
 
 import qualified HEP.Vector.LorentzTVector as TV
+import           HEP.Vector.ThreeVector    (ThreeVector)
 import qualified HEP.Vector.ThreeVector    as V3
+import           HEP.Vector.TwoVector      (TwoVector)
 import qualified HEP.Vector.TwoVector      as V2
 
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
@@ -44,30 +44,20 @@ setEtaPhiPtM eta' phi' pt' m' = LorentzVector (V4 e px py pz)
         py = pt' * sin phi'
         pz = pt' * sinh eta'
 
-components :: LorentzVector a -> (a, a, a, a)
-components v = (t v, x v, y v, z v)
-  where t = view _x . getVector
-        x = view _y . getVector
-        y = view _z . getVector
-        z = view _w . getVector
-
 instance Functor LorentzVector where
-  fmap f v = let (t, x, y, z) = components v
-             in LorentzVector (V4 (f t) (f x) (f y) (f z))
+  fmap f (LorentzVector (V4 t x y z)) = LorentzVector (V4 (f t) (f x) (f y) (f z))
 
 instance Applicative LorentzVector where
   pure a = LorentzVector (V4 a a a a)
-  v <*> v' = let (t , x , y , z ) = components v
-                 (t', x', y', z') = components v'
-             in LorentzVector (V4 (t t') (x x') (y y') (z z'))
+  (LorentzVector (V4 t x y z)) <*> (LorentzVector (V4 t' x' y' z')) =
+    LorentzVector (V4 (t t') (x x') (y y') (z z'))
 
 instance Additive LorentzVector where
   zero = pure 0
 
 instance Metric LorentzVector where
-  v `dot` v' = let (t , x , y , z ) = components v
-                   (t', x', y', z') = components v'
-               in t * t' - x * x' - y * y' - z * z'
+  (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
+    t * t' - x * x' - y * y' - z * z'
 
 vectorSum :: (Foldable f, Functor f, Num a)
              => f (LorentzVector a) -> LorentzVector a
@@ -78,19 +68,17 @@ invariantMass = norm
 
 transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
 transverseMass = TV.invariantMass `on` transverseV
-    where transverseV v = let (t, x, y, z) = components v
-                          in TV.LorentzTVector (V3 (sqrt $ t * t - z * z) x y)
+    where transverseV (LorentzVector (V4 t x y z)) =
+            TV.LorentzTVector (V3 (sqrt $ t * t - z * z) x y)
 
-transV :: LorentzVector a -> V2.TwoVector a
-transV v = let (_, x, y, _) = components v
-           in V2.TwoVector (V2 x y)
+transV :: LorentzVector a -> TwoVector a
+transV (LorentzVector (V4 _ x y _)) = V2.TwoVector (V2 x y)
 
 pT :: Floating a => LorentzVector a -> a
 pT = norm . V2.getVector . transV
 
-spatialV :: Num a => LorentzVector a -> V3.ThreeVector a
-spatialV v = let (_, x, y, z) = components v
-             in V3.ThreeVector (V3 x y z)
+spatialV :: Num a => LorentzVector a -> ThreeVector a
+spatialV (LorentzVector (V4 _ x y z)) = V3.ThreeVector (V3 x y z)
 
 eta :: (Floating a, Ord a) => LorentzVector a -> a
 eta = V3.pseudoRapidity . spatialV
@@ -109,6 +97,6 @@ deltaR v v' = sqrt $ deta * deta + dphi * dphi
 deltaTheta :: (Floating a, Ord a) => LorentzVector a -> LorentzVector a -> a
 deltaTheta = V3.angle `on` spatialV
 
-boostVector :: Fractional a => LorentzVector a -> V3.ThreeVector a
-boostVector v = let e = view _x (getVector v)
-                in V3.ThreeVector ((V3.getVector . spatialV) v ^/ e)
+boostVector :: Fractional a => LorentzVector a -> ThreeVector a
+boostVector v@(LorentzVector (V4 t _ _ _)) =
+  V3.ThreeVector ((V3.getVector . spatialV) v ^/ t)
