@@ -12,8 +12,8 @@ class HasFourMomentum a where
   eta :: a -> Double
   phi :: a -> Double
 
-  invarintMass :: [a] -> Double
-  invarintMass = LV.invariantMass . momentumSum
+  invariantMass :: [a] -> Double
+  invariantMass = LV.invariantMass . momentumSum
 
   ptCompare :: a -> a -> Ordering
   ptCompare = flip compare `on` pt
