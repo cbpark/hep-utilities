@@ -18,8 +18,11 @@ class HasFourMomentum a where
   ptCompare :: a -> a -> Ordering
   ptCompare = flip compare `on` pt
 
-  ptSum :: [a] -> Double
-  ptSum = foldr (\p acc -> pt p + acc) 0
+  ptScalarSum :: [a] -> Double
+  ptScalarSum = foldr (\p acc -> pt p + acc) 0
+
+  ptVectorSum :: [a] -> Double
+  ptVectorSum = LV.pT . momentumSum
 
   momentumSum :: [a] -> LorentzVector Double
   momentumSum = LV.vectorSum . map fourMomentum
