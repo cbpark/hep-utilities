@@ -6,11 +6,20 @@ import           HEP.Vector.LorentzVector (LorentzVector)
 import qualified HEP.Vector.LorentzVector as LV
 import           HEP.Vector.TwoVector     (phi2MPiPi)
 
+-- |
+--
+-- Minimal complete definition: 'fourMomentum'.
 class HasFourMomentum a where
   fourMomentum :: a -> LorentzVector Double
+
   pt :: a -> Double
+  pt = LV.pT . fourMomentum
+
   eta :: a -> Double
+  eta = LV.eta . fourMomentum
+
   phi :: a -> Double
+  phi = LV.phi . fourMomentum
 
   invariantMass :: [a] -> Double
   invariantMass = LV.invariantMass . momentumSum
