@@ -12,7 +12,8 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     HEP.Vector.TwoVector
+  exposed-modules:     HEP.Vector
+                       HEP.Vector.TwoVector
                        HEP.Vector.ThreeVector
                        HEP.Vector.LorentzTVector
                        HEP.Vector.LorentzVector
