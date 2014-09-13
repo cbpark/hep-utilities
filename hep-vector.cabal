@@ -1,15 +1,21 @@
 name:                hep-vector
 version:             0.1.0.0
-synopsis:            Vectors in physics
-description:         Various vectors for utiliting in the high energy physics studies and analyses
-homepage:            https://github.com/cbpark/hep-vector
+synopsis:            Vectors in high energy physics
+description:         Various vectors and functions for utiliting in the high energy physics studies and analyses.
+homepage:            http://github.com/cbpark/hep-vector
+bug-reports:         http://github.com/cbpark/hep-vector/issues
 license:             BSD3
 license-file:        LICENSE
 author:              Chan Beom Park
-maintainer:          chanbeom.park@cern.ch
+maintainer:          Chan Beom Park <cbpark@gmail.com>
+copyright:           (c) 2014 Chan Beom Park
 category:            Physics
 build-type:          Simple
 cabal-version:       >=1.10
+
+source-repository head
+  type:                git
+  location:            git@github.com:cbpark/hep-vector.git
 
 library
   exposed-modules:     HEP.Vector
