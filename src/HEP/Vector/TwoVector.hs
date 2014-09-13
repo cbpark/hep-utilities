@@ -1,12 +1,26 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HEP.Vector.TwoVector
+-- Copyright   :  (c) 2014 Chan Beom Park
+-- License     :  BSD-style
+-- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- Two-dimensional vector.
+--
+--------------------------------------------------------------------------------
 module HEP.Vector.TwoVector
-    (
-      TwoVector (..)
+       ( -- * Type
+         TwoVector (..)
 
-    , phi2MPiPi
-    ) where
+         -- * Function
+       , phi2MPiPi
+       ) where
 
 import           Linear.V2 (V2 (..))
 
+-- | Two-dimensional vector type.
 newtype TwoVector a = TwoVector { getVector :: V2 a }
                     deriving (Eq, Ord, Show)
 

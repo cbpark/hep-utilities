@@ -7,7 +7,7 @@
 -- Stability   :  experimental
 -- Portability :  GHC
 --
--- This module provides a simple Lorentz vector type and utility functions for
+-- A (3+1)-dimensional Lorentz vector type and utility functions for
 -- four-momentum objects in high-energy processes.
 --
 --------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ import qualified HEP.Vector.ThreeVector    as V3
 import           HEP.Vector.TwoVector      (TwoVector)
 import qualified HEP.Vector.TwoVector      as V2
 
--- | The Lorentz vector type.
+-- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
 
@@ -68,12 +68,12 @@ instance Metric LorentzVector where
   (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
     t * t' - x * x' - y * y' - z * z'
 
--- | Makes 'LorentzVector' out of values based on x, y, z, t coordinates.
+-- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
 setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
 
--- | Makes 'LorentzVector' out of values based on pseudorapidity, azimuthal angle,
--- transverse momentum, and mass coordinates.
+-- | Makes 'LorentzVector' out of components based on pseudorapidity,
+-- azimuthal angle, transverse momentum, and mass coordinates.
 setEtaPhiPtM :: Floating a => a -> a -> a -> a -> LorentzVector a
 setEtaPhiPtM eta' phi' pt' m' = LorentzVector (V4 e px py pz)
   where e = sqrt $ px * px + py * py + pz * pz + m' * m'
