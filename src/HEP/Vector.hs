@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Vector
@@ -12,12 +13,15 @@
 --------------------------------------------------------------------------------
 module HEP.Vector (HasFourMomentum (..)) where
 
-import           Data.Foldable            as Foldable
-import           Data.Function            (on)
+import           Data.Foldable             as Foldable
+import           Data.Function             (on)
+import           Linear.V3                 (V3 (..))
+import           Linear.V4                 (V4 (..))
 
-import           HEP.Vector.LorentzVector (LorentzVector)
-import qualified HEP.Vector.LorentzVector as LV
-import           HEP.Vector.TwoVector     (phi2MPiPi)
+import           HEP.Vector.LorentzTVector (LorentzTVector (..))
+import qualified HEP.Vector.LorentzTVector as TV
+import           HEP.Vector.LorentzVector  (LorentzVector (..))
+import qualified HEP.Vector.LorentzVector  as LV
 
 -- | Type class for four-momentum objects in high-energy processes.
 --
@@ -41,6 +45,12 @@ class HasFourMomentum a where
   invariantMass :: (Foldable f, Functor f) => f a -> Double
   invariantMass = LV.invariantMass . momentumSum
 
+  -- | Transverse mass of the visible + invisible particle system.
+  transverseMass :: a -> LorentzTVector Double -> Double
+  transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
+    where makeTV (LorentzVector (V4 t x y z)) =
+            LorentzTVector (V3 (sqrt $ t ** 2 - z ** 2) x y)
+
   -- | Comparison of objects by the magnitude of transverse momentum.
   ptCompare :: a -> a -> Ordering
   ptCompare = flip compare `on` pt
@@ -63,14 +73,15 @@ class HasFourMomentum a where
 
   -- | Azimuthal angle difference.
   deltaPhi :: a -> a -> Double
-  deltaPhi p p' = phi2MPiPi $ phi p - phi p'
+  deltaPhi = LV.deltaPhi `on` fourMomentum
 
   -- | Cone size.
   deltaR :: a -> a -> Double
-  deltaR p p' = sqrt $ deta * deta + dphi * dphi
-    where deta = deltaEta p p'
-          dphi = deltaPhi p p'
+  deltaR = LV.deltaR `on` fourMomentum
 
   -- | Cosine of angle between four-momenta.
   cosTheta :: a -> a -> Double
-  cosTheta p p' = cos $ (LV.deltaTheta `on` fourMomentum) p p'
+  cosTheta = LV.cosTheta `on` fourMomentum
+
+instance HasFourMomentum (LorentzVector Double) where
+  fourMomentum = id

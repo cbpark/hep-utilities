@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Vector.LorentzVector
@@ -21,7 +22,6 @@ module HEP.Vector.LorentzVector
 
        , vectorSum
        , invariantMass
-       , transverseMass
 
        , eta
        , phi
@@ -30,36 +30,36 @@ module HEP.Vector.LorentzVector
        , deltaPhi
        , deltaR
        , deltaTheta
+       , cosTheta
 
        , boostVector
        ) where
 
-import           Control.Applicative       (Applicative (..))
-import           Data.Foldable             (Foldable (..))
-import           Data.Function             (on)
-import           Linear.Metric             (Metric (..))
-import           Linear.V2                 (V2 (..))
-import           Linear.V3                 (V3 (..))
-import           Linear.V4                 (V4 (..))
-import           Linear.Vector             (Additive (..), sumV, (^/))
+import           Control.Applicative    (Applicative (..))
+import           Data.Foldable          (Foldable (..))
+import           Data.Function          (on)
+import           Linear.Metric          (Metric (..))
+import           Linear.V2              (V2 (..))
+import           Linear.V3              (V3 (..))
+import           Linear.V4              (V4 (..))
+import           Linear.Vector          (Additive (..), sumV, (^/))
 
-import qualified HEP.Vector.LorentzTVector as TV
-import           HEP.Vector.ThreeVector    (ThreeVector)
-import qualified HEP.Vector.ThreeVector    as V3
-import           HEP.Vector.TwoVector      (TwoVector)
-import qualified HEP.Vector.TwoVector      as V2
+import           HEP.Vector.ThreeVector (ThreeVector)
+import qualified HEP.Vector.ThreeVector as V3
+import           HEP.Vector.TwoVector   (TwoVector)
+import qualified HEP.Vector.TwoVector   as V2
 
 -- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
 
 instance Functor LorentzVector where
-  fmap f (LorentzVector (V4 t x y z)) = LorentzVector (V4 (f t) (f x) (f y) (f z))
+  fmap f (LorentzVector (V4 t x y z)) = LorentzVector $ V4 (f t) (f x) (f y) (f z)
 
 instance Applicative LorentzVector where
   pure a = LorentzVector (V4 a a a a)
   (LorentzVector (V4 t x y z)) <*> (LorentzVector (V4 t' x' y' z')) =
-    LorentzVector (V4 (t t') (x x') (y y') (z z'))
+    LorentzVector $ V4 (t t') (x x') (y y') (z z')
 
 instance Additive LorentzVector where
   zero = pure 0
@@ -75,11 +75,11 @@ setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
 -- | Makes 'LorentzVector' out of components based on pseudorapidity,
 -- azimuthal angle, transverse momentum, and mass coordinates.
 setEtaPhiPtM :: Floating a => a -> a -> a -> a -> LorentzVector a
-setEtaPhiPtM eta' phi' pt' m' = LorentzVector (V4 e px py pz)
-  where e = sqrt $ px * px + py * py + pz * pz + m' * m'
-        px = pt' * cos phi'
-        py = pt' * sin phi'
-        pz = pt' * sinh eta'
+setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
+  where !e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
+        !px = pt' * cos phi'
+        !py = pt' * sin phi'
+        !pz = pt' * sinh eta'
 
 -- | Vector sum of Lorentz vectors.
 vectorSum :: (Foldable f, Functor f, Num a)
@@ -89,12 +89,6 @@ vectorSum = LorentzVector . sumV . fmap getVector
 -- | Invariant mass.
 invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
-
--- | Trasverse mass.
-transverseMass :: Floating a => LorentzVector a -> LorentzVector a -> a
-transverseMass = TV.invariantMass `on` transverseV
-    where transverseV (LorentzVector (V4 t x y z)) =
-            TV.LorentzTVector (V3 (sqrt $ t * t - z * z) x y)
 
 transV :: LorentzVector a -> TwoVector a
 transV (LorentzVector (V4 _ x y _)) = V2.TwoVector (V2 x y)
@@ -120,13 +114,17 @@ deltaPhi v v' = V2.phi2MPiPi $ phi v - phi v'
 
 -- | Size of the cone spanned by two Lorentz vectors.
 deltaR :: RealFloat a => LorentzVector a -> LorentzVector a -> a
-deltaR v v' = sqrt $ deta * deta + dphi * dphi
-    where deta = eta v - eta v'
-          dphi = deltaPhi v v'
+deltaR v v' = sqrt $ deta ** 2 + dphi ** 2
+    where !deta = eta v - eta v'
+          !dphi = deltaPhi v v'
 
 -- | Separation angle between two Lorentz vectors.
 deltaTheta :: (Floating a, Ord a) => LorentzVector a -> LorentzVector a -> a
 deltaTheta = V3.angle `on` spatialV
+
+-- | Cosine of angle between two Lorentz vectors.
+cosTheta :: (Floating a , Ord a) => LorentzVector a -> LorentzVector a -> a
+cosTheta p p' = cos $ deltaTheta p p'
 
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a

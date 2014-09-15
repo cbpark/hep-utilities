@@ -15,6 +15,7 @@ module HEP.Vector.LorentzTVector
          LorentzTVector (..)
 
          -- * Function
+       , setXYM
        , invariantMass
        ) where
 
@@ -28,12 +29,12 @@ newtype LorentzTVector a = LorentzTVector { getVector :: V3 a }
                          deriving (Eq, Ord, Show)
 
 instance Functor LorentzTVector where
-  fmap f (LorentzTVector (V3 t x y)) = LorentzTVector (V3 (f t) (f x) (f y))
+  fmap f (LorentzTVector (V3 t x y)) = LorentzTVector $ V3 (f t) (f x) (f y)
 
 instance Applicative LorentzTVector where
   pure a = LorentzTVector (V3 a a a)
   (LorentzTVector (V3 t x y)) <*> (LorentzTVector (V3 t' x' y')) =
-    LorentzTVector (V3 (t t') (x x') (y y'))
+    LorentzTVector $ V3 (t t') (x x') (y y')
 
 instance Additive LorentzTVector where
   zero = pure 0
@@ -41,6 +42,10 @@ instance Additive LorentzTVector where
 instance Metric LorentzTVector where
   (LorentzTVector (V3 t x y)) `dot` (LorentzTVector (V3 t' x' y')) =
     t * t' - x * x' - y * y'
+
+-- | Makes 'LorentzTVector' out of components based on x, y, m coordinates.
+setXYM :: Floating a => a -> a -> a -> LorentzTVector a
+setXYM px py m = LorentzTVector $ V3 (sqrt $ px ** 2 + py ** 2 + m ** 2) px py
 
 -- | Invariant mass. It would be a transverse mass in (3+1)-dimensional
 -- space.

@@ -18,7 +18,7 @@ module HEP.Vector.TwoVector
        , phi2MPiPi
        ) where
 
-import           Linear.V2 (V2 (..))
+import           Linear.V2 (V2)
 
 -- | Two-dimensional vector type.
 newtype TwoVector a = TwoVector { getVector :: V2 a }
