@@ -49,7 +49,7 @@ class HasFourMomentum a where
   transverseMass :: a -> LorentzTVector Double -> Double
   transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
     where makeTV (LorentzVector (V4 t x y z)) =
-            LorentzTVector (V3 (sqrt $ t ** 2 - z ** 2) x y)
+            LorentzTVector $! V3 (sqrt $ t ** 2 - z ** 2) x y
 
   -- | Comparison of objects by the magnitude of transverse momentum.
   ptCompare :: a -> a -> Ordering
@@ -69,7 +69,7 @@ class HasFourMomentum a where
 
   -- | Pseudorapidity difference.
   deltaEta :: a -> a -> Double
-  deltaEta = (-) `on` eta
+  deltaEta = LV.deltaEta `on` fourMomentum
 
   -- | Azimuthal angle difference.
   deltaPhi :: a -> a -> Double
@@ -85,3 +85,4 @@ class HasFourMomentum a where
 
 instance HasFourMomentum (LorentzVector Double) where
   fourMomentum = id
+  {-# INLINE fourMomentum #-}

@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Vector.LorentzVector
@@ -27,6 +26,7 @@ module HEP.Vector.LorentzVector
        , phi
        , pT
 
+       , deltaEta
        , deltaPhi
        , deltaR
        , deltaTheta
@@ -70,16 +70,16 @@ instance Metric LorentzVector where
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
-setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
+setXYZT px' py' pz' e' = LorentzVector $ V4 e' px' py' pz'
 
 -- | Makes 'LorentzVector' out of components based on pseudorapidity,
 -- azimuthal angle, transverse momentum, and mass coordinates.
 setEtaPhiPtM :: Floating a => a -> a -> a -> a -> LorentzVector a
 setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
-  where !e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
-        !px = pt' * cos phi'
-        !py = pt' * sin phi'
-        !pz = pt' * sinh eta'
+  where e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
+        px = pt' * cos phi'
+        py = pt' * sin phi'
+        pz = pt' * sinh eta'
 
 -- | Vector sum of Lorentz vectors.
 vectorSum :: (Foldable f, Functor f, Num a)
@@ -108,15 +108,17 @@ eta = V3.pseudoRapidity . spatialV
 phi :: RealFloat a => LorentzVector a -> a
 phi = V3.phi . spatialV
 
+-- | Pseudorapidity difference between two Lorentz vectors.
+deltaEta :: (Floating a, Ord a) => LorentzVector a -> LorentzVector a -> a
+deltaEta = (-) `on` eta
+
 -- | Azimuthal angle difference between two Lorentz vectors.
 deltaPhi :: RealFloat a => LorentzVector a -> LorentzVector a -> a
-deltaPhi v v' = V2.phi2MPiPi $ phi v - phi v'
+deltaPhi v v' = V2.phi2MPiPi $! phi v - phi v'
 
 -- | Size of the cone spanned by two Lorentz vectors.
 deltaR :: RealFloat a => LorentzVector a -> LorentzVector a -> a
-deltaR v v' = sqrt $ deta ** 2 + dphi ** 2
-    where !deta = eta v - eta v'
-          !dphi = deltaPhi v v'
+deltaR v v' = sqrt $! deltaEta v v' ** 2 + deltaPhi v v' ** 2
 
 -- | Separation angle between two Lorentz vectors.
 deltaTheta :: (Floating a, Ord a) => LorentzVector a -> LorentzVector a -> a
@@ -124,9 +126,9 @@ deltaTheta = V3.angle `on` spatialV
 
 -- | Cosine of angle between two Lorentz vectors.
 cosTheta :: (Floating a , Ord a) => LorentzVector a -> LorentzVector a -> a
-cosTheta p p' = cos $ deltaTheta p p'
+cosTheta p p' = cos $! deltaTheta p p'
 
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a
 boostVector v@(LorentzVector (V4 t _ _ _)) =
-  V3.ThreeVector ((V3.getVector . spatialV) v ^/ t)
+  V3.ThreeVector $ (V3.getVector . spatialV) v ^/ t
