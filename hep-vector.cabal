@@ -1,7 +1,7 @@
 name:                hep-vector
 version:             0.1.0.0
 synopsis:            Vectors in high energy physics
-description:         Various vectors and functions for utiliting in the high energy physics studies and analyses.
+description:         Various vectors and their functions for utilizing in studies and analyses for high-energy physics processes.
 homepage:            http://github.com/cbpark/hep-vector
 bug-reports:         http://github.com/cbpark/hep-vector/issues
 license:             BSD3
