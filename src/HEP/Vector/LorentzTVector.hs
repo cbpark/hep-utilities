@@ -22,19 +22,18 @@ module HEP.Vector.LorentzTVector
 import           Control.Applicative (Applicative (..))
 import           Linear.Metric       (Metric (..))
 import           Linear.V3           (V3 (..))
-import           Linear.Vector       (Additive (..), (^+^))
+import           Linear.Vector       (Additive (..))
 
 -- | Type for (2+1)-dimensional vector.
 newtype LorentzTVector a = LorentzTVector { getVector :: V3 a }
                          deriving (Eq, Ord, Show)
 
 instance Functor LorentzTVector where
-  fmap f (LorentzTVector (V3 t x y)) = LorentzTVector $ V3 (f t) (f x) (f y)
+  fmap f (LorentzTVector v3) = LorentzTVector (fmap f v3)
 
 instance Applicative LorentzTVector where
   pure a = LorentzTVector (V3 a a a)
-  (LorentzTVector (V3 t x y)) <*> (LorentzTVector (V3 t' x' y')) =
-    LorentzTVector $ V3 (t t') (x x') (y y')
+  LorentzTVector v3 <*> LorentzTVector v3' = LorentzTVector (v3 <*> v3')
 
 instance Additive LorentzTVector where
   zero = pure 0
@@ -47,7 +46,6 @@ instance Metric LorentzTVector where
 setXYM :: Floating a => a -> a -> a -> LorentzTVector a
 setXYM px py m = LorentzTVector $ V3 (sqrt $ px ** 2 + py ** 2 + m ** 2) px py
 
--- | Invariant mass. It would be a transverse mass in (3+1)-dimensional
--- space.
+-- | Invariant mass. It would be a transverse mass in (3+1)-dimensional space.
 invariantMass :: Floating a => LorentzTVector a -> LorentzTVector a -> a
 invariantMass v v' = norm (v ^+^ v')

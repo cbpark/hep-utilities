@@ -31,7 +31,7 @@ class HasFourMomentum a where
 
   -- | Transverse momentum.
   pt :: a -> Double
-  pt = LV.pT . fourMomentum
+  pt = LV.pt . fourMomentum
 
   -- | Pseudorapidity.
   eta :: a -> Double
@@ -49,7 +49,7 @@ class HasFourMomentum a where
   transverseMass :: a -> LorentzTVector Double -> Double
   transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
     where makeTV (LorentzVector (V4 t x y z)) =
-            LorentzTVector $! V3 (sqrt $ t ** 2 - z ** 2) x y
+            LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
 
   -- | Comparison of objects by the magnitude of transverse momentum.
   ptCompare :: a -> a -> Ordering
@@ -57,11 +57,11 @@ class HasFourMomentum a where
 
   -- | Scalar sum of transverse momenta.
   ptScalarSum :: Foldable f => f a -> Double
-  ptScalarSum = Foldable.foldr (\p acc -> pt p + acc) 0
+  ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
 
   -- | Vector sum of transverse momenta.
   ptVectorSum :: (Foldable f, Functor f) => f a -> Double
-  ptVectorSum = LV.pT . momentumSum
+  ptVectorSum = LV.pt . momentumSum
 
   -- | Total four-momentum.
   momentumSum :: (Foldable f, Functor f) => f a -> LorentzVector Double

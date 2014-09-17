@@ -22,9 +22,9 @@ module HEP.Vector.LorentzVector
        , vectorSum
        , invariantMass
 
+       , pt
        , eta
        , phi
-       , pT
 
        , deltaEta
        , deltaPhi
@@ -36,7 +36,7 @@ module HEP.Vector.LorentzVector
        ) where
 
 import           Control.Applicative    (Applicative (..))
-import           Data.Foldable          (Foldable (..))
+import           Data.Foldable          as Foldable
 import           Data.Function          (on)
 import           Linear.Metric          (Metric (..))
 import           Linear.V2              (V2 (..))
@@ -54,12 +54,11 @@ newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
 
 instance Functor LorentzVector where
-  fmap f (LorentzVector (V4 t x y z)) = LorentzVector $ V4 (f t) (f x) (f y) (f z)
+  fmap f (LorentzVector v4) = LorentzVector (fmap f v4)
 
 instance Applicative LorentzVector where
   pure a = LorentzVector (V4 a a a a)
-  (LorentzVector (V4 t x y z)) <*> (LorentzVector (V4 t' x' y' z')) =
-    LorentzVector $ V4 (t t') (x x') (y y') (z z')
+  LorentzVector v4 <*> LorentzVector v4' = LorentzVector (v4 <*> v4')
 
 instance Additive LorentzVector where
   zero = pure 0
@@ -94,8 +93,8 @@ transV :: LorentzVector a -> TwoVector a
 transV (LorentzVector (V4 _ x y _)) = V2.TwoVector (V2 x y)
 
 -- | Magnitude of transverse momentum.
-pT :: Floating a => LorentzVector a -> a
-pT = norm . V2.getVector . transV
+pt :: Floating a => LorentzVector a -> a
+pt = norm . V2.getVector . transV
 
 spatialV :: Num a => LorentzVector a -> ThreeVector a
 spatialV (LorentzVector (V4 _ x y z)) = V3.ThreeVector (V3 x y z)
@@ -126,7 +125,7 @@ deltaTheta = V3.angle `on` spatialV
 
 -- | Cosine of angle between two Lorentz vectors.
 cosTheta :: (Floating a , Ord a) => LorentzVector a -> LorentzVector a -> a
-cosTheta p p' = cos $! deltaTheta p p'
+cosTheta v v' = cos $! deltaTheta v v'
 
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a

@@ -37,9 +37,9 @@ angle v v' = let ptot2 = ((*) `on` (quadrance . getVector)) v v'
              in if ptot2 <= 0
                 then 0
                 else let arg = (dot `on` getVector) v v' / sqrt ptot2
-                      in if | arg >  1  -> 0
-                            | arg < -1  -> pi
-                            | otherwise -> acos arg
+                     in if | arg >  1  -> 0
+                           | arg < -1  -> pi
+                           | otherwise -> acos arg
 
 -- | Cosine of the angle with respect to the z-direction.
 cosTheta :: (Floating a, Ord a) => ThreeVector a -> a
