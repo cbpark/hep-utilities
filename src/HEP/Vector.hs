@@ -15,6 +15,7 @@ module HEP.Vector (HasFourMomentum (..)) where
 
 import           Data.Foldable             as Foldable
 import           Data.Function             (on)
+import           Data.Traversable          (Traversable, fmapDefault)
 import           Linear.V3                 (V3 (..))
 import           Linear.V4                 (V4 (..))
 
@@ -42,7 +43,7 @@ class HasFourMomentum a where
   phi = LV.phi . fourMomentum
 
   -- | Invariant mass.
-  invariantMass :: (Foldable f, Functor f) => f a -> Double
+  invariantMass :: Traversable f => f a -> Double
   invariantMass = LV.invariantMass . momentumSum
 
   -- | Transverse mass of the visible + invisible particle system.
@@ -60,12 +61,12 @@ class HasFourMomentum a where
   ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
 
   -- | Vector sum of transverse momenta.
-  ptVectorSum :: (Foldable f, Functor f) => f a -> Double
+  ptVectorSum :: Traversable f => f a -> Double
   ptVectorSum = LV.pt . momentumSum
 
   -- | Total four-momentum.
-  momentumSum :: (Foldable f, Functor f) => f a -> LorentzVector Double
-  momentumSum = LV.vectorSum . fmap fourMomentum
+  momentumSum :: Traversable f => f a -> LorentzVector Double
+  momentumSum = LV.vectorSum . fmapDefault fourMomentum
 
   -- | Pseudorapidity difference.
   deltaEta :: a -> a -> Double

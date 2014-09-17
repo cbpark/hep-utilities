@@ -36,8 +36,8 @@ module HEP.Vector.LorentzVector
        ) where
 
 import           Control.Applicative    (Applicative (..))
-import           Data.Foldable          as Foldable
 import           Data.Function          (on)
+import           Data.Traversable       (Traversable, fmapDefault)
 import           Linear.Metric          (Metric (..))
 import           Linear.V2              (V2 (..))
 import           Linear.V3              (V3 (..))
@@ -81,9 +81,8 @@ setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
         pz = pt' * sinh eta'
 
 -- | Vector sum of Lorentz vectors.
-vectorSum :: (Foldable f, Functor f, Num a)
-             => f (LorentzVector a) -> LorentzVector a
-vectorSum = LorentzVector . sumV . fmap getVector
+vectorSum :: (Traversable f, Num a) => f (LorentzVector a) -> LorentzVector a
+vectorSum = LorentzVector . sumV . fmapDefault getVector
 
 -- | Invariant mass.
 invariantMass :: Floating a => LorentzVector a -> a
