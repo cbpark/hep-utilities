@@ -81,6 +81,9 @@ setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
         pz = pt' * sinh eta'
 
 -- | Vector sum of Lorentz vectors.
+--
+-- >>> vectorSum [LorentzVector (V4 4 1 2 3), LorentzVector (V4 12 5 6 7)]
+-- LorentzVector {getVector = V4 16 6 8 10}
 vectorSum :: (Traversable f, Num a) => f (LorentzVector a) -> LorentzVector a
 vectorSum = LorentzVector . sumV . fmapDefault getVector
 

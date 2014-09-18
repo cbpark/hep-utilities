@@ -52,7 +52,8 @@ class HasFourMomentum a where
     where makeTV (LorentzVector (V4 t x y z)) =
             LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
 
-  -- | Comparison of objects by the magnitude of transverse momentum.
+  -- | Comparison of objects by the magnitude of transverse momentum
+  -- in descending order.
   ptCompare :: a -> a -> Ordering
   ptCompare = flip compare `on` pt
 

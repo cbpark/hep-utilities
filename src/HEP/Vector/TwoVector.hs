@@ -25,6 +25,9 @@ newtype TwoVector a = TwoVector { getVector :: V2 a }
                     deriving (Eq, Ord, Show)
 
 -- | Angle in the interval [-pi, pi).
+--
+-- >>> phi2MPiPi (2 * pi)
+-- 0.0
 phi2MPiPi :: (Floating a, Ord a) => a -> a
 phi2MPiPi x | x >= pi   = phi2MPiPi $! x - 2*pi
             | x < -pi   = phi2MPiPi $! x + 2*pi
