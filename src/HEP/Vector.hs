@@ -11,7 +11,20 @@
 -- Types and type classes for vector objects.
 --
 --------------------------------------------------------------------------------
-module HEP.Vector (HasFourMomentum (..)) where
+module HEP.Vector
+       ( HasFourMomentum (..)
+
+       , invariantMass
+       , transverseMass
+       , ptCompare
+       , ptScalarSum
+       , ptVectorSum
+       , momentumSum
+       , deltaEta
+       , deltaPhi
+       , deltaR
+       , cosTheta
+       ) where
 
 import           Data.Foldable             as Foldable
 import           Data.Function             (on)
@@ -42,49 +55,49 @@ class HasFourMomentum a where
   phi :: a -> Double
   phi = LV.phi . fourMomentum
 
-  -- | Invariant mass.
-  invariantMass :: Traversable f => f a -> Double
-  invariantMass = LV.invariantMass . momentumSum
-
-  -- | Transverse mass of the visible + invisible particle system.
-  transverseMass :: a -> LorentzTVector Double -> Double
-  transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
-    where makeTV (LorentzVector (V4 t x y z)) =
-            LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
-
-  -- | Comparison of objects by the magnitude of transverse momentum
-  -- in descending order.
-  ptCompare :: a -> a -> Ordering
-  ptCompare = flip compare `on` pt
-
-  -- | Scalar sum of transverse momenta.
-  ptScalarSum :: Foldable f => f a -> Double
-  ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
-
-  -- | Vector sum of transverse momenta.
-  ptVectorSum :: Traversable f => f a -> Double
-  ptVectorSum = LV.pt . momentumSum
-
-  -- | Total four-momentum.
-  momentumSum :: Traversable f => f a -> LorentzVector Double
-  momentumSum = LV.vectorSum . fmapDefault fourMomentum
-
-  -- | Pseudorapidity difference.
-  deltaEta :: a -> a -> Double
-  deltaEta = LV.deltaEta `on` fourMomentum
-
-  -- | Azimuthal angle difference.
-  deltaPhi :: a -> a -> Double
-  deltaPhi = LV.deltaPhi `on` fourMomentum
-
-  -- | Cone size.
-  deltaR :: a -> a -> Double
-  deltaR = LV.deltaR `on` fourMomentum
-
-  -- | Cosine of angle between four-momenta.
-  cosTheta :: a -> a -> Double
-  cosTheta = LV.cosTheta `on` fourMomentum
-
 instance HasFourMomentum (LorentzVector Double) where
   fourMomentum = id
   {-# INLINE fourMomentum #-}
+
+-- | Invariant mass.
+invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
+invariantMass = LV.invariantMass . momentumSum
+
+-- | Transverse mass of the visible + invisible particle system.
+transverseMass :: HasFourMomentum a => a -> LorentzTVector Double -> Double
+transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
+  where makeTV (LorentzVector (V4 t x y z)) =
+          LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
+
+-- | Comparison of objects by the magnitude of transverse momentum
+-- in descending order.
+ptCompare :: HasFourMomentum a => a -> a -> Ordering
+ptCompare = flip compare `on` pt
+
+-- | Scalar sum of transverse momenta.
+ptScalarSum :: HasFourMomentum a => Foldable f => f a -> Double
+ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
+
+-- | Vector sum of transverse momenta.
+ptVectorSum :: (Traversable f, HasFourMomentum a) => f a -> Double
+ptVectorSum = LV.pt . momentumSum
+
+-- | Total four-momentum.
+momentumSum :: (Traversable f, HasFourMomentum a) => f a -> LorentzVector Double
+momentumSum = LV.vectorSum . fmapDefault fourMomentum
+
+-- | Pseudorapidity difference.
+deltaEta :: HasFourMomentum a => a -> a -> Double
+deltaEta = LV.deltaEta `on` fourMomentum
+
+-- | Azimuthal angle difference.
+deltaPhi :: HasFourMomentum a => a -> a -> Double
+deltaPhi = LV.deltaPhi `on` fourMomentum
+
+-- | Cone size.
+deltaR :: HasFourMomentum a => a -> a -> Double
+deltaR = LV.deltaR `on` fourMomentum
+
+-- | Cosine of angle between four-momenta.
+cosTheta :: HasFourMomentum a => a -> a -> Double
+cosTheta = LV.cosTheta `on` fourMomentum
