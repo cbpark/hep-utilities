@@ -58,4 +58,4 @@ pseudoRapidity v@(ThreeVector (V3 _ _ z))
 -- | Azimuthal angle from -pi to pi.
 phi :: RealFloat a => ThreeVector a -> a
 phi (ThreeVector (V3 x y _)) | x == 0 && y == 0 = 0
-                             | otherwise        = atan2 x y
+                             | otherwise        = atan2 y x
