@@ -15,6 +15,7 @@ module HEP.Vector.ThreeVector
        (
          -- * Type
          ThreeVector (..)
+       , Z (..)
 
          -- * Function
        , angle
@@ -30,6 +31,8 @@ import           Linear.V3     (V3 (..))
 -- | Three-dimensional vector type.
 newtype ThreeVector a = ThreeVector { getVector :: V3 a }
                       deriving (Eq, Ord, Show)
+
+newtype Z a = Z { getZ :: a } deriving (Eq, Ord, Show)
 
 -- | Angle of the 3-vector with respect to another 3-vector.
 angle :: (Floating a, Ord a) => ThreeVector a -> ThreeVector a -> a

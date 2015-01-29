@@ -13,6 +13,8 @@
 module HEP.Vector.TwoVector
        ( -- * Type
          TwoVector (..)
+       , X (..)
+       , Y (..)
 
          -- * Function
        , phi2MPiPi
@@ -21,8 +23,11 @@ module HEP.Vector.TwoVector
 import           Linear.V2 (V2)
 
 -- | Two-dimensional vector type.
-newtype TwoVector a = TwoVector { getVector :: V2 a }
-                    deriving (Eq, Ord, Show)
+newtype TwoVector a = TwoVector { getVector :: V2 a } deriving (Eq, Ord, Show)
+
+newtype X a = X { getX :: a } deriving (Eq, Ord, Show)
+
+newtype Y a = Y { getY :: a } deriving (Eq, Ord, Show)
 
 -- | Angle in the interval [-pi, pi).
 --
