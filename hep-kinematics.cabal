@@ -1,9 +1,9 @@
-name:                hep-vector
+name:                hep-kinematics
 version:             0.1.0.0
-synopsis:            Vectors in high energy physics
+synopsis:            Relativistic kinematics in high energy physics
 description:         Various vectors and their functions for utilizing in studies and analyses for high-energy physics processes.
-homepage:            http://github.com/cbpark/hep-vector
-bug-reports:         http://github.com/cbpark/hep-vector/issues
+homepage:            http://github.com/cbpark/hep-kinematics
+bug-reports:         http://github.com/cbpark/hep-kinematics/issues
 license:             BSD3
 license-file:        LICENSE
 author:              Chan Beom Park
@@ -15,14 +15,14 @@ cabal-version:       >=1.10
 
 source-repository head
   type:                git
-  location:            git@github.com:cbpark/hep-vector.git
+  location:            git@github.com:cbpark/hep-kinematics.git
 
 library
-  exposed-modules:     HEP.Vector
-                       HEP.Vector.TwoVector
-                       HEP.Vector.ThreeVector
-                       HEP.Vector.LorentzTVector
-                       HEP.Vector.LorentzVector
+  exposed-modules:     HEP.Kinematics
+                       HEP.Kinematics.Vector.TwoVector
+                       HEP.Kinematics.Vector.ThreeVector
+                       HEP.Kinematics.Vector.LorentzTVector
+                       HEP.Kinematics.Vector.LorentzVector
   build-depends:       base >=4.6
                      , linear >=1.10
   hs-source-dirs:      src

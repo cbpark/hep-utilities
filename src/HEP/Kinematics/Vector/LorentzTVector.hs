@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HEP.Vector.LorentzTVector
--- Copyright   :  (c) 2014 Chan Beom Park
+-- Module      :  HEP.Kinematics.Vector.LorentzTVector
+-- Copyright   :  (c) 2014 - 2015 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -10,7 +10,7 @@
 -- (2+1)-dimensional vector.
 --
 --------------------------------------------------------------------------------
-module HEP.Vector.LorentzTVector
+module HEP.Kinematics.Vector.LorentzTVector
        ( -- * Type
          LorentzTVector (..)
 

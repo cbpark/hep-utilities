@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HEP.Vector
--- Copyright   :  (c) 2014 Chan Beom Park
+-- Module      :  HEP.Kinematics
+-- Copyright   :  (c) 2014 - 2015 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -11,7 +11,7 @@
 -- Types and type classes for vector objects.
 --
 --------------------------------------------------------------------------------
-module HEP.Vector
+module HEP.Kinematics
        ( HasFourMomentum (..)
 
        , invariantMass
@@ -26,16 +26,16 @@ module HEP.Vector
        , cosTheta
        ) where
 
-import           Data.Foldable             as Foldable
-import           Data.Function             (on)
-import           Data.Traversable          (Traversable, fmapDefault)
-import           Linear.V3                 (V3 (..))
-import           Linear.V4                 (V4 (..))
+import           Data.Foldable                        as Foldable
+import           Data.Function                        (on)
+import           Data.Traversable                     (Traversable, fmapDefault)
+import           Linear.V3                            (V3 (..))
+import           Linear.V4                            (V4 (..))
 
-import           HEP.Vector.LorentzTVector (LorentzTVector (..))
-import qualified HEP.Vector.LorentzTVector as TV
-import           HEP.Vector.LorentzVector  (LorentzVector (..))
-import qualified HEP.Vector.LorentzVector  as LV
+import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector (..))
+import qualified HEP.Kinematics.Vector.LorentzTVector as TV
+import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector (..))
+import qualified HEP.Kinematics.Vector.LorentzVector  as LV
 
 -- | Type class for four-momentum objects in high-energy processes.
 --

@@ -1,8 +1,8 @@
 {-# LANGUAGE MultiWayIf #-}
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HEP.Vector.ThreeVector
--- Copyright   :  (c) 2014 Chan Beom Park
+-- Module      :  HEP.Kinematics.Vector.ThreeVector
+-- Copyright   :  (c) 2014 - 2015 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -11,11 +11,10 @@
 -- Three-dimensional vector.
 --
 --------------------------------------------------------------------------------
-module HEP.Vector.ThreeVector
+module HEP.Kinematics.Vector.ThreeVector
        (
          -- * Type
          ThreeVector (..)
-       , Z (..)
 
          -- * Function
        , angle
@@ -31,8 +30,6 @@ import           Linear.V3     (V3 (..))
 -- | Three-dimensional vector type.
 newtype ThreeVector a = ThreeVector { getVector :: V3 a }
                       deriving (Eq, Ord, Show)
-
-newtype Z a = Z { getZ :: a } deriving (Eq, Ord, Show)
 
 -- | Angle of the 3-vector with respect to another 3-vector.
 angle :: (Floating a, Ord a) => ThreeVector a -> ThreeVector a -> a

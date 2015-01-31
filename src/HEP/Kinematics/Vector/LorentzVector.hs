@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
--- Module      :  HEP.Vector.LorentzVector
--- Copyright   :  (c) 2014 Chan Beom Park
+-- Module      :  HEP.Kinematics.Vector.LorentzVector
+-- Copyright   :  (c) 2014 - 2015 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -11,7 +11,7 @@
 -- four-momentum objects in high-energy processes.
 --
 --------------------------------------------------------------------------------
-module HEP.Vector.LorentzVector
+module HEP.Kinematics.Vector.LorentzVector
        ( -- * Type
          LorentzVector (..)
 
@@ -44,10 +44,10 @@ import           Linear.V3              (V3 (..))
 import           Linear.V4              (V4 (..))
 import           Linear.Vector          (Additive (..), sumV, (^/))
 
-import           HEP.Vector.ThreeVector (ThreeVector)
-import qualified HEP.Vector.ThreeVector as V3
-import           HEP.Vector.TwoVector   (TwoVector)
-import qualified HEP.Vector.TwoVector   as V2
+import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
+import qualified HEP.Kinematics.Vector.ThreeVector as V3
+import           HEP.Kinematics.Vector.TwoVector   (TwoVector)
+import qualified HEP.Kinematics.Vector.TwoVector   as V2
 
 -- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
