@@ -1,7 +1,7 @@
 name:                hep-kinematics
 version:             0.1.0.0
 synopsis:            Relativistic kinematics in high energy physics
-description:         Various vectors and their functions for utilizing in studies and analyses for high-energy physics processes.
+description:         Types and functions for various vectors and kinematics variables in collider studies.
 homepage:            http://github.com/cbpark/hep-kinematics
 bug-reports:         http://github.com/cbpark/hep-kinematics/issues
 license:             BSD3

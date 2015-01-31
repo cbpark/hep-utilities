@@ -8,7 +8,7 @@
 -- Stability   :  experimental
 -- Portability :  GHC
 --
--- Types and type classes for vector objects.
+-- Types and type classes for physics objects.
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics

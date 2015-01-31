@@ -1,4 +1,4 @@
 hep-kinematrics
 ===============
 
-Various vectors and their functions for utilizing in studies and analyses for high-energy physics processes.
+Types and functions for various vectors and kinematics variables in collider studies. If you want to use C++, see [CKinematics](https://github.com/cbpark/CKinematics).
