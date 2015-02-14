@@ -55,6 +55,10 @@ class HasFourMomentum a where
   phi :: a -> Double
   phi = LV.phi . fourMomentum
 
+  -- | Invariant mass.
+  mass :: a -> Double
+  mass = LV.invariantMass . fourMomentum
+
 instance HasFourMomentum (LorentzVector Double) where
   fourMomentum = id
   {-# INLINE fourMomentum #-}
