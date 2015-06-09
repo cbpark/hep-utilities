@@ -19,7 +19,6 @@ module HEP.Kinematics.Vector.LorentzTVector
        , invariantMass
        ) where
 
-import           Control.Applicative (Applicative (..))
 import           Linear.Metric       (Metric (..))
 import           Linear.V3           (V3 (..))
 import           Linear.Vector       (Additive (..))

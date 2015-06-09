@@ -28,7 +28,7 @@ module HEP.Kinematics
 
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
-import           Data.Traversable                     (Traversable, fmapDefault)
+import           Data.Traversable                     (fmapDefault)
 import           Linear.V3                            (V3 (..))
 import           Linear.V4                            (V4 (..))
 

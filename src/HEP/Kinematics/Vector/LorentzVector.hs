@@ -35,9 +35,8 @@ module HEP.Kinematics.Vector.LorentzVector
        , boostVector
        ) where
 
-import           Control.Applicative    (Applicative (..))
 import           Data.Function          (on)
-import           Data.Traversable       (Traversable, fmapDefault)
+import           Data.Traversable       (fmapDefault)
 import           Linear.Metric          (Metric (..))
 import           Linear.V2              (V2 (..))
 import           Linear.V3              (V3 (..))

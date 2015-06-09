@@ -23,7 +23,7 @@ library
                        HEP.Kinematics.Vector.ThreeVector
                        HEP.Kinematics.Vector.LorentzTVector
                        HEP.Kinematics.Vector.LorentzVector
-  build-depends:       base >=4.6
+  build-depends:       base >=4.8
                      , linear >=1.10
   hs-source-dirs:      src
   default-language:    Haskell2010
