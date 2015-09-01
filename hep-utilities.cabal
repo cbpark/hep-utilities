@@ -24,6 +24,7 @@ library
                        HEP.Kinematics.Vector.ThreeVector
                        HEP.Kinematics.Vector.LorentzTVector
                        HEP.Kinematics.Vector.LorentzVector
+                       HEP.Particle.ID
   build-depends:       base >=4.8
                      , linear
                      , vector
