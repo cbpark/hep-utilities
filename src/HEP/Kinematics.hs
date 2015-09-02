@@ -77,6 +77,11 @@ instance HasFourMomentum FourMomentum where
 
 type TransverseMomentum = TwoVector Double
 
+instance HasFourMomentum TransverseMomentum where
+  fourMomentum (TwoVector (V2 x y))
+    = LorentzVector (V4 (sqrt $ x ** 2 + y ** 2) x y 0)
+  {-# INLINE fourMomentum #-}
+
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
 invariantMass = LV.invariantMass . momentumSum
