@@ -13,11 +13,14 @@
 --------------------------------------------------------------------------------
 module HEP.Kinematics
        (
-         FourMomentum
-       , HasFourMomentum (..)
+         HasFourMomentum (..)
+       , FourMomentum
+       , TransverseMomentum
 
        , invariantMass
        , transverseMass
+       , transverseMassCluster
+       , transverseVector
        , ptCompare
        , ptScalarSum
        , ptVectorSum
@@ -26,12 +29,14 @@ module HEP.Kinematics
        , deltaPhi
        , deltaR
        , cosTheta
+       , zeroV2
        , zeroV4
        ) where
 
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
 import           Data.Traversable                     (fmapDefault)
+import           Linear.V2                            (V2 (..))
 import           Linear.V3                            (V3 (..))
 import           Linear.V4                            (V4 (..))
 
@@ -39,6 +44,8 @@ import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector (..))
 import qualified HEP.Kinematics.Vector.LorentzTVector as TV
 import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector (..))
 import qualified HEP.Kinematics.Vector.LorentzVector  as LV
+import           HEP.Kinematics.Vector.TwoVector      (TwoVector (..))
+import qualified HEP.Kinematics.Vector.TwoVector      as TW
 
 type FourMomentum = LorentzVector Double
 
@@ -68,15 +75,28 @@ instance HasFourMomentum FourMomentum where
   fourMomentum = id
   {-# INLINE fourMomentum #-}
 
+type TransverseMomentum = TwoVector Double
+
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
 invariantMass = LV.invariantMass . momentumSum
 
 -- | Transverse mass of the visible + invisible particle system.
-transverseMass :: HasFourMomentum a => a -> LorentzTVector Double -> Double
-transverseMass p = TV.invariantMass ((makeTV . fourMomentum) p)
+transverseMass :: (Traversable f, HasFourMomentum a) =>
+                  f a -> LorentzTVector Double -> Double
+transverseMass p = TV.invariantMass ((makeTV . fourMomentum . momentumSum) p)
   where makeTV (LorentzVector (V4 t x y z)) =
           LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
+
+-- | Cluster transverse mass.
+-- This is the same as mTtrue in
+-- <http://arxiv.org/abs/0902.4864 arXiv:0902.4864>.
+transverseMassCluster :: (Traversable f, HasFourMomentum a) =>
+                         f a -> TransverseMomentum -> Double
+transverseMassCluster p (TwoVector (V2 x y)) = transverseMass p (TV.setXYM x y 0)
+
+transverseVector :: FourMomentum -> TransverseMomentum
+transverseVector = LV.transV
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.
@@ -111,5 +131,8 @@ deltaR = LV.deltaR `on` fourMomentum
 cosTheta :: HasFourMomentum a => a -> a -> Double
 cosTheta = LV.cosTheta `on` fourMomentum
 
-zeroV4 :: LorentzVector Double
+zeroV2 :: TransverseMomentum
+zeroV2 = TW.zeroTW
+
+zeroV4 :: FourMomentum
 zeroV4 = LV.zeroLV

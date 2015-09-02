@@ -21,6 +21,7 @@ module HEP.Kinematics.Vector.LorentzVector
 
        , vectorSum
        , invariantMass
+       , transV
 
        , pt
        , eta
@@ -66,6 +67,10 @@ instance Additive LorentzVector where
 instance Metric LorentzVector where
   (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
     t * t' - x * x' - y * y' - z * z'
+
+instance Num a => Monoid (LorentzVector a) where
+  mempty = zero
+  LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 + v4')
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
