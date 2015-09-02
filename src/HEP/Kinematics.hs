@@ -95,8 +95,8 @@ transverseMassCluster :: (Traversable f, HasFourMomentum a) =>
                          f a -> TransverseMomentum -> Double
 transverseMassCluster p (TwoVector (V2 x y)) = transverseMass p (TV.setXYM x y 0)
 
-transverseVector :: FourMomentum -> TransverseMomentum
-transverseVector = LV.transV
+transverseVector :: HasFourMomentum a => a -> TransverseMomentum
+transverseVector = LV.transV . fourMomentum
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.
@@ -104,7 +104,7 @@ ptCompare :: HasFourMomentum a => a -> a -> Ordering
 ptCompare = flip compare `on` pt
 
 -- | Scalar sum of transverse momenta.
-ptScalarSum :: HasFourMomentum a => Foldable f => f a -> Double
+ptScalarSum :: (Foldable f, HasFourMomentum a) => f a -> Double
 ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
 
 -- | Vector sum of transverse momenta.
