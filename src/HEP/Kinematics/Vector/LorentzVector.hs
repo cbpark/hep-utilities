@@ -74,7 +74,7 @@ instance Num a => Monoid (LorentzVector a) where
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
-setXYZT px' py' pz' e' = LorentzVector $ V4 e' px' py' pz'
+setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
 
 -- | Makes 'LorentzVector' out of components based on pseudorapidity,
 -- azimuthal angle, transverse momentum, and mass coordinates.

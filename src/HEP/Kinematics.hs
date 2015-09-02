@@ -71,6 +71,16 @@ class HasFourMomentum a where
   mass :: a -> Double
   mass = LV.invariantMass . fourMomentum
 
+  epxpypz :: a -> (Double, Double, Double, Double)
+  epxpypz p = let (LorentzVector (V4 e px py pz)) = fourMomentum p
+              in (e, px, py, pz)
+
+  pxpypz :: a -> (Double, Double, Double)
+  pxpypz p = let (_, px, py, pz) = epxpypz p in (px, py, pz)
+
+  pxpy :: a -> (Double, Double)
+  pxpy p = let (px, py, _) = pxpypz p in (px, py)
+
 instance HasFourMomentum FourMomentum where
   fourMomentum = id
   {-# INLINE fourMomentum #-}
