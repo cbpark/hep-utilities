@@ -33,7 +33,7 @@ module HEP.Kinematics.Vector.LorentzVector
        , cosTheta
 
        , boostVector
-       , emptyLV
+       , zeroLV
        ) where
 
 import           Data.Function          (on)
@@ -134,5 +134,5 @@ boostVector :: Fractional a => LorentzVector a -> ThreeVector a
 boostVector v@(LorentzVector (V4 t _ _ _)) =
   V3.ThreeVector $ (V3.getVector . spatialV) v ^/ t
 
-emptyLV :: Num a => LorentzVector a
-emptyLV = zero
+zeroLV :: Num a => LorentzVector a
+zeroLV = zero

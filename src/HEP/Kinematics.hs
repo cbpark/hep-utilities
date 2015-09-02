@@ -12,7 +12,9 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics
-       ( HasFourMomentum (..)
+       (
+         FourMomentum
+       , HasFourMomentum (..)
 
        , invariantMass
        , transverseMass
@@ -24,6 +26,7 @@ module HEP.Kinematics
        , deltaPhi
        , deltaR
        , cosTheta
+       , zeroV4
        ) where
 
 import           Data.Foldable                        as Foldable
@@ -37,11 +40,13 @@ import qualified HEP.Kinematics.Vector.LorentzTVector as TV
 import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector (..))
 import qualified HEP.Kinematics.Vector.LorentzVector  as LV
 
+type FourMomentum = LorentzVector Double
+
 -- | Type class for four-momentum objects in high-energy processes.
 --
 -- Minimal complete definition: 'fourMomentum'.
 class HasFourMomentum a where
-  fourMomentum :: a -> LorentzVector Double
+  fourMomentum :: a -> FourMomentum
 
   -- | Transverse momentum.
   pt :: a -> Double
@@ -59,7 +64,7 @@ class HasFourMomentum a where
   mass :: a -> Double
   mass = LV.invariantMass . fourMomentum
 
-instance HasFourMomentum (LorentzVector Double) where
+instance HasFourMomentum FourMomentum where
   fourMomentum = id
   {-# INLINE fourMomentum #-}
 
@@ -87,7 +92,7 @@ ptVectorSum :: (Traversable f, HasFourMomentum a) => f a -> Double
 ptVectorSum = LV.pt . momentumSum
 
 -- | Total four-momentum.
-momentumSum :: (Traversable f, HasFourMomentum a) => f a -> LorentzVector Double
+momentumSum :: (Traversable f, HasFourMomentum a) => f a -> FourMomentum
 momentumSum = LV.vectorSum . fmapDefault fourMomentum
 
 -- | Pseudorapidity difference.
@@ -105,3 +110,6 @@ deltaR = LV.deltaR `on` fourMomentum
 -- | Cosine of angle between four-momenta.
 cosTheta :: HasFourMomentum a => a -> a -> Double
 cosTheta = LV.cosTheta `on` fourMomentum
+
+zeroV4 :: LorentzVector Double
+zeroV4 = LV.zeroLV
