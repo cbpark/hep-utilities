@@ -46,7 +46,10 @@ library
   install-includes:    FlatRandom.h
                        mTLowerAndUpperBound.h
                        mTLowerAndUpperBound_c.h
-  cc-options:          -O2
+  if os(linux)
+    cc-options:        -O2 -std=c++11
+  else
+    cc-options:        -O2
   extra-libraries:     stdc++
 
 executable test_mtbound

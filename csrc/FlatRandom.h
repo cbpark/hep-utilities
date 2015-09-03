@@ -28,9 +28,9 @@ namespace Lester {
 namespace Lester {
 double FlatRandom() {
     std::random_device rd;
-    std::mt19937 mt(rd());
+    std::minstd_rand gen(rd());
     std::uniform_real_distribution<double> dr(0.0, 1.0);
-    return dr(mt);
+    return dr(gen);
 }
 }  // namespace Lester
 
