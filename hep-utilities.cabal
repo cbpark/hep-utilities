@@ -28,12 +28,13 @@ flag devel
 library
   exposed-modules:     HEP.Analysis.Histogram1D
                        HEP.Kinematics
-                       HEP.Kinematics.Variable.MTLowerAndUpper
+                       HEP.Kinematics.Variable
                        HEP.Kinematics.Vector.TwoVector
                        HEP.Kinematics.Vector.ThreeVector
                        HEP.Kinematics.Vector.LorentzTVector
                        HEP.Kinematics.Vector.LorentzVector
                        HEP.Particle.ID
+  other-modules:       HEP.Kinematics.Variable.MTLowerAndUpper
   build-depends:       base >=4.8
                      , linear
                      , vector

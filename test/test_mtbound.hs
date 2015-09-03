@@ -1,9 +1,9 @@
 module Main where
 
-import           HEP.Kinematics.Vector.LorentzVector     (setXYZT)
-import           HEP.Kinematics.Vector.TwoVector         (setXY)
+import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
+import           HEP.Kinematics.Vector.TwoVector     (setXY)
 
-import           HEP.Kinematics.Variable.MTLowerAndUpper (mTBound)
+import           HEP.Kinematics.Variable             (mTBound)
 
 main :: IO ()
 main = do

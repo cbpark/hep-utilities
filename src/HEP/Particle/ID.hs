@@ -1,3 +1,16 @@
+--------------------------------------------------------------------------------
+-- |
+-- Module      :  HEP.Particle.ID
+-- Copyright   :  (c) 2015 Chan Beom Park
+-- License     :  BSD-style
+-- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
+-- Stability   :  experimental
+-- Portability :  GHC
+--
+-- Particle ID numbers based on the PDG.
+--
+--------------------------------------------------------------------------------
+
 module HEP.Particle.ID where
 
 type PdgID = Int

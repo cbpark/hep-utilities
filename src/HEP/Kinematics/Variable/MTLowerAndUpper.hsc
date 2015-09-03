@@ -26,7 +26,12 @@ mTBoundPrim visA visB ptmiss mIntermediate =
                             pxMiss pyMiss
                             (realToFrac mIntermediate)
 
-mTBound :: FourMomentum -> FourMomentum -> TransverseMomentum -> Double -> Double
+-- | calculates mTBound defined in <http://arxiv.org/abs/1106.2322 arXiv:1106.2322>.
+mTBound :: FourMomentum       -- ^ four-momentum of the first visible systme
+        -> FourMomentum       -- ^ four-momentum of the second visible system
+        -> TransverseMomentum -- ^ missing transverse momentum
+        -> Double             -- ^ mass of the intermediate particle
+        -> Double
 mTBound visA visB ptmiss mIntermediate =
   let (eVisA, pxVisA, pyVisA, pzVisA) = epxpypz visA
       (eVisB, pxVisB, pyVisB, pzVisB) = epxpypz visB
