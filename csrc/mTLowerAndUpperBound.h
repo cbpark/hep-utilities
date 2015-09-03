@@ -256,7 +256,7 @@ namespace Lester {
       return -2;
     }
 
-    double mhsq;
+    double mhsq = 0.0;
     bool set=false;
     const double magicSign = biasSillyValuesHighSinceWeAreFindingALowerBound ? +1 : -1;
 
@@ -449,7 +449,7 @@ namespace Lester {
 
       double kxOld = kxStart;
       double kyOld = kyStart;
-      double oldH = bestHMassSoFar;
+      // double oldH = bestHMassSoFar;
 
       double typicalStepSize = distFromWall;
 
