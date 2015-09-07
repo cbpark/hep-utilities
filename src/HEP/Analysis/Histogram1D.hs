@@ -15,6 +15,7 @@ module HEP.Analysis.Histogram1D
          Hist1D (..)
        , emptyHist
        , histogram
+       , histogram1
        , scaleHist
        , integrate
        , unitNormalize
@@ -67,6 +68,10 @@ histogram nbin lo hi xs
                     lowhigh = V.zip binVector (V.tail binVector)
                     hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
                 in Hist1D $ Just (V.zip binVector hist)
+
+-- | Histogram for single element.
+histogram1 :: (Fractional a, Ord a, Unbox a) => Int -> a -> a -> a -> Hist1D a
+histogram1 nbin lo hi x = histogram nbin lo hi [x]
 
 binList :: (Fractional a, Num a, Unbox a) => Int -> a -> a -> Vector a
 binList nbin lo hi = V.iterateN (nbin + 1) (+ binsize) lo
