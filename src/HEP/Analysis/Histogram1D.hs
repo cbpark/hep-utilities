@@ -13,6 +13,7 @@
 module HEP.Analysis.Histogram1D
        (
          Hist1D (..)
+       , emptyHist
        , histogram
        , scaleHist
        , integrate
@@ -20,6 +21,8 @@ module HEP.Analysis.Histogram1D
        , add
        , sub
        , showHist1D
+       , bins
+       , contents
        ) where
 
 import           Data.Vector.Unboxed (Unbox, Vector)
@@ -28,8 +31,11 @@ import qualified Data.Vector.Unboxed as V
 newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
                  deriving Show
 
+emptyHist :: Hist1D a
+emptyHist = Hist1D Nothing
+
 instance (Eq a, Unbox a) => Monoid (Hist1D a) where
-  mempty = Hist1D Nothing
+  mempty = emptyHist
   mappend = add
 
 add :: (Eq a, Unbox a) => Hist1D a -> Hist1D a -> Hist1D a
@@ -57,10 +63,10 @@ histogram :: (Fractional a, Ord a, Unbox a) =>
           -> Hist1D a
 histogram nbin lo hi xs
   | hi <= lo  = Hist1D Nothing
-  | otherwise = let bins = binList nbin lo hi
-                    lowhigh = V.zip bins (V.tail bins)
+  | otherwise = let binVector = binList nbin lo hi
+                    lowhigh = V.zip binVector (V.tail binVector)
                     hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
-                in Hist1D $ Just (V.zip bins hist)
+                in Hist1D $ Just (V.zip binVector hist)
 
 binList :: (Fractional a, Num a, Unbox a) => Int -> a -> a -> Vector a
 binList nbin lo hi = V.iterateN (nbin + 1) (+ binsize) lo
@@ -85,3 +91,11 @@ showHist1D :: (Show a, Unbox a) => Hist1D a -> String
 showHist1D (Hist1D Nothing)  = ""
 showHist1D (Hist1D (Just h)) = unlines . map toStr $ V.toList h
   where toStr (b, x) = show b ++ ", " ++ show x
+
+bins :: Unbox a => Hist1D a -> [a]
+bins (Hist1D Nothing) = []
+bins (Hist1D (Just h)) = map fst $ V.toList h
+
+contents :: Unbox a => Hist1D a -> [Double]
+contents (Hist1D Nothing)  = []
+contents (Hist1D (Just h)) = map snd $ V.toList h
