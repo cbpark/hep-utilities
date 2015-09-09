@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Analysis.Histogram1D
@@ -37,7 +39,7 @@ emptyHist = Hist1D Nothing
 
 instance (Eq a, Unbox a) => Monoid (Hist1D a) where
   mempty = emptyHist
-  mappend = add
+  mappend h1 h2 = h1 `seq` h2 `seq` add h1 h2
 
 add :: (Eq a, Unbox a) => Hist1D a -> Hist1D a -> Hist1D a
 add = combine (+)
@@ -54,7 +56,7 @@ combine f (Hist1D (Just h1)) (Hist1D (Just h2)) =
       (bin2, x2) = V.unzip h2
   in Hist1D $ if bin1 /= bin2
               then Nothing
-              else Just (V.zip bin1 (V.zipWith f x1 x2))
+              else Just $ V.zip bin1 (V.zipWith f x1 x2)
 
 histogram :: (Fractional a, Ord a, Unbox a) =>
              Int  -- ^ Number of bins
@@ -64,9 +66,9 @@ histogram :: (Fractional a, Ord a, Unbox a) =>
           -> Hist1D a
 histogram nbin lo hi xs
   | hi <= lo  = Hist1D Nothing
-  | otherwise = let binVector = binList nbin lo hi
-                    lowhigh = V.zip binVector (V.tail binVector)
-                    hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
+  | otherwise = let !binVector = binList nbin lo hi
+                    !lowhigh = V.zip binVector (V.tail binVector)
+                    !hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
                 in Hist1D $ Just (V.zip binVector hist)
 
 -- | Histogram for single element.
