@@ -70,7 +70,7 @@ instance Metric LorentzVector where
 
 instance Num a => Monoid (LorentzVector a) where
   mempty = zero
-  LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 + v4')
+  LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 ^+^ v4')
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a

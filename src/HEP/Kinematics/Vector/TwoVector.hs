@@ -42,7 +42,7 @@ instance Metric TwoVector where
 
 instance Num a => Monoid (TwoVector a) where
   mempty = zero
-  TwoVector v2 `mappend` TwoVector v2' = TwoVector (v2 + v2')
+  TwoVector v2 `mappend` TwoVector v2' = TwoVector (v2 ^+^ v2')
 
 setXY :: a -> a -> TwoVector a
 setXY x y = TwoVector (V2 x y)
