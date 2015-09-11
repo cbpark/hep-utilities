@@ -37,13 +37,14 @@ module HEP.Kinematics.Vector.LorentzVector
        , zeroLV
        ) where
 
-import           Data.Function          (on)
-import           Data.Traversable       (fmapDefault)
-import           Linear.Metric          (Metric (..))
-import           Linear.V2              (V2 (..))
-import           Linear.V3              (V3 (..))
-import           Linear.V4              (V4 (..))
-import           Linear.Vector          (Additive (..), sumV, (^/))
+import           Control.Applicative
+import           Data.Function                     (on)
+import           Data.Traversable                  (fmapDefault)
+import           Linear.Metric                     (Metric (..))
+import           Linear.V2                         (V2 (..))
+import           Linear.V3                         (V3 (..))
+import           Linear.V4                         (V4 (..))
+import           Linear.Vector                     (Additive (..), sumV, (^/))
 
 import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
 import qualified HEP.Kinematics.Vector.ThreeVector as V3
@@ -53,6 +54,15 @@ import qualified HEP.Kinematics.Vector.TwoVector   as V2
 -- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
 newtype LorentzVector a = LorentzVector { getVector :: V4 a }
                         deriving (Eq, Ord, Show)
+
+instance Num a => Num (LorentzVector a) where
+  (+) = liftA2 (+)
+  (*) = liftA2 (*)
+  (-) = liftA2 (-)
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger = pure . fromInteger
 
 instance Functor LorentzVector where
   fmap f (LorentzVector v4) = LorentzVector (fmap f v4)
