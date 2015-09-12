@@ -19,6 +19,7 @@ module HEP.Kinematics.Vector.LorentzTVector
        , invariantMass
        ) where
 
+import           Control.Applicative
 import           Linear.Metric       (Metric (..))
 import           Linear.V3           (V3 (..))
 import           Linear.Vector       (Additive (..))
@@ -26,6 +27,15 @@ import           Linear.Vector       (Additive (..))
 -- | Type for (2+1)-dimensional vector.
 newtype LorentzTVector a = LorentzTVector { getVector :: V3 a }
                          deriving (Eq, Ord, Show)
+
+instance Num a => Num (LorentzTVector a) where
+  (+) = liftA2 (+)
+  (*) = liftA2 (*)
+  (-) = liftA2 (-)
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger = pure . fromInteger
 
 instance Functor LorentzTVector where
   fmap f (LorentzTVector v3) = LorentzTVector (fmap f v3)

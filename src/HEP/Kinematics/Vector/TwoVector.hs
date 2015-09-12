@@ -20,12 +20,22 @@ module HEP.Kinematics.Vector.TwoVector
        , zeroTW
        ) where
 
-import           Linear.Metric (Metric (..))
-import           Linear.V2     (V2 (..))
-import           Linear.Vector (Additive (..))
+import           Control.Applicative
+import           Linear.Metric       (Metric (..))
+import           Linear.V2           (V2 (..))
+import           Linear.Vector       (Additive (..))
 
 -- | Two-dimensional vector type.
 newtype TwoVector a = TwoVector { getVector :: V2 a } deriving (Eq, Ord, Show)
+
+instance Num a => Num (TwoVector a) where
+  (+) = liftA2 (+)
+  (*) = liftA2 (*)
+  (-) = liftA2 (-)
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger = pure . fromInteger
 
 instance Functor TwoVector where
   fmap f (TwoVector v2) = TwoVector (fmap f v2)
