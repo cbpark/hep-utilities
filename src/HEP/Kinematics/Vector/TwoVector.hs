@@ -16,6 +16,7 @@ module HEP.Kinematics.Vector.TwoVector
 
          -- * Function
        , setXY
+       , setPtPhi
        , phi2MPiPi
        , zeroTW
        ) where
@@ -56,6 +57,10 @@ instance Num a => Monoid (TwoVector a) where
 
 setXY :: a -> a -> TwoVector a
 setXY x y = TwoVector (V2 x y)
+
+setPtPhi :: Floating a => a -> a -> TwoVector a
+setPtPhi pt phi = let (px, py) = (pt * cos phi, pt * sin phi)
+                  in TwoVector (V2 px py)
 
 -- | Angle in the interval [-pi, pi).
 --
