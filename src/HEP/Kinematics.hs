@@ -21,6 +21,7 @@ module HEP.Kinematics
        , transverseMass
        , transverseMassCluster
        , transverseVector
+       , transverseEnergy
        , ptCompare
        , ptScalarSum
        , ptVectorSum
@@ -33,18 +34,18 @@ module HEP.Kinematics
        , zeroV4
        ) where
 
+import           Control.Lens                         ((^.))
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
 import           Data.Traversable                     (fmapDefault)
-import           Linear.V2                            (V2 (..))
-import           Linear.V3                            (V3 (..))
-import           Linear.V4                            (V4 (..))
+import           Linear.V2                            (R2 (..), V2 (..))
+import           Linear.V4                            (R4 (..), V4 (..))
 
-import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector (..))
+import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector)
 import qualified HEP.Kinematics.Vector.LorentzTVector as TV
-import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector (..))
+import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector)
 import qualified HEP.Kinematics.Vector.LorentzVector  as LV
-import           HEP.Kinematics.Vector.TwoVector      (TwoVector (..))
+import           HEP.Kinematics.Vector.TwoVector      (TwoVector)
 import qualified HEP.Kinematics.Vector.TwoVector      as TW
 
 type FourMomentum = LorentzVector Double
@@ -72,14 +73,26 @@ class HasFourMomentum a where
   mass = LV.invariantMass . fourMomentum
 
   epxpypz :: a -> (Double, Double, Double, Double)
-  epxpypz p = let (LorentzVector (V4 e px py pz)) = fourMomentum p
-              in (e, px, py, pz)
+  epxpypz p = let (V4 e' px' py' pz') = fourMomentum p ^._xyzw
+              in (e', px', py', pz')
 
   pxpypz :: a -> (Double, Double, Double)
-  pxpypz p = let (_, px, py, pz) = epxpypz p in (px, py, pz)
+  pxpypz p = let (_, px', py', pz') = epxpypz p in (px', py', pz')
 
   pxpy :: a -> (Double, Double)
-  pxpy p = let (px, py, _) = pxpypz p in (px, py)
+  pxpy p = let (px', py', _) = pxpypz p in (px', py')
+
+  px :: a -> Double
+  px p = let (px', _) = pxpy p in px'
+
+  py :: a -> Double
+  py p = let (_, py') = pxpy p in py'
+
+  pz :: a -> Double
+  pz p = let (_, _, pz') = pxpypz p in pz'
+
+  energy :: a -> Double
+  energy p = let (e', _, _, _) = epxpypz p in e'
 
 instance HasFourMomentum FourMomentum where
   fourMomentum = id
@@ -88,8 +101,8 @@ instance HasFourMomentum FourMomentum where
 type TransverseMomentum = TwoVector Double
 
 instance HasFourMomentum TransverseMomentum where
-  fourMomentum (TwoVector (V2 x y))
-    = LorentzVector (V4 (sqrt $ x ** 2 + y ** 2) x y 0)
+  fourMomentum v2 = let (V2 x y) = v2 ^._xy
+                    in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
   {-# INLINE fourMomentum #-}
 
 -- | Invariant mass.
@@ -100,18 +113,24 @@ invariantMass = LV.invariantMass . momentumSum
 transverseMass :: (Traversable f, HasFourMomentum a) =>
                   f a -> LorentzTVector Double -> Double
 transverseMass p = TV.invariantMass ((makeTV . fourMomentum . momentumSum) p)
-  where makeTV (LorentzVector (V4 t x y z)) =
-          LorentzTVector $ V3 (sqrt $ t ** 2 - z ** 2) x y
+  where makeTV v4 = let (e', px', py', pz') = epxpypz v4
+                    in TV.setXYT px' py' (sqrt (e' ** 2 - pz' ** 2))
 
 -- | Cluster transverse mass.
 -- This is the same as mTtrue in
 -- <http://arxiv.org/abs/0902.4864 arXiv:0902.4864>.
 transverseMassCluster :: (Traversable f, HasFourMomentum a) =>
                          f a -> TransverseMomentum -> Double
-transverseMassCluster p (TwoVector (V2 x y)) = transverseMass p (TV.setXYM x y 0)
+transverseMassCluster p v2 = let (V2 x y) = v2 ^._xy
+                             in transverseMass p (TV.setXYM x y 0)
 
 transverseVector :: HasFourMomentum a => a -> TransverseMomentum
 transverseVector = LV.transV . fourMomentum
+
+transverseEnergy :: HasFourMomentum a => a -> Double
+transverseEnergy v = let m = mass v
+                         pt' = pt v
+                     in sqrt $ m * m + pt' * pt'
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.

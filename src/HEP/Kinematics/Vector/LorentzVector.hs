@@ -13,7 +13,7 @@
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.LorentzVector
        ( -- * Type
-         LorentzVector (..)
+         LorentzVector
 
          -- * Function
        , setXYZT
@@ -37,13 +37,14 @@ module HEP.Kinematics.Vector.LorentzVector
        , zeroLV
        ) where
 
+import Control.Lens ((^.))
 import           Control.Applicative
 import           Data.Function                     (on)
 import           Data.Traversable                  (fmapDefault)
 import           Linear.Metric                     (Metric (..))
 import           Linear.V2                         (V2 (..))
 import           Linear.V3                         (V3 (..))
-import           Linear.V4                         (V4 (..))
+import           Linear.V4
 import           Linear.Vector                     (Additive (..), sumV, (^/))
 
 import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
@@ -52,8 +53,7 @@ import           HEP.Kinematics.Vector.TwoVector   (TwoVector)
 import qualified HEP.Kinematics.Vector.TwoVector   as V2
 
 -- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
-newtype LorentzVector a = LorentzVector { getVector :: V4 a }
-                        deriving (Eq, Ord, Show)
+newtype LorentzVector a = LorentzVector (V4 a) deriving (Eq, Show)
 
 instance Num a => Num (LorentzVector a) where
   (+) = liftA2 (+)
@@ -82,6 +82,30 @@ instance Num a => Monoid (LorentzVector a) where
   mempty = zero
   LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 ^+^ v4')
 
+instance R1 LorentzVector where
+  _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x
+  {-# INLINE _x #-}
+
+instance R2 LorentzVector where
+  _y f (LorentzVector (V4 t x y z)) = (\y' -> LorentzVector (V4 t x y' z)) <$> f y
+  {-# INLINE _y #-}
+  _xy f (LorentzVector (V4 t x y z)) =
+    (\(V2 x' y') -> LorentzVector (V4 t x' y' z)) <$> f (V2 x y)
+  {-# INLINE _xy #-}
+
+instance R3 LorentzVector where
+  _z f (LorentzVector (V4 t x y z)) = (LorentzVector . V4 t x y) <$> f z
+  {-# INLINE _z #-}
+  _xyz f (LorentzVector (V4 t x y z)) =
+    (\(V3 x' y' z') -> LorentzVector (V4 t x' y' z')) <$> f (V3 x y z)
+  {-# INLINE _xyz #-}
+
+instance R4 LorentzVector where
+  _w f (LorentzVector (V4 t x y z)) = (\t' -> LorentzVector (V4 t' x y z)) <$> f t
+  {-# INLINE _w #-}
+  _xyzw f (LorentzVector v4) = LorentzVector <$> f v4
+  {-# INLINE _xyzw #-}
+
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
 setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
@@ -98,23 +122,23 @@ setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
 -- | Vector sum of Lorentz vectors.
 --
 -- >>> vectorSum [LorentzVector (V4 4 1 2 3), LorentzVector (V4 12 5 6 7)]
--- LorentzVector {getVector = V4 16 6 8 10}
+-- LorentzVector (V4 16 6 8 10)
 vectorSum :: (Traversable f, Num a) => f (LorentzVector a) -> LorentzVector a
-vectorSum = LorentzVector . sumV . fmapDefault getVector
+vectorSum = LorentzVector . sumV . fmapDefault (^._xyzw)
 
 -- | Invariant mass.
 invariantMass :: Floating a => LorentzVector a -> a
 invariantMass = norm
 
 transV :: LorentzVector a -> TwoVector a
-transV (LorentzVector (V4 _ x y _)) = V2.TwoVector (V2 x y)
+transV (LorentzVector (V4 _ x y _)) = V2.setXY x y
 
 -- | Magnitude of transverse momentum.
 pt :: Floating a => LorentzVector a -> a
-pt = norm . V2.getVector . transV
+pt = norm . transV
 
 spatialV :: Num a => LorentzVector a -> ThreeVector a
-spatialV (LorentzVector (V4 _ x y z)) = V3.ThreeVector (V3 x y z)
+spatialV (LorentzVector (V4 _ x y z)) = V3.setXYZ x y z
 
 -- | Pseudorapidity.
 eta :: (Floating a, Ord a) => LorentzVector a -> a
@@ -146,8 +170,7 @@ cosTheta v v' = cos $! deltaTheta v v'
 
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a
-boostVector v@(LorentzVector (V4 t _ _ _)) =
-  V3.ThreeVector $ (V3.getVector . spatialV) v ^/ t
+boostVector v@(LorentzVector (V4 t _ _ _)) = spatialV v ^/ t
 
 zeroLV :: Num a => LorentzVector a
 zeroLV = zero

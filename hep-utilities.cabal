@@ -36,6 +36,7 @@ library
                        HEP.Particle.ID
   other-modules:       HEP.Kinematics.Variable.MTLowerAndUpper
   build-depends:       base >=4.8
+                     , lens
                      , linear
                      , vector
   hs-source-dirs:      src

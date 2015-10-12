@@ -12,22 +12,22 @@
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.TwoVector
        ( -- * Type
-         TwoVector (..)
+         TwoVector
 
          -- * Function
        , setXY
        , setPtPhi
-       , phi2MPiPi
        , zeroTW
+       , phi2MPiPi
        ) where
 
 import           Control.Applicative
 import           Linear.Metric       (Metric (..))
-import           Linear.V2           (V2 (..))
+import           Linear.V2           (R1 (..), R2 (..), V2 (..))
 import           Linear.Vector       (Additive (..))
 
 -- | Two-dimensional vector type.
-newtype TwoVector a = TwoVector { getVector :: V2 a } deriving (Eq, Ord, Show)
+newtype TwoVector a = TwoVector (V2 a) deriving (Eq, Show)
 
 instance Num a => Num (TwoVector a) where
   (+) = liftA2 (+)
@@ -55,21 +55,34 @@ instance Num a => Monoid (TwoVector a) where
   mempty = zero
   TwoVector v2 `mappend` TwoVector v2' = TwoVector (v2 ^+^ v2')
 
+instance R1 TwoVector where
+  _x f (TwoVector (V2 x y)) = (\x' -> TwoVector (V2 x' y)) <$> f x
+  {-# INLINE _x #-}
+
+instance R2 TwoVector where
+  _y f (TwoVector (V2 x y)) = (TwoVector . V2 x) <$> f y
+  {-# INLINE _y #-}
+  _xy f (TwoVector v2) = TwoVector <$> f v2
+  {-# INLINE _xy #-}
+
 setXY :: a -> a -> TwoVector a
 setXY x y = TwoVector (V2 x y)
 
 setPtPhi :: Floating a => a -> a -> TwoVector a
-setPtPhi pt phi = let (px, py) = (pt * cos phi, pt * sin phi)
+setPtPhi pt phi = let px = pt * cos phi
+                      py = pt * sin phi
                   in TwoVector (V2 px py)
+
+zeroTW :: Num a => TwoVector a
+zeroTW = zero
 
 -- | Angle in the interval [-pi, pi).
 --
 -- >>> phi2MPiPi (2 * pi)
 -- 0.0
+-- >>> phi2MPiPi (-pi)
+-- -3.141592653589793
 phi2MPiPi :: (Floating a, Ord a) => a -> a
 phi2MPiPi x | x >= pi   = phi2MPiPi $! x - 2*pi
             | x < -pi   = phi2MPiPi $! x + 2*pi
             | otherwise = x
-
-zeroTW :: Num a => TwoVector a
-zeroTW = zero
