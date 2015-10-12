@@ -34,11 +34,10 @@ module HEP.Kinematics.Vector.LorentzVector
        , cosTheta
 
        , boostVector
-       , zeroLV
        ) where
 
-import Control.Lens ((^.))
 import           Control.Applicative
+import           Control.Lens                      ((^.))
 import           Data.Function                     (on)
 import           Data.Traversable                  (fmapDefault)
 import           Linear.Metric                     (Metric (..))
@@ -171,6 +170,3 @@ cosTheta v v' = cos $! deltaTheta v v'
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a
 boostVector v@(LorentzVector (V4 t _ _ _)) = spatialV v ^/ t
-
-zeroLV :: Num a => LorentzVector a
-zeroLV = zero

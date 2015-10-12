@@ -16,6 +16,8 @@ module HEP.Kinematics
          HasFourMomentum (..)
        , FourMomentum
        , TransverseMomentum
+       , module LM
+       , module LV
 
        , invariantMass
        , transverseMass
@@ -30,23 +32,22 @@ module HEP.Kinematics
        , deltaPhi
        , deltaR
        , cosTheta
-       , zeroV2
-       , zeroV4
        ) where
 
 import           Control.Lens                         ((^.))
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
 import           Data.Traversable                     (fmapDefault)
-import           Linear.V2                            (R2 (..), V2 (..))
+import           Linear.Metric                        as LM
+import           Linear.V2
 import           Linear.V4                            (R4 (..), V4 (..))
+import           Linear.Vector                        as LV
 
 import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector)
 import qualified HEP.Kinematics.Vector.LorentzTVector as TV
 import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector)
 import qualified HEP.Kinematics.Vector.LorentzVector  as LV
 import           HEP.Kinematics.Vector.TwoVector      (TwoVector)
-import qualified HEP.Kinematics.Vector.TwoVector      as TW
 
 type FourMomentum = LorentzVector Double
 
@@ -104,6 +105,9 @@ instance HasFourMomentum TransverseMomentum where
   fourMomentum v2 = let (V2 x y) = v2 ^._xy
                     in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
   {-# INLINE fourMomentum #-}
+  pxpy v2 = let (V2 x y) = v2 ^._xy in (x, y)
+  px = (^._x)
+  py = (^._y)
 
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
@@ -164,9 +168,3 @@ deltaR = LV.deltaR `on` fourMomentum
 -- | Cosine of angle between four-momenta.
 cosTheta :: HasFourMomentum a => a -> a -> Double
 cosTheta = LV.cosTheta `on` fourMomentum
-
-zeroV2 :: TransverseMomentum
-zeroV2 = TW.zeroTW
-
-zeroV4 :: FourMomentum
-zeroV4 = LV.zeroLV

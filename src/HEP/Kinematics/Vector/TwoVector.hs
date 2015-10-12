@@ -17,7 +17,6 @@ module HEP.Kinematics.Vector.TwoVector
          -- * Function
        , setXY
        , setPtPhi
-       , zeroTW
        , phi2MPiPi
        ) where
 
@@ -72,9 +71,6 @@ setPtPhi :: Floating a => a -> a -> TwoVector a
 setPtPhi pt phi = let px = pt * cos phi
                       py = pt * sin phi
                   in TwoVector (V2 px py)
-
-zeroTW :: Num a => TwoVector a
-zeroTW = zero
 
 -- | Angle in the interval [-pi, pi).
 --
