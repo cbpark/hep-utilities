@@ -105,9 +105,12 @@ instance HasFourMomentum TransverseMomentum where
   fourMomentum v2 = let (V2 x y) = v2 ^._xy
                     in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
   {-# INLINE fourMomentum #-}
-  pxpy v2 = let (V2 x y) = v2 ^._xy in (x, y)
+  pxpy v2 = (v2 ^._x, v2^._y)
+  {-# INLINE pxpy #-}
   px = (^._x)
+  {-# INLINE px #-}
   py = (^._y)
+  {-# INLINE py #-}
 
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
