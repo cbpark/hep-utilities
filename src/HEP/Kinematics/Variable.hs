@@ -13,7 +13,7 @@
 
 module HEP.Kinematics.Variable
        (
-         mTBound
+         mTLowerBound
        ) where
 
-import HEP.Kinematics.Variable.MTLowerAndUpper (mTBound)
+import HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound)

@@ -1,14 +1,14 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module HEP.Kinematics.Variable.MTLowerAndUpper where
+module HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound) where
 
-import           Control.Monad                       (replicateM)
-import           Control.Monad.IO.Class
+import           Control.Monad                       (liftM, replicateM, when)
+import           Control.Monad.IO.Class              (MonadIO (..))
 import           Control.Monad.ST                    (runST)
+import           Control.Monad.Trans.Class           (MonadTrans (..))
 import           Control.Monad.Trans.Reader
-import Control.Monad.Trans.Class
 import           Control.Monad.Trans.State
-import           Data.Maybe
+import           Data.Maybe                          (mapMaybe)
 import           System.Random.MWC
 
 import           HEP.Kinematics
@@ -16,67 +16,39 @@ import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
 import           HEP.Kinematics.Vector.TwoVector     (setXY)
 
 type Mass = Double
-type StepSize = Double
 type Splitting = TransverseMomentum
-type Result = (Mass, Splitting)
+data Result = Result { recomass :: Mass, splitting :: TransverseMomentum }
 
-mTBound :: Mass
-mTBound = undefined
+type StepSize = Double
 
 data Input = Input { visible1      :: FourMomentum
                    , visible2      :: FourMomentum
                    , missing       :: TransverseMomentum
                    , mIntermediate :: Mass }
 
--- mTLowerBound' :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass
---               -> StateT Result IO ()
--- mTLowerBound' vis1 vis2 miss m = do
---   splitting <- liftIO $ startPoint vis1 vis2 miss m
---   return undefined
+mTLowerBound :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass
+             -> IO Mass
+mTLowerBound vis1 vis2 miss m = do
+  let scale' = sqrt $ (getScale vis1 + getScale vis2 + getScale miss) / 8.0
+      scale = if scale' == 0 then 2.0 * m else scale'
+      vis1' = fmap (/ scale) vis1
+      vis2' = fmap (/ scale) vis2
+      miss' = fmap (/ scale) miss
+      m' = m / scale
+      input = Input vis1' vis2' miss' m'
+  Result {..} <- runReaderT mTLowerBound' input
+  return (recomass * scale)
+    where
+      getScale :: HasFourMomentum a => a -> Double
+      getScale v = let (px', py', pz') = pxpypz v
+                   in px' ** 2 + py' ** 2 + pz' ** 2
 
--- mTLowerBound'' :: Result -> StepSize
---                -> FourMomentum -> FourMomentum -> TransverseMomentum -> Mass
---                -> StateT StepSize IO Result
--- mTLowerBound'' result size vis1 vis2 miss m =
---   if size < 1.0e-8 / typicalScale
---   then return result
---   else do let (boundM, splitting) = result
---               splitting' = deltaK r1 r2 distFromWall
-
-startPoint :: ReaderT Input IO Result
-startPoint = do
+mTLowerBound' :: MonadIO m => ReaderT Input m Result
+mTLowerBound' = do
   input <- ask
-  s <- liftIO $ createSystemRandom >>= save
-  let (split0, s0) = getSplit distFromWall s
-  return $ runReader (findPoint s0 split0 updateFunc) input
-    where updateFunc :: Splitting -> Seed -> (Splitting, Seed)
-          updateFunc _ = getSplit distFromWall
-
-findPoint :: Seed -> Splitting -> (Splitting -> Seed -> (Splitting, Seed))
-          -> Reader Input Result
-findPoint s splitting splitFn = do
-  input <- ask
-  case runReader (recoMass splitting) input of
-    Nothing -> do let (splitting', s') = splitFn splitting s
-                  findPoint s' splitting' splitFn
-    Just sp -> return sp
-
-getSplit :: StepSize -> Seed -> (Splitting, Seed)
-getSplit dist s =
-  let (r1, r2, s') = proceedRd s
-      theta = (r1 - 0.5) * pi
-      distToStep = dist * tan theta
-      angToStep = 2.0 * r2 * pi
-      deltaK = setXY (distToStep * cos angToStep) (distToStep * sin angToStep)
-  in (deltaK, s')
-
-proceedRd :: Seed -> (Double, Double, Seed)
-proceedRd s = runST $ do gen <- restore s
-                         rs <- replicateM 2 (uniform gen)
-                         -- to generate variates within [0, 1).
-                         let rs' = fmap (\x -> x - 2 ** (-53)) rs
-                         s' <- save gen
-                         return (head rs', (head . tail) rs', s')
+  (p, s) <- runReaderT startingPoint input
+  (result, _) <- runReaderT (execStateT (findMinimum distFromWall) (p, s)) input
+  return result
 
 distFromWall :: StepSize
 distFromWall = 2.0 / typicalScale
@@ -84,18 +56,70 @@ distFromWall = 2.0 / typicalScale
 typicalScale :: Double
 typicalScale = 26.0
 
+findMinimum :: MonadIO m => StepSize -> StateT (Result, Seed) (ReaderT Input m) ()
+findMinimum dist =
+  when (dist > tolerance) $ do
+    (r0@(Result recomass0 splitting0), s0) <- get
+    let (delta, s) = runState (deltaK dist) s0
+        split = splitting0 + delta
+    input <- lift ask
+    case runReader (recoMass split) input of
+      Nothing              -> do put (r0, s)
+                                 findMinimum (dist * shrinkageFactor)
+      Just (r@Result {..}) -> if recomass < recomass0
+                              then do put (r, s)
+                                      findMinimum (dist * growthFactor)
+                              else do put (r0, s)
+                                      findMinimum (dist * shrinkageFactor)
+      where tolerance = 1.0e-8 / typicalScale
+            growthFactor = 1.1
+            shrinkageFactor = 0.99
+
+startingPoint :: MonadIO m => ReaderT Input m (Result, Seed)
+startingPoint = do
+  s <- liftIO $ createSystemRandom >>= save
+  let (split0, s0) = runState (deltaK distFromWall) s
+  liftM (runReader (getPhysical s0 split0)) ask
+    where
+      getPhysical :: Seed -> Splitting -> Reader Input (Result, Seed)
+      getPhysical s split =
+        do input <- ask
+           case runReader (recoMass split) input of
+             Nothing -> do let (split', s') = runState (deltaK distFromWall) s
+                           getPhysical s' split'
+             Just r  -> return (r, s)
+
+deltaK :: StepSize -> State Seed Splitting
+deltaK dist = do
+  s <- get
+  let (r1, r2, s') = proceedRd s
+      theta = (r1 - 0.5) * pi
+      distStep = dist * tan theta
+      angStep = 2.0 * pi * r2
+      delta = setXY (distStep * cos angStep) (distStep * sin angStep)
+  put s'
+  return delta
+    where
+      proceedRd :: Seed -> (Double, Double, Seed)
+      proceedRd s = runST $ do gen <- restore s
+                               rs <- replicateM 2 (uniform gen)
+                               -- to generate variates within [0, 1).
+                               let (r1':(r2':_)) = map (\x -> x - 2 ** (-53)) rs
+                               s' <- save gen
+                               return (r1', r2', s')
+
 recoMass :: Splitting -> Reader Input (Maybe Result)
-recoMass splitting = do
+recoMass split = do
   Input {..} <- ask
-  let invis1 = fmap (*0.5) (missing + splitting)
-      invis2 = fmap (*0.5) (missing - splitting)
+  let invis1 = fmap (*0.5) (missing + split)
+      invis2 = fmap (*0.5) (missing - split)
       kneu1 = kNeutrino visible1 invis1 mIntermediate
       kneu2 = kNeutrino visible2 invis2 mIntermediate
   return $ if null kneu1 || null kneu2
            then Nothing
-           else Just ( minimum [invariantMass [visible1, visible2, k1, k2] |
-                                k1 <- kneu1, k2 <- kneu2 ]
-                     , splitting)
+           else Just $ Result (minimum
+                               [invariantMass [visible1, visible2, k1, k2 ] |
+                                k1 <- kneu1 , k2 <- kneu2 ]) split
 
 kNeutrino :: FourMomentum -> TransverseMomentum -> Mass -> [FourMomentum]
 kNeutrino vis invis m = let (kx, ky) = pxpy invis
@@ -117,4 +141,4 @@ kNeutrinoL vis invis m =
      then [Nothing]
      else let term1 = pz vis * disc'
               term2 = energy vis * sqrt disc
-          in map (Just . (/ (visEt * visEt))) [term1 + term2, term1 - term2]
+          in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]
