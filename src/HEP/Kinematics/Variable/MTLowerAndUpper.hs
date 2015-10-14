@@ -79,14 +79,14 @@ startingPoint :: MonadIO m => ReaderT Input m (Result, Seed)
 startingPoint = do
   s <- liftIO $ createSystemRandom >>= save
   let (split0, s0) = runState (deltaK distFromWall) s
-  liftM (runReader (getPhysical s0 split0)) ask
+  liftM (runReader (physicalPoint s0 split0)) ask
     where
-      getPhysical :: Seed -> Splitting -> Reader Input (Result, Seed)
-      getPhysical s split =
+      physicalPoint :: Seed -> Splitting -> Reader Input (Result, Seed)
+      physicalPoint s split =
         do input <- ask
            case runReader (recoMass split) input of
              Nothing -> do let (split', s') = runState (deltaK distFromWall) s
-                           getPhysical s' split'
+                           physicalPoint s' split'
              Just r  -> return (r, s)
 
 deltaK :: StepSize -> State Seed Splitting
