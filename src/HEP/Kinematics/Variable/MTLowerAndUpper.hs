@@ -35,8 +35,7 @@ mTLowerBound vis1 vis2 miss m = do
       vis2' = fmap (/ scale) vis2
       miss' = fmap (/ scale) miss
       m' = m / scale
-      input = Input vis1' vis2' miss' m'
-  Result {..} <- runReaderT mTLowerBound' input
+  Result {..} <- runReaderT mTLowerBound' (Input vis1' vis2' miss' m')
   return (recomass * scale)
     where
       getScale :: HasFourMomentum a => a -> Double
@@ -94,9 +93,9 @@ deltaK dist = do
   s <- get
   let (r1, r2, s') = proceedRd s
       theta = (r1 - 0.5) * pi
-      distStep = dist * tan theta
-      angStep = 2.0 * pi * r2
-      delta = setXY (distStep * cos angStep) (distStep * sin angStep)
+      step = dist * tan theta
+      angle = 2.0 * pi * r2
+      delta = setXY (step * cos angle) (step * sin angle)
   put s'
   return delta
     where
@@ -111,8 +110,8 @@ deltaK dist = do
 recoMass :: Splitting -> Reader Input (Maybe Result)
 recoMass split = do
   Input {..} <- ask
-  let invis1 = fmap (*0.5) (missing + split)
-      invis2 = fmap (*0.5) (missing - split)
+  let invis1 = fmap (/ 2.0) (missing + split)
+      invis2 = fmap (/ 2.0) (missing - split)
       kneu1 = kNeutrino visible1 invis1 mIntermediate
       kneu2 = kNeutrino visible2 invis2 mIntermediate
   return $ if null kneu1 || null kneu2
@@ -126,7 +125,7 @@ kNeutrino vis invis m = let (kx, ky) = pxpy invis
                             kz = kNeutrinoL vis invis m
                         in mapMaybe (setMomentum kx ky) kz
   where setMomentum _ _ Nothing  = Nothing
-        setMomentum x y (Just z) = let t = sqrt $ x * x + y * y + z * z
+        setMomentum x y (Just z) = let t = sqrt $ x ** 2 + y ** 2 + z ** 2
                                    in Just (setXYZT x y z t)
 
 kNeutrinoL :: FourMomentum -> TransverseMomentum -> Mass -> [Maybe Double]
