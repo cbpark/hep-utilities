@@ -30,7 +30,8 @@ library
                        HEP.Kinematics.Vector.LorentzTVector
                        HEP.Kinematics.Vector.LorentzVector
                        HEP.Particle.ID
-  other-modules:       HEP.Kinematics.Variable.MTLowerAndUpper
+  other-modules:       HEP.Kinematics.Variable.MT2
+                       HEP.Kinematics.Variable.MTLowerAndUpper
   build-depends:       base >=4.8
                      , lens
                      , linear
