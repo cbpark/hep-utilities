@@ -2,18 +2,17 @@
 
 module HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound) where
 
-import           Control.Monad                       (liftM, replicateM, when)
-import           Control.Monad.IO.Class              (MonadIO (..))
-import           Control.Monad.ST                    (runST)
-import           Control.Monad.Trans.Class           (MonadTrans (..))
+import           Control.Monad                   (liftM, replicateM, when)
+import           Control.Monad.IO.Class          (MonadIO (..))
+import           Control.Monad.ST                (runST)
+import           Control.Monad.Trans.Class       (MonadTrans (..))
 import           Control.Monad.Trans.Reader
 import           Control.Monad.Trans.State
-import           Data.Maybe                          (mapMaybe)
 import           System.Random.MWC
 
 import           HEP.Kinematics
-import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
-import           HEP.Kinematics.Vector.TwoVector     (setXY)
+import           HEP.Kinematics.Variable.MAOS    (momentumSolution)
+import           HEP.Kinematics.Vector.TwoVector (setXY)
 
 type Mass = Double
 type Splitting = TransverseMomentum
@@ -111,32 +110,11 @@ recoMass split = do
   Input {..} <- ask
   let invis1 = fmap (/ 2.0) (missing + split)
       invis2 = fmap (/ 2.0) (missing - split)
-      kneu1 = kNeutrino visible1 invis1 mIntermediate
-      kneu2 = kNeutrino visible2 invis2 mIntermediate
+      kneu1 = momentumSolution visible1 invis1 mIntermediate 0
+      kneu2 = momentumSolution visible2 invis2 mIntermediate 0
   return $ if null kneu1 || null kneu2
            then Nothing
-           else Just $ Result (minimum
-                               [invariantMass [visible1, visible2, k1, k2 ] |
-                                k1 <- kneu1 , k2 <- kneu2 ]) split
-
-kNeutrino :: FourMomentum -> TransverseMomentum -> Mass -> [FourMomentum]
-kNeutrino vis invis m = let (kx, ky) = pxpy invis
-                            kz = kNeutrinoL vis invis m
-                        in mapMaybe (setMomentum kx ky) kz
-  where setMomentum _ _ Nothing  = Nothing
-        setMomentum x y (Just z) = let t = sqrt $ x ** 2 + y ** 2 + z ** 2
-                                   in Just (setXYZT x y z t)
-
-kNeutrinoL :: FourMomentum -> TransverseMomentum -> Mass -> [Maybe Double]
-kNeutrinoL vis invis m =
-  let visMass = mass vis
-      visTrans = transverseVector vis
-      disc' = 0.5 * (m ** 2 - visMass ** 2) + invis `dot` visTrans
-      visEt = transverseEnergy vis
-      invisEt = norm invis
-      disc = disc' ** 2 - (visEt * invisEt) ** 2
-  in if disc < 0
-     then [Nothing]
-     else let term1 = pz vis * disc'
-              term2 = energy vis * sqrt disc
-          in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]
+           else let minMass = minimum
+                              [invariantMass [visible1, visible2, k1, k2 ] |
+                               k1 <- kneu1 , k2 <- kneu2 ]
+                in Just $ Result minMass split
