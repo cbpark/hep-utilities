@@ -10,7 +10,6 @@ import           Linear.Matrix                   (M33, det33)
 import           Linear.V3
 
 import           HEP.Kinematics
-import           HEP.Kinematics.Vector.TwoVector (setXY)
 
 type Mass = Double
 
@@ -31,6 +30,7 @@ mT2 :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass -> Mass
 mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
   let mVis1 = mass vis1
       mVis2 = mass vis2
+      getScale v = pt v ** 2
       scale = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
                      + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
   in case scale of 0 -> 0
@@ -41,23 +41,20 @@ mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
                                   (Input vis1 vis2 miss mInv1 mInv2 pre sec)
                            else mT2' m1Min s
                                   (Input vis2 vis1 miss mInv2 mInv1 pre sec)
-    where getScale :: HasFourMomentum a => a -> Double
-          getScale v = pt v ** 2
 
-type Scale = Double
-
-mT2' :: Mass -> Scale -> Input -> Mass
+mT2' :: Mass -> Double -> Input -> Mass
 mT2' mMin scale input@Input {..} =
   let mLower = mMin
       mUpper = runReader (growUpper (mMin + scale)) input
   in case mUpper of
        Nothing  -> -1
-       (Just m) -> runReader (evalStateT (bisect useDeciSections) (mLower, m)) input
+       (Just m) -> runReader
+                   (evalStateT (bisect useDeciSections) (mLower, m)) input
 
 growUpper :: Mass -> Reader Input (Maybe Mass)
 growUpper mUpper = do
   Input {..} <- ask
-  let side1 = mkEllipse mUpper mInvisible1 (-visible1) (setXY 0 0)
+  let side1 = mkEllipse mUpper mInvisible1 (-visible1) zero
       side2 = mkEllipse mUpper mInvisible2 visible2 missing
   case ellipsesAreDisjoint side1 side2 of
     Nothing      -> return Nothing
@@ -76,7 +73,7 @@ bisect sec = do
           if trialM <= mLower || trialM >= mUpper
           then return trialM
           else do
-            let side1 = mkEllipse trialM mInvisible1 (-visible1) (setXY 0 0)
+            let side1 = mkEllipse trialM mInvisible1 (-visible1) zero
                 side2 = mkEllipse trialM mInvisible2 visible2 missing
             case ellipsesAreDisjoint side1 side2 of
               Nothing      -> return mLower

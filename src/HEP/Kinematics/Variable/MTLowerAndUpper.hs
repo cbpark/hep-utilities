@@ -29,7 +29,7 @@ data Input = Input { visible1      :: FourMomentum
 mTLowerBound :: FourMomentum        -- ^ four-momentum of the first visible system
              -> FourMomentum        -- ^ four-momentum of the second visible system
              -> TransverseMomentum  -- ^ missing transverse momentum
-             -> Double                -- ^ mass of the intermediate state
+             -> Double              -- ^ mass of the intermediate state
              -> IO Double
 mTLowerBound vis1 vis2 miss m = do
   let scale' = sqrt $ (getScale vis1 + getScale vis2 + getScale miss) / 8.0
@@ -40,8 +40,7 @@ mTLowerBound vis1 vis2 miss m = do
       m' = m / scale
   Result {..} <- runReaderT mTLowerBound' (Input vis1' vis2' miss' m')
   return (recomass * scale)
-    where getScale :: HasFourMomentum a => a -> Double
-          getScale v = let (px', py', pz') = pxpypz v
+    where getScale v = let (px', py', pz') = pxpypz v
                        in px' ** 2 + py' ** 2 + pz' ** 2
 
 mTLowerBound' :: MonadIO m => ReaderT Input m Result
