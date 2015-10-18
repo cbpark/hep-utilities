@@ -1,12 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module HEP.Kinematics.Variable.MT2 where
+module HEP.Kinematics.Variable.MT2 (mT2) where
 
-import           Control.Lens   ((^.))
-import           Linear.Matrix  (M33, det33)
+import           Control.Lens                    ((^.))
+import           Control.Monad.Trans.Class       (MonadTrans (..))
+import           Control.Monad.Trans.Reader
+import           Control.Monad.Trans.State
+import           Linear.Matrix                   (M33, det33)
 import           Linear.V3
 
 import           HEP.Kinematics
+import           HEP.Kinematics.Vector.TwoVector (setXY)
 
 type Mass = Double
 
@@ -18,6 +22,10 @@ data Input = Input { visible1        :: FourMomentum
                    , precision       :: Double
                    , useDeciSections :: Bool }
 
+-- | calculates MT2.
+--
+-- This uses the algorithm in <http://arxiv.org/abs/1411.4312 arXiv:1411.4312>
+-- by C.G. Lester and B. Nachman.
 mT2 :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass -> Mass
     -> Double -> Bool -> Mass
 mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
@@ -26,9 +34,9 @@ mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
       scale = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
                      + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
   in case scale of 0 -> 0
-                   s -> let m1Min = mVis1 + mInv1
-                            m2Min = mVis2 + mInv2
-                        in if m2Min > m1Min
+                   s -> do let m1Min = mVis1 + mInv1
+                               m2Min = mVis2 + mInv2
+                           if m2Min > m1Min
                            then mT2' m2Min s
                                   (Input vis1 vis2 miss mInv1 mInv2 pre sec)
                            else mT2' m1Min s
@@ -39,9 +47,41 @@ mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
 type Scale = Double
 
 mT2' :: Mass -> Scale -> Input -> Mass
-mT2' mMin scale Input {..} = let mLower = mMin
-                                 mUpper = mMin + scale
-                             in undefined
+mT2' mMin scale input@Input {..} =
+  let mLower = mMin
+      mUpper = runReader (growUpper (mMin + scale)) input
+  in case mUpper of
+       Nothing  -> -1
+       (Just m) -> runReader (evalStateT (bisect useDeciSections) (mLower, m)) input
+
+growUpper :: Mass -> Reader Input (Maybe Mass)
+growUpper mUpper = do
+  Input {..} <- ask
+  let side1 = mkEllipse mUpper mInvisible1 (-visible1) (setXY 0 0)
+      side2 = mkEllipse mUpper mInvisible2 visible2 missing
+  case ellipsesAreDisjoint side1 side2 of
+    Nothing      -> return Nothing
+    (Just False) -> return (Just mUpper)
+    (Just _)     -> growUpper $! mUpper * 2
+
+bisect :: Bool -> StateT (Mass, Mass) (Reader Input) Mass
+bisect sec = do
+  (mLower, mUpper) <- get
+  Input {..} <- lift ask
+  if mUpper - mLower <= precision
+  then return $ (mLower + mUpper) / 2.0
+  else do let trialM = if sec
+                       then (mLower * 15 + mUpper) / 16
+                       else (mLower + mUpper) / 2
+          if trialM <= mLower || trialM >= mUpper
+          then return trialM
+          else do
+            let side1 = mkEllipse trialM mInvisible1 (-visible1) (setXY 0 0)
+                side2 = mkEllipse trialM mInvisible2 visible2 missing
+            case ellipsesAreDisjoint side1 side2 of
+              Nothing      -> return mLower
+              (Just False) -> put (mLower, trialM) >> bisect sec
+              (Just _)     -> put (trialM, mUpper) >> bisect False
 
 type CoeffMatrix = M33 Double
 
@@ -110,18 +150,19 @@ coeffLamPow m1 m2 =
                              + a * axx * byy - byy * ax ** 2
                              - b * axy ** 2 - bxx * ay ** 2
 
-ellipsesAreDisjoint :: CoeffMatrix -> CoeffMatrix -> Maybe Bool
-ellipsesAreDisjoint m1 m2
+ellipsesAreDisjoint :: Maybe CoeffMatrix -> Maybe CoeffMatrix -> Maybe Bool
+ellipsesAreDisjoint Nothing   _         = Nothing
+ellipsesAreDisjoint _         Nothing   = Nothing
+ellipsesAreDisjoint (Just m1) (Just m2)
   | m1 == m2 = Just False
-  | otherwise = let [c3, c2, c1, c0] = coeffLamPow m1 m2
-                in case c3 of
-                     0 -> Nothing
-                     _ -> let [a, b, c] = map (/ c3) [c2, c1, c0]
-                              s2 = -3 * b + a ** 2
-                              s4 = -27 * c ** 3 + 18 * c * a * b
-                                   + (a ** 2) * (b ** 2) - 4 * c * a ** 3
-                                   - 4 * b ** 3
-                          in if s2 <= 0 || s4 <= 0
-                             then Just False
-                             else Just $ a < 0
-                                    || 3 * a * c + b * a ** 2 - 4 * b ** 2 < 0
+  | otherwise =
+    let [c3, c2, c1, c0] = coeffLamPow m1 m2
+    in case c3 of
+         0 -> Nothing
+         _ -> let [a, b, c] = map (/ c3) [c2, c1, c0]
+                  s2 = - 3 * b + a ** 2
+                  s4 = - 27 * c ** 2 + 18 * c * a * b + (a ** 2) * (b ** 2)
+                       - 4 * c * a ** 3 - 4 * b ** 3
+              in if s2 <= 0 || s4 <= 0
+                 then Just False
+                 else Just (a < 0 || 3 * a * c + b * a ** 2 - 4 * b ** 2 < 0)

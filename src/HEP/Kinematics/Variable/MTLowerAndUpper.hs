@@ -26,8 +26,11 @@ data Input = Input { visible1      :: FourMomentum
                    , missing       :: TransverseMomentum
                    , mIntermediate :: Mass }
 
-mTLowerBound :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass
-             -> IO Mass
+mTLowerBound :: FourMomentum        -- ^ four-momentum of the first visible system
+             -> FourMomentum        -- ^ four-momentum of the second visible system
+             -> TransverseMomentum  -- ^ missing transverse momentum
+             -> Double                -- ^ mass of the intermediate state
+             -> IO Double
 mTLowerBound vis1 vis2 miss m = do
   let scale' = sqrt $ (getScale vis1 + getScale vis2 + getScale miss) / 8.0
       scale = if scale' == 0 then 2.0 * m else scale'
@@ -37,10 +40,9 @@ mTLowerBound vis1 vis2 miss m = do
       m' = m / scale
   Result {..} <- runReaderT mTLowerBound' (Input vis1' vis2' miss' m')
   return (recomass * scale)
-    where
-      getScale :: HasFourMomentum a => a -> Double
-      getScale v = let (px', py', pz') = pxpypz v
-                   in px' ** 2 + py' ** 2 + pz' ** 2
+    where getScale :: HasFourMomentum a => a -> Double
+          getScale v = let (px', py', pz') = pxpypz v
+                       in px' ** 2 + py' ** 2 + pz' ** 2
 
 mTLowerBound' :: MonadIO m => ReaderT Input m Result
 mTLowerBound' = do
@@ -49,10 +51,8 @@ mTLowerBound' = do
   (result, _) <- runReaderT (execStateT (findMinimum distFromWall) (p, s)) input
   return result
 
-distFromWall :: StepSize
+distFromWall, typicalScale :: StepSize
 distFromWall = 2.0 / typicalScale
-
-typicalScale :: Double
 typicalScale = 26.0
 
 findMinimum :: MonadIO m => StepSize -> StateT (Result, Seed) (ReaderT Input m) ()
