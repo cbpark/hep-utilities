@@ -1,6 +1,6 @@
 flags:
   hep-utilities:
-    devel: false
+    devel: true
 packages:
 - '.'
 extra-deps: []

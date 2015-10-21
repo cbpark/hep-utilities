@@ -34,9 +34,9 @@ mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
       scale = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
                      + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
   in case scale of 0 -> 0
-                   s -> do let m1Min = mVis1 + mInv1
-                               m2Min = mVis2 + mInv2
-                           if m2Min > m1Min
+                   s -> let m1Min = mVis1 + mInv1
+                            m2Min = mVis2 + mInv2
+                        in if m2Min > m1Min
                            then mT2' m2Min s
                                   (Input vis1 vis2 miss mInv1 mInv2 pre sec)
                            else mT2' m1Min s

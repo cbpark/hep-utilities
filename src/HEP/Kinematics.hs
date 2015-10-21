@@ -21,6 +21,7 @@ module HEP.Kinematics
 
        , invariantMass
        , transverseMass
+       , transverseMass1
        , transverseMassCluster
        , transverseVector
        , transverseEnergy
@@ -37,6 +38,7 @@ module HEP.Kinematics
 import           Control.Lens                         ((^.))
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
+import           Data.Functor.Identity                (Identity (..))
 import           Data.Traversable                     (fmapDefault)
 import           Linear.Metric                        as LM
 import           Linear.V2
@@ -122,6 +124,9 @@ transverseMass :: (Traversable f, HasFourMomentum a) =>
 transverseMass p = TV.invariantMass ((makeTV . fourMomentum . momentumSum) p)
   where makeTV v4 = let (e', px', py', pz') = epxpypz v4
                     in TV.setXYT px' py' (sqrt (e' ** 2 - pz' ** 2))
+
+transverseMass1 :: HasFourMomentum a => a -> LorentzTVector Double -> Double
+transverseMass1 = transverseMass . Identity
 
 -- | Cluster transverse mass.
 -- This is the same as mTtrue in

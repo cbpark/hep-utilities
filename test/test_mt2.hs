@@ -4,14 +4,16 @@ module Main where
 
 import           HEP.Kinematics                      (FourMomentum,
                                                       TransverseMomentum)
-import           HEP.Kinematics.Variable             (mT2Symm)
+import           HEP.Kinematics.Variable
 import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
 import           HEP.Kinematics.Vector.TwoVector     (setXY)
 
 main :: IO ()
 main = do
-  let ms = map calc [input1, input2, input3, input4, input5, input6]
-  putStr $ unlines (map show ms)
+  -- let ms = map calc [input1, input2, input3, input4, input5, input6, input7]
+  -- putStr $ unlines (map show ms)
+  maos <- mapM calc2 [input6]
+  putStr $ unlines (map show maos)
 
 data Input = Input { visible1   :: FourMomentum
                    , visible2   :: FourMomentum
@@ -20,6 +22,11 @@ data Input = Input { visible1   :: FourMomentum
 
 calc :: Input -> Double
 calc Input {..} = mT2Symm visible1 visible2 missing mInvisible
+
+calc2 :: Input -> IO ([FourMomentum], [FourMomentum], SolutionType)
+calc2 input@Input {..} = do
+  let mT2 = calc input
+  maosMomentaSymmetric2 mT2 visible1 visible2 missing mInvisible
 
 mtau :: Double
 mtau = 1.77682
@@ -58,4 +65,10 @@ input6 :: Input
 input6 = Input visA visB ptmiss 100
   where visA = setXYZT 410.0 20.0 0.0 422.493
         visB = setXYZT (-210.0) (-300.0) 0.0 395.727
+        ptmiss = setXY (-200.0) 280.0
+
+input7 :: Input
+input7 = Input visA visB ptmiss 100
+  where visA = setXYZT (-210.0) (-300.0) 0.0 395.727
+        visB = setXYZT 410.0 20.0 0.0 422.493
         ptmiss = setXY (-200.0) 280.0
