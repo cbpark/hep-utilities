@@ -53,7 +53,7 @@ maosMomentaSymmetric :: Double              -- ^ the MT2 value
                      -> TransverseMomentum  -- ^ missing transverse momentum
                      -> Double              -- ^ parent particle mass
                      -> Double              -- ^ invisible particle mass
-                     -> IO ([FourMomentum], [FourMomentum], SolutionType)
+                     -> ([FourMomentum], [FourMomentum], SolutionType)
 maosMomentaSymmetric mT2value vis1 vis2 miss mY mX =
   maosMomenta mT2value (vis1, mY, mX) (vis2, mY, mX) miss
 
@@ -64,6 +64,6 @@ maosMomentaSymmetric2 :: Double              -- ^ the MT2 value
                       -> FourMomentum        -- ^ four-momentum of the second visible system
                       -> TransverseMomentum  -- ^ missing transverse momentum
                       -> Double              -- ^ invisible particle mass
-                      -> IO ([FourMomentum], [FourMomentum], SolutionType)
+                      -> ([FourMomentum], [FourMomentum], SolutionType)
 maosMomentaSymmetric2 mT2value vis1 vis2 miss mX =
   maosMomenta mT2value (vis1, mT2value, mX) (vis2, mT2value, mX) miss

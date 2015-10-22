@@ -83,27 +83,20 @@ instance Num a => Monoid (LorentzVector a) where
 
 instance R1 LorentzVector where
   _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x
-  {-# INLINE _x #-}
 
 instance R2 LorentzVector where
   _y f (LorentzVector (V4 t x y z)) = (\y' -> LorentzVector (V4 t x y' z)) <$> f y
-  {-# INLINE _y #-}
   _xy f (LorentzVector (V4 t x y z)) =
     (\(V2 x' y') -> LorentzVector (V4 t x' y' z)) <$> f (V2 x y)
-  {-# INLINE _xy #-}
 
 instance R3 LorentzVector where
   _z f (LorentzVector (V4 t x y z)) = (LorentzVector . V4 t x y) <$> f z
-  {-# INLINE _z #-}
   _xyz f (LorentzVector (V4 t x y z)) =
     (\(V3 x' y' z') -> LorentzVector (V4 t x' y' z')) <$> f (V3 x y z)
-  {-# INLINE _xyz #-}
 
 instance R4 LorentzVector where
   _w f (LorentzVector (V4 t x y z)) = (\t' -> LorentzVector (V4 t' x y z)) <$> f t
-  {-# INLINE _w #-}
   _xyzw f (LorentzVector v4) = LorentzVector <$> f v4
-  {-# INLINE _xyzw #-}
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a

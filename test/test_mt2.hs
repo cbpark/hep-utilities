@@ -2,17 +2,16 @@
 
 module Main where
 
-import           HEP.Kinematics                      (FourMomentum,
-                                                      TransverseMomentum)
+import           HEP.Kinematics
 import           HEP.Kinematics.Variable
 import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
 import           HEP.Kinematics.Vector.TwoVector     (setXY)
 
 main :: IO ()
 main = do
-  -- let ms = map calc [input1, input2, input3, input4, input5, input6, input7]
-  -- putStr $ unlines (map show ms)
-  maos <- mapM calc2 [input6]
+  let ms = map calc [input1, input2, input3, input4, input5, input6, input7]
+  putStr $ unlines (map show ms)
+  let maos = map calc2 [input1, input2, input3, input4, input5, input6, input7]
   putStr $ unlines (map show maos)
 
 data Input = Input { visible1   :: FourMomentum
@@ -23,10 +22,16 @@ data Input = Input { visible1   :: FourMomentum
 calc :: Input -> Double
 calc Input {..} = mT2Symm visible1 visible2 missing mInvisible
 
-calc2 :: Input -> IO ([FourMomentum], [FourMomentum], SolutionType)
-calc2 input@Input {..} = do
+calc2 :: Input -> (Double, Double, [FourMomentum], [FourMomentum], SolutionType)
+calc2 input@Input {..} =
   let mT2 = calc input
-  maosMomentaSymmetric2 mT2 visible1 visible2 missing mInvisible
+      getScale v = pt v ** 2
+      visM1 = mass visible1
+      visM2 = mass visible2
+      scale = sqrt $ (getScale visible1 + getScale visible2 + getScale missing
+                     + visM1 ** 2 + visM2 ** 2 + 4 * mInvisible ** 2) / 8.0
+      (k1, k2, s) = maosMomentaSymmetric2 mT2 visible1 visible2 missing mInvisible
+  in (mT2, scale, k1, k2, s)
 
 mtau :: Double
 mtau = 1.77682

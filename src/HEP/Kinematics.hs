@@ -142,7 +142,7 @@ transverseVector = LV.transV . fourMomentum
 transverseEnergy :: HasFourMomentum a => a -> Double
 transverseEnergy v = let m = mass v
                          pt' = pt v
-                     in sqrt $ m * m + pt' * pt'
+                     in sqrt $! m * m + pt' * pt'
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.

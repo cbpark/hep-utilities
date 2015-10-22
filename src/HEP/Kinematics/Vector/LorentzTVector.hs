@@ -54,14 +54,11 @@ instance Metric LorentzTVector where
 
 instance R1 LorentzTVector where
   _x f (LorentzTVector (V3 t x y)) = (\x' -> LorentzTVector (V3 t x' y)) <$> f x
-  {-# INLINE _x #-}
 
 instance R2 LorentzTVector where
   _y f (LorentzTVector (V3 t x y)) = (LorentzTVector . V3 t x) <$> f y
-  {-# INLINE _y #-}
   _xy f (LorentzTVector (V3 t x y)) =
     (\(V2 x' y') -> LorentzTVector (V3 t x' y')) <$> f (V2 x y)
-  {-# inline _xy #-}
 
 -- | Makes 'LorentzTVector' out of components based on x, y, t coordinates.
 setXYT :: Floating a => a -> a -> a -> LorentzTVector a
