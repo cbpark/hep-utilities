@@ -124,14 +124,14 @@ mT2Solution soltype = do
 
 startingPoint :: Double -> Reader (Input, Double) (Maybe (Double, Double, Mass))
 startingPoint kLower = do
-  (input, kUpper) <- ask
+  (input@Input {..}, kUpper) <- ask
   if kLower > kUpper
   then return Nothing
   else case runReader (newkxFrom kLower) input of
          Just (kx1a, kx1b) -> do
            let (kx1, deltaM) = runReader (deltaMT kx1a kx1b kLower) input
            return $ Just (kx1, kLower, deltaM)
-         Nothing -> startingPoint $! kLower + 1.0e-4
+         Nothing -> startingPoint $! kLower + scale / 1.0e+7
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mT2 mInv =

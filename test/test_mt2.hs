@@ -11,7 +11,7 @@ main :: IO ()
 main = do
   let ms = map calc [input1, input2, input3, input4, input5, input6, input7]
   putStr $ unlines (map show ms)
-  let maos = map calc2 [input1, input2, input3, input4, input5, input6, input7]
+  let maos = map calc2 [input6, input7]
   putStr $ unlines (map show maos)
 
 data Input = Input { visible1   :: FourMomentum
@@ -29,7 +29,7 @@ calc2 input@Input {..} =
       visM1 = mass visible1
       visM2 = mass visible2
       scale = sqrt $ (getScale visible1 + getScale visible2 + getScale missing
-                     + visM1 ** 2 + visM2 ** 2 + 4 * mInvisible ** 2) / 8.0
+                     + visM1 ** 2 + visM2 ** 2 + 2 * mInvisible ** 2) / 8.0
       (k1, k2, s) = maosMomentaSymmetric2 mT2 visible1 visible2 missing mInvisible
   in (mT2, scale, k1, k2, s)
 
