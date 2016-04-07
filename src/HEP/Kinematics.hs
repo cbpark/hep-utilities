@@ -33,6 +33,7 @@ module HEP.Kinematics
        , deltaPhi
        , deltaR
        , cosTheta
+       , cosThetaBeam
        ) where
 
 import           Control.Lens                         ((^.))
@@ -42,6 +43,7 @@ import           Data.Functor.Identity                (Identity (..))
 import           Data.Traversable                     (fmapDefault)
 import           Linear.Metric                        as LM
 import           Linear.V2
+import           Linear.V3                            (R3 (..), V3 (..))
 import           Linear.V4                            (R4 (..), V4 (..))
 import           Linear.Vector                        as LV
 
@@ -49,6 +51,8 @@ import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector)
 import qualified HEP.Kinematics.Vector.LorentzTVector as TV
 import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector)
 import qualified HEP.Kinematics.Vector.LorentzVector  as LV
+import           HEP.Kinematics.Vector.ThreeVector    (ThreeVector)
+import qualified HEP.Kinematics.Vector.ThreeVector    as ThreeVector
 import           HEP.Kinematics.Vector.TwoVector      (TwoVector)
 
 type FourMomentum = LorentzVector Double
@@ -57,62 +61,77 @@ type FourMomentum = LorentzVector Double
 --
 -- Minimal complete definition: 'fourMomentum'.
 class HasFourMomentum a where
-  fourMomentum :: a -> FourMomentum
+    fourMomentum :: a -> FourMomentum
 
-  -- | Transverse momentum.
-  pt :: a -> Double
-  pt = LV.pt . fourMomentum
+    -- | Transverse momentum.
+    pt :: a -> Double
+    pt = LV.pt . fourMomentum
 
-  -- | Pseudorapidity.
-  eta :: a -> Double
-  eta = LV.eta . fourMomentum
+    -- | Pseudorapidity.
+    eta :: a -> Double
+    eta = LV.eta . fourMomentum
 
-  -- | Azimuthal angle.
-  phi :: a -> Double
-  phi = LV.phi . fourMomentum
+    -- | Azimuthal angle.
+    phi :: a -> Double
+    phi = LV.phi . fourMomentum
 
-  -- | Invariant mass.
-  mass :: a -> Double
-  mass = LV.invariantMass . fourMomentum
+    -- | Invariant mass.
+    mass :: a -> Double
+    mass = LV.invariantMass . fourMomentum
 
-  epxpypz :: a -> (Double, Double, Double, Double)
-  epxpypz p = let (V4 e' px' py' pz') = fourMomentum p ^._xyzw
-              in (e', px', py', pz')
+    epxpypz :: a -> (Double, Double, Double, Double)
+    epxpypz p = let (V4 e' px' py' pz') = fourMomentum p ^._xyzw
+                in (e', px', py', pz')
 
-  pxpypz :: a -> (Double, Double, Double)
-  pxpypz p = let (_, px', py', pz') = epxpypz p in (px', py', pz')
+    pxpypz :: a -> (Double, Double, Double)
+    pxpypz p = let (_, px', py', pz') = epxpypz p in (px', py', pz')
 
-  pxpy :: a -> (Double, Double)
-  pxpy p = let (px', py', _) = pxpypz p in (px', py')
+    pxpy :: a -> (Double, Double)
+    pxpy p = let (px', py', _) = pxpypz p in (px', py')
 
-  px :: a -> Double
-  px p = let (px', _) = pxpy p in px'
+    px :: a -> Double
+    px p = let (px', _) = pxpy p in px'
 
-  py :: a -> Double
-  py p = let (_, py') = pxpy p in py'
+    py :: a -> Double
+    py p = let (_, py') = pxpy p in py'
 
-  pz :: a -> Double
-  pz p = let (_, _, pz') = pxpypz p in pz'
+    pz :: a -> Double
+    pz p = let (_, _, pz') = pxpypz p in pz'
 
-  energy :: a -> Double
-  energy p = let (e', _, _, _) = epxpypz p in e'
+    energy :: a -> Double
+    energy p = let (e', _, _, _) = epxpypz p in e'
 
 instance HasFourMomentum FourMomentum where
-  fourMomentum = id
-  {-# INLINE fourMomentum #-}
+    fourMomentum = id
+    {-# INLINE fourMomentum #-}
 
 type TransverseMomentum = TwoVector Double
 
 instance HasFourMomentum TransverseMomentum where
-  fourMomentum v2 = let (V2 x y) = v2 ^._xy
-                    in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
-  {-# INLINE fourMomentum #-}
-  pxpy v2 = (v2 ^._x, v2^._y)
-  {-# INLINE pxpy #-}
-  px = (^._x)
-  {-# INLINE px #-}
-  py = (^._y)
-  {-# INLINE py #-}
+    fourMomentum v2 = let (V2 x y) = v2 ^._xy
+                      in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
+    {-# INLINE fourMomentum #-}
+    pxpy v2 = (v2 ^._x, v2^._y)
+    {-# INLINE pxpy #-}
+    px = (^._x)
+    {-# INLINE px #-}
+    py = (^._y)
+    {-# INLINE py #-}
+
+type SpatialMomentum = ThreeVector Double
+
+instance HasFourMomentum SpatialMomentum where
+    fourMomentum v3 = let (V3 x y z) = v3 ^._xyz
+                      in LV.setXYZT x y z (sqrt $ x ** 2 + y ** 2 + z ** 2)
+    {-# INLINE fourMomentum #-}
+    pxpypz v3 = (v3 ^._x, v3^._y, v3^._z)
+    {-# INLINE pxpy #-}
+    px = (^._x)
+    {-# INLINE px #-}
+    py = (^._y)
+    {-# INLINE py #-}
+    pz = (^._z)
+    {-# INLINE pz #-}
 
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
@@ -176,3 +195,8 @@ deltaR = LV.deltaR `on` fourMomentum
 -- | Cosine of angle between four-momenta.
 cosTheta :: HasFourMomentum a => a -> a -> Double
 cosTheta = LV.cosTheta `on` fourMomentum
+
+-- | Cosine of angle between the beam direction (+z).
+cosThetaBeam :: HasFourMomentum a => a -> Double
+cosThetaBeam v = let (x, y, z) = pxpypz v
+                 in ThreeVector.cosTheta (ThreeVector.setXYZ x y z)
