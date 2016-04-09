@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Analysis.Histogram1D
--- Copyright   :  (c) 2015 Chan Beom Park
+-- Copyright   :  (c) 2015 - 2016 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -26,10 +26,18 @@ module HEP.Analysis.Histogram1D
        , showHist1D
        , bins
        , contents
+       , consHist
        ) where
 
-import           Data.Vector.Unboxed (Unbox, Vector)
-import qualified Data.Vector.Unboxed as V
+import           Control.Monad.Trans.State.Strict
+import           Data.Attoparsec.ByteString       (Parser)
+import           Data.Vector.Unboxed              (Unbox, Vector)
+import qualified Data.Vector.Unboxed              as V
+import           Pipes
+import qualified Pipes.Attoparsec                 as PA
+import           Pipes.ByteString                 (fromHandle)
+import qualified Pipes.Prelude                    as P
+import           System.IO                        (Handle)
 
 newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
                  deriving Show
@@ -106,3 +114,12 @@ bins (Hist1D (Just h)) = map fst $ V.toList h
 contents :: Unbox a => Hist1D a -> [Double]
 contents (Hist1D Nothing)  = []
 contents (Hist1D (Just h)) = map snd $ V.toList h
+
+consHist :: (MonadIO m, Fractional a, Ord a, Unbox a) =>
+            Parser a -> Int -> a -> a -> Handle -> m (Hist1D a)
+consHist parser nbin lo hi hin = P.fold mappend mempty id hist
+  where
+    hist = (getValue . fromHandle) hin >-> P.map (histogram1 nbin lo hi)
+    getValue s = do (r, s') <- lift $ runStateT (PA.parse parser) s
+                    case r of Just (Right v) -> yield v >> getValue s'
+                              _              -> return ()
