@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.LorentzTVector
--- Copyright   :  (c) 2014 - 2015 Chan Beom Park
+-- Copyright   :  (c) 2014 - 2016 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
