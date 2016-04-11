@@ -30,35 +30,35 @@ import           Linear.Vector       (Additive (..))
 newtype LorentzTVector a = LorentzTVector (V3 a) deriving (Eq, Show)
 
 instance Num a => Num (LorentzTVector a) where
-  (+) = liftA2 (+)
-  (*) = liftA2 (*)
-  (-) = liftA2 (-)
-  negate = fmap negate
-  abs = fmap abs
-  signum = fmap signum
-  fromInteger = pure . fromInteger
+    (+) = liftA2 (+)
+    (*) = liftA2 (*)
+    (-) = liftA2 (-)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
 instance Functor LorentzTVector where
-  fmap f (LorentzTVector v3) = LorentzTVector (fmap f v3)
+    fmap f (LorentzTVector v3) = LorentzTVector (fmap f v3)
 
 instance Applicative LorentzTVector where
-  pure a = LorentzTVector (V3 a a a)
-  LorentzTVector v3 <*> LorentzTVector v3' = LorentzTVector (v3 <*> v3')
+    pure a = LorentzTVector (V3 a a a)
+    LorentzTVector v3 <*> LorentzTVector v3' = LorentzTVector (v3 <*> v3')
 
 instance Additive LorentzTVector where
-  zero = pure 0
+    zero = pure 0
 
 instance Metric LorentzTVector where
-  (LorentzTVector (V3 t x y)) `dot` (LorentzTVector (V3 t' x' y')) =
-    t * t' - x * x' - y * y'
+    (LorentzTVector (V3 t x y)) `dot` (LorentzTVector (V3 t' x' y')) =
+        t * t' - x * x' - y * y'
 
 instance R1 LorentzTVector where
-  _x f (LorentzTVector (V3 t x y)) = (\x' -> LorentzTVector (V3 t x' y)) <$> f x
+    _x f (LorentzTVector (V3 t x y)) = (\x' -> LorentzTVector (V3 t x' y)) <$> f x
 
 instance R2 LorentzTVector where
-  _y f (LorentzTVector (V3 t x y)) = (LorentzTVector . V3 t x) <$> f y
-  _xy f (LorentzTVector (V3 t x y)) =
-    (\(V2 x' y') -> LorentzTVector (V3 t x' y')) <$> f (V2 x y)
+    _y f (LorentzTVector (V3 t x y)) = (LorentzTVector . V3 t x) <$> f y
+    _xy f (LorentzTVector (V3 t x y)) =
+        (\(V2 x' y') -> LorentzTVector (V3 t x' y')) <$> f (V2 x y)
 
 -- | Makes 'LorentzTVector' out of components based on x, y, t coordinates.
 setXYT :: Floating a => a -> a -> a -> LorentzTVector a

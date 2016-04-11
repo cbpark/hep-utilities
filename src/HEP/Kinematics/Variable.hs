@@ -55,7 +55,7 @@ maosMomentaSymmetric :: Double              -- ^ the MT2 value
                      -> Double              -- ^ invisible particle mass
                      -> ([FourMomentum], [FourMomentum], SolutionType)
 maosMomentaSymmetric mT2value vis1 vis2 miss mY mX =
-  maosMomenta mT2value (vis1, mY, mX) (vis2, mY, mX) miss
+    maosMomenta mT2value (vis1, mY, mX) (vis2, mY, mX) miss
 
 -- | This calculates the modified MAOS momenta defined in
 -- <http://arxiv.org/abs/1106.6087 arXiv:1106.6087>.
@@ -66,4 +66,4 @@ maosMomentaSymmetric2 :: Double              -- ^ the MT2 value
                       -> Double              -- ^ invisible particle mass
                       -> ([FourMomentum], [FourMomentum], SolutionType)
 maosMomentaSymmetric2 mT2value vis1 vis2 miss mX =
-  maosMomenta mT2value (vis1, mT2value, mX) (vis2, mT2value, mX) miss
+    maosMomenta mT2value (vis1, mT2value, mX) (vis2, mT2value, mX) miss

@@ -29,40 +29,40 @@ import           Linear.Vector       (Additive (..))
 newtype TwoVector a = TwoVector (V2 a) deriving (Eq, Show)
 
 instance Num a => Num (TwoVector a) where
-  (+) = liftA2 (+)
-  (*) = liftA2 (*)
-  (-) = liftA2 (-)
-  negate = fmap negate
-  abs = fmap abs
-  signum = fmap signum
-  fromInteger = pure . fromInteger
+    (+) = liftA2 (+)
+    (*) = liftA2 (*)
+    (-) = liftA2 (-)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
 instance Functor TwoVector where
-  fmap f (TwoVector v2) = TwoVector (fmap f v2)
+    fmap f (TwoVector v2) = TwoVector (fmap f v2)
 
 instance Applicative TwoVector where
-  pure a = TwoVector (V2 a a)
-  TwoVector v2 <*> TwoVector v2' = TwoVector (v2 <*> v2')
+    pure a = TwoVector (V2 a a)
+    TwoVector v2 <*> TwoVector v2' = TwoVector (v2 <*> v2')
 
 instance Additive TwoVector where
-  zero = pure 0
+    zero = pure 0
 
 instance Metric TwoVector where
-  TwoVector (V2 x y) `dot` TwoVector (V2 x' y') = x * x' + y * y'
+    TwoVector (V2 x y) `dot` TwoVector (V2 x' y') = x * x' + y * y'
 
 instance Num a => Monoid (TwoVector a) where
-  mempty = zero
-  TwoVector v2 `mappend` TwoVector v2' = TwoVector (v2 ^+^ v2')
+    mempty = zero
+    TwoVector v2 `mappend` TwoVector v2' = TwoVector (v2 ^+^ v2')
 
 instance R1 TwoVector where
-  _x f (TwoVector (V2 x y)) = (\x' -> TwoVector (V2 x' y)) <$> f x
-  {-# INLINE _x #-}
+    _x f (TwoVector (V2 x y)) = (\x' -> TwoVector (V2 x' y)) <$> f x
+    {-# INLINE _x #-}
 
 instance R2 TwoVector where
-  _y f (TwoVector (V2 x y)) = (TwoVector . V2 x) <$> f y
-  {-# INLINE _y #-}
-  _xy f (TwoVector v2) = TwoVector <$> f v2
-  {-# INLINE _xy #-}
+    _y f (TwoVector (V2 x y)) = (TwoVector . V2 x) <$> f y
+    {-# INLINE _y #-}
+    _xy f (TwoVector v2) = TwoVector <$> f v2
+    {-# INLINE _xy #-}
 
 setXY :: a -> a -> TwoVector a
 setXY x y = TwoVector (V2 x y)

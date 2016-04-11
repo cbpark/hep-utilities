@@ -55,48 +55,48 @@ import qualified HEP.Kinematics.Vector.TwoVector   as V2
 newtype LorentzVector a = LorentzVector (V4 a) deriving (Eq, Show)
 
 instance Num a => Num (LorentzVector a) where
-  (+) = liftA2 (+)
-  (*) = liftA2 (*)
-  (-) = liftA2 (-)
-  negate = fmap negate
-  abs = fmap abs
-  signum = fmap signum
-  fromInteger = pure . fromInteger
+    (+) = liftA2 (+)
+    (*) = liftA2 (*)
+    (-) = liftA2 (-)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
 instance Functor LorentzVector where
-  fmap f (LorentzVector v4) = LorentzVector (fmap f v4)
+    fmap f (LorentzVector v4) = LorentzVector (fmap f v4)
 
 instance Applicative LorentzVector where
-  pure a = LorentzVector (V4 a a a a)
-  LorentzVector v4 <*> LorentzVector v4' = LorentzVector (v4 <*> v4')
+    pure a = LorentzVector (V4 a a a a)
+    LorentzVector v4 <*> LorentzVector v4' = LorentzVector (v4 <*> v4')
 
 instance Additive LorentzVector where
-  zero = pure 0
+    zero = pure 0
 
 instance Metric LorentzVector where
-  (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
-    t * t' - x * x' - y * y' - z * z'
+    (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
+        t * t' - x * x' - y * y' - z * z'
 
 instance Num a => Monoid (LorentzVector a) where
-  mempty = zero
-  LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 ^+^ v4')
+    mempty = zero
+    LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 ^+^ v4')
 
 instance R1 LorentzVector where
-  _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x
+    _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x
 
 instance R2 LorentzVector where
-  _y f (LorentzVector (V4 t x y z)) = (\y' -> LorentzVector (V4 t x y' z)) <$> f y
-  _xy f (LorentzVector (V4 t x y z)) =
-    (\(V2 x' y') -> LorentzVector (V4 t x' y' z)) <$> f (V2 x y)
+    _y f (LorentzVector (V4 t x y z)) = (\y' -> LorentzVector (V4 t x y' z)) <$> f y
+    _xy f (LorentzVector (V4 t x y z)) =
+        (\(V2 x' y') -> LorentzVector (V4 t x' y' z)) <$> f (V2 x y)
 
 instance R3 LorentzVector where
-  _z f (LorentzVector (V4 t x y z)) = (LorentzVector . V4 t x y) <$> f z
-  _xyz f (LorentzVector (V4 t x y z)) =
-    (\(V3 x' y' z') -> LorentzVector (V4 t x' y' z')) <$> f (V3 x y z)
+    _z f (LorentzVector (V4 t x y z)) = (LorentzVector . V4 t x y) <$> f z
+    _xyz f (LorentzVector (V4 t x y z)) =
+        (\(V3 x' y' z') -> LorentzVector (V4 t x' y' z')) <$> f (V3 x y z)
 
 instance R4 LorentzVector where
-  _w f (LorentzVector (V4 t x y z)) = (\t' -> LorentzVector (V4 t' x y z)) <$> f t
-  _xyzw f (LorentzVector v4) = LorentzVector <$> f v4
+    _w f (LorentzVector (V4 t x y z)) = (\t' -> LorentzVector (V4 t' x y z)) <$> f t
+    _xyzw f (LorentzVector v4) = LorentzVector <$> f v4
 
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a

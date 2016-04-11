@@ -36,44 +36,44 @@ import           Linear.Vector       (Additive (..))
 newtype ThreeVector a = ThreeVector (V3 a) deriving (Eq, Show)
 
 instance Num a => Num (ThreeVector a) where
-  (+) = liftA2 (+)
-  (*) = liftA2 (*)
-  (-) = liftA2 (-)
-  negate = fmap negate
-  abs = fmap abs
-  signum = fmap signum
-  fromInteger = pure . fromInteger
+    (+) = liftA2 (+)
+    (*) = liftA2 (*)
+    (-) = liftA2 (-)
+    negate = fmap negate
+    abs = fmap abs
+    signum = fmap signum
+    fromInteger = pure . fromInteger
 
 instance Functor ThreeVector where
-  fmap f (ThreeVector v3) = ThreeVector (fmap f v3)
+    fmap f (ThreeVector v3) = ThreeVector (fmap f v3)
 
 instance Applicative ThreeVector where
-  pure a = ThreeVector (V3 a a a)
-  ThreeVector v3 <*> ThreeVector v3' = ThreeVector (v3 <*> v3')
+    pure a = ThreeVector (V3 a a a)
+    ThreeVector v3 <*> ThreeVector v3' = ThreeVector (v3 <*> v3')
 
 instance Additive ThreeVector where
-  zero = pure 0
+    zero = pure 0
 
 instance Num a => Monoid (ThreeVector a) where
-  mempty = zero
-  ThreeVector v3 `mappend` ThreeVector v3' = ThreeVector (v3 ^+^ v3')
+    mempty = zero
+    ThreeVector v3 `mappend` ThreeVector v3' = ThreeVector (v3 ^+^ v3')
 
 instance R1 ThreeVector where
-  _x f (ThreeVector (V3 x y z)) = (\x' -> ThreeVector (V3 x' y z)) <$> f x
-  {-# INLINE _x #-}
+    _x f (ThreeVector (V3 x y z)) = (\x' -> ThreeVector (V3 x' y z)) <$> f x
+    {-# INLINE _x #-}
 
 instance R2 ThreeVector where
-  _y f (ThreeVector (V3 x y z)) = (\y' -> ThreeVector (V3 x y' z)) <$> f y
-  {-# INLINE _y #-}
-  _xy f (ThreeVector (V3 x y z)) =
-    (\(V2 x' y') -> ThreeVector (V3 x' y' z)) <$> f (V2 x y)
-  {-# INLINE _xy #-}
+    _y f (ThreeVector (V3 x y z)) = (\y' -> ThreeVector (V3 x y' z)) <$> f y
+    {-# INLINE _y #-}
+    _xy f (ThreeVector (V3 x y z)) =
+        (\(V2 x' y') -> ThreeVector (V3 x' y' z)) <$> f (V2 x y)
+    {-# INLINE _xy #-}
 
 instance R3 ThreeVector where
-  _z f (ThreeVector (V3 x y z)) = (ThreeVector . V3 x y) <$> f z
-  {-# INLINE _z #-}
-  _xyz f (ThreeVector v3) = ThreeVector <$> f v3
-  {-# INLINE _xyz #-}
+    _z f (ThreeVector (V3 x y z)) = (ThreeVector . V3 x y) <$> f z
+    {-# INLINE _z #-}
+    _xyz f (ThreeVector v3) = ThreeVector <$> f v3
+    {-# INLINE _xyz #-}
 
 setXYZ :: a -> a -> a -> ThreeVector a
 setXYZ x y z = ThreeVector (V3 x y z)
@@ -96,10 +96,10 @@ cosTheta (ThreeVector v@(V3 _ _ z)) = let ptot = norm v
 -- | Pseudorapidity.
 pseudoRapidity :: (Floating a, Ord a) => ThreeVector a -> a
 pseudoRapidity v@(ThreeVector (V3 _ _ z))
-  | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
-  | z == 0      =  0
-  | z >  0      =  10e10
-  | otherwise   = -10e10
+    | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
+    | z == 0      =  0
+    | z >  0      =  10e10
+    | otherwise   = -10e10
   where ct = cosTheta v
 
 -- | Azimuthal angle from -pi to pi.

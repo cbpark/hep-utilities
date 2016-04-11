@@ -27,6 +27,7 @@ module HEP.Analysis.Histogram1D
        , bins
        , contents
        , consHist
+       , printHist
        ) where
 
 import           Control.Monad.Trans.State.Strict
@@ -37,7 +38,8 @@ import           Pipes
 import qualified Pipes.Attoparsec                 as PA
 import           Pipes.ByteString                 (fromHandle)
 import qualified Pipes.Prelude                    as P
-import           System.IO                        (Handle)
+import           System.IO                        (Handle, IOMode (..),
+                                                   withFile)
 
 newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
                  deriving Show
@@ -123,3 +125,11 @@ consHist parser nbin lo hi hin = P.fold mappend mempty id hist
     getValue s = do (r, s') <- lift $ runStateT (PA.parse parser) s
                     case r of Just (Right v) -> yield v >> getValue s'
                               _              -> return ()
+
+printHist :: (Unbox a, Show a) =>
+             FilePath                   -- ^ Input file
+          -> (Handle -> IO (Hist1D a))
+          -> (Hist1D a -> Hist1D a)     -- ^ Function for transforming histogram (ex: 'unitNormalize')
+          -> IO ()
+printHist infile histFunc f =
+    withFile infile ReadMode histFunc >>= putStr . showHist1D . f
