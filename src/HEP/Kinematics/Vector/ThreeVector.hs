@@ -54,6 +54,10 @@ instance Applicative ThreeVector where
 instance Additive ThreeVector where
     zero = pure 0
 
+instance Metric ThreeVector where
+    (ThreeVector (V3 x y z)) `dot` (ThreeVector (V3 x' y' z')) =
+        x * x' + y * y' + z * z'
+
 instance Num a => Monoid (ThreeVector a) where
     mempty = zero
     ThreeVector v3 `mappend` ThreeVector v3' = ThreeVector (v3 ^+^ v3')

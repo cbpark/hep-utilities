@@ -34,6 +34,8 @@ module HEP.Kinematics.Vector.LorentzVector
        , cosTheta
 
        , boostVector
+       , beta
+       , gamma
        ) where
 
 import           Control.Applicative
@@ -163,3 +165,9 @@ cosTheta v v' = cos $! deltaTheta v v'
 -- | Boost vector. It returns 'ThreeVector'.
 boostVector :: Fractional a => LorentzVector a -> ThreeVector a
 boostVector v@(LorentzVector (V4 t _ _ _)) = spatialV v ^/ t
+
+beta :: LorentzVector Double -> Double
+beta v@(LorentzVector (V4 t _ _ _)) = (norm . spatialV) v / t
+
+gamma :: LorentzVector Double -> Double
+gamma v = let b = beta v in 1.0 / sqrt (1.0 - b * b)

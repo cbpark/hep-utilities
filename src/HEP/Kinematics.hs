@@ -34,6 +34,8 @@ module HEP.Kinematics
        , deltaR
        , cosTheta
        , cosThetaBeam
+       , beta
+       , gamma
        ) where
 
 import           Control.Lens                         ((^.))
@@ -200,3 +202,9 @@ cosTheta = LV.cosTheta `on` fourMomentum
 cosThetaBeam :: HasFourMomentum a => a -> Double
 cosThetaBeam v = let (x, y, z) = pxpypz v
                  in ThreeVector.cosTheta (ThreeVector.setXYZ x y z)
+
+beta :: FourMomentum -> Double
+beta = LV.beta
+
+gamma :: FourMomentum -> Double
+gamma = LV.gamma
