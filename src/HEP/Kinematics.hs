@@ -203,8 +203,8 @@ cosThetaBeam :: HasFourMomentum a => a -> Double
 cosThetaBeam v = let (x, y, z) = pxpypz v
                  in ThreeVector.cosTheta (ThreeVector.setXYZ x y z)
 
-beta :: FourMomentum -> Double
-beta = LV.beta
+beta :: HasFourMomentum a => a -> Double
+beta = LV.beta . fourMomentum
 
-gamma :: FourMomentum -> Double
-gamma = LV.gamma
+gamma :: HasFourMomentum a => a -> Double
+gamma = LV.gamma . fourMomentum
