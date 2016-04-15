@@ -35,6 +35,7 @@ library
                        HEP.Kinematics.Variable.MTLowerAndUpper
   build-depends:       base >=4.8
                      , attoparsec
+                     , bytestring
                      , lens
                      , linear
                      , mwc-random

@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Analysis.Histogram1D
@@ -30,16 +29,16 @@ module HEP.Analysis.Histogram1D
        , printHist
        ) where
 
-import           Control.Monad.Trans.State.Strict
+import           Control.Monad.Trans.State.Strict (StateT (..))
 import           Data.Attoparsec.ByteString       (Parser)
+import           Data.ByteString.Char8            (ByteString)
 import           Data.Vector.Unboxed              (Unbox, Vector)
 import qualified Data.Vector.Unboxed              as V
 import           Pipes
 import qualified Pipes.Attoparsec                 as PA
 import           Pipes.ByteString                 (fromHandle)
 import qualified Pipes.Prelude                    as P
-import           System.IO                        (Handle, IOMode (..),
-                                                   withFile)
+import           System.IO
 
 newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
                  deriving Show
@@ -121,15 +120,19 @@ consHist :: (MonadIO m, Fractional a, Ord a, Unbox a) =>
             Parser a -> Int -> a -> a -> Handle -> m (Hist1D a)
 consHist parser nbin lo hi hin = P.fold mappend mempty id hist
   where
-    hist = (getValue . fromHandle) hin >-> P.map (histogram1 nbin lo hi)
-    getValue s = do (r, s') <- lift $ runStateT (PA.parse parser) s
-                    case r of Just (Right v) -> yield v >> getValue s'
-                              _              -> return ()
+    hist = (getValue parser . fromHandle) hin >-> P.map (histogram1 nbin lo hi)
+
+getValue :: Monad m => Parser a -> Producer ByteString m () -> Producer a m ()
+getValue parser s = do
+    (r, s') <- lift $ runStateT (PA.parse parser) s
+    case r of Just (Right v) -> yield v >> getValue parser s'
+              _              -> return ()
 
 printHist :: (Unbox a, Show a) =>
              FilePath                   -- ^ Input file
           -> (Handle -> IO (Hist1D a))
-          -> (Hist1D a -> Hist1D a)     -- ^ Function for transforming histogram (ex: 'unitNormalize')
+          -> (Hist1D a -> Hist1D a)     -- ^ Function for transforming histogram
+                                        --   (ex: 'unitNormalize')
           -> IO ()
 printHist infile histFunc f =
     withFile infile ReadMode histFunc >>= putStr . showHist1D . f
