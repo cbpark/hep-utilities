@@ -47,9 +47,9 @@ mT2' mMin scale input@Input {..} =
     let mLower = mMin
         mUpper = runReader (growUpper (mMin + scale)) input
     in case mUpper of
-        Nothing  -> -1
-        (Just m) -> runReader (evalStateT (bisect useDeciSections) (mLower, m))
-                              input
+        Nothing -> -1
+        Just m  -> runReader (evalStateT (bisect useDeciSections) (mLower, m))
+                             input
 
 growUpper :: Mass -> Reader Input (Maybe Mass)
 growUpper mUpper = do
@@ -57,9 +57,9 @@ growUpper mUpper = do
     let side1 = mkEllipse mUpper mInvisible1 (-visible1) zero
         side2 = mkEllipse mUpper mInvisible2 visible2 missing
     case ellipsesAreDisjoint side1 side2 of
-        Nothing      -> return Nothing
-        (Just False) -> return (Just mUpper)
-        (Just _)     -> growUpper $! mUpper * 2
+        Nothing    -> return Nothing
+        Just False -> return (Just mUpper)
+        Just _     -> growUpper $! mUpper * 2
 
 bisect :: Bool -> StateT (Mass, Mass) (Reader Input) Mass
 bisect sec = do
@@ -76,9 +76,9 @@ bisect sec = do
                         let side1 = mkEllipse trialM mInvisible1 (-visible1) zero
                             side2 = mkEllipse trialM mInvisible2 visible2 missing
                         case ellipsesAreDisjoint side1 side2 of
-                            Nothing      -> return mLower
-                            (Just False) -> put (mLower, trialM) >> bisect sec
-                            (Just _)     -> put (trialM, mUpper) >> bisect False
+                            Nothing    -> return mLower
+                            Just False -> put (mLower, trialM) >> bisect sec
+                            Just _     -> put (trialM, mUpper) >> bisect False
 
 type CoeffMatrix = M33 Double
 
@@ -140,12 +140,10 @@ coeffLamPow m1 m2 =
                           ax = cx m1'; ay = cy m1'; a = cz m1'
                           bxx = cxx m2'; bxy = cxy m2'; byy = cyy m2'
                           bx = cx m2'; by = cy m2'; b = cz m2'
-                      in axx * ayy * b + 2.0 * axy * ay * bx
-                         - 2 * ax * ayy * bx + a * ayy * bxx
-                         - 2 * a * axy * bxy + 2 * ax * ay * bxy
-                         + 2 * ax * axy * by - 2 * axx * ay * by
-                         + a * axx * byy - byy * ax ** 2
-                         - b * axy ** 2 - bxx * ay ** 2
+                      in axx * ayy * b + 2.0 * axy * ay * bx - 2 * ax * ayy * bx
+                         + a * ayy * bxx - 2 * a * axy * bxy + 2 * ax * ay * bxy
+                         + 2 * ax * axy * by - 2 * axx * ay * by + a * axx * byy
+                         - byy * ax ** 2 - b * axy ** 2 - bxx * ay ** 2
 
 ellipsesAreDisjoint :: Maybe CoeffMatrix -> Maybe CoeffMatrix -> Maybe Bool
 ellipsesAreDisjoint Nothing   _         = Nothing
