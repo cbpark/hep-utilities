@@ -12,26 +12,26 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Analysis.Histogram1D
-       (
-         Hist1D (..)
-       , emptyHist
-       , histogram
-       , histogram1
-       , scaleHist
-       , integrate
-       , unitNormalize
-       , add
-       , sub
-       , showHist1D
-       , bins
-       , contents
-       , consHist
-       , printHist
-       ) where
+    (
+      Hist1D (..)
+
+    , emptyHist
+    , histogram
+    , histogram1
+    , scaleHist
+    , integrate
+    , unitNormalize
+    , add
+    , sub
+    , showHist1D
+    , bins
+    , contents
+    , consHist
+    , printHist
+    ) where
 
 import           Control.Arrow                    (second)
-import           System.IO                        (Handle, IOMode (..),
-                                                   withFile)
+import           System.IO
 
 import           Control.Monad.Trans.State.Strict (StateT (..))
 import           Data.Attoparsec.ByteString       (Parser)
@@ -43,15 +43,17 @@ import qualified Pipes.Attoparsec                 as PA
 import           Pipes.ByteString                 (fromHandle)
 import qualified Pipes.Prelude                    as P
 
-newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
-                 deriving Show
+newtype Hist1D a = Hist1D (Maybe (Vector (a, Double))) deriving Show
 
 emptyHist :: Hist1D a
 emptyHist = Hist1D Nothing
 
 instance (Eq a, Unbox a) => Monoid (Hist1D a) where
-  mempty = emptyHist
-  mappend h1 h2 = h1 `seq` h2 `seq` add h1 h2
+    -- mempty :: Hist1D a
+    mempty = emptyHist
+
+    -- mappend :: Hist1D a -> Hist1D a -> Hist1D a
+    mappend h1 h2 = h1 `seq` h2 `seq` add h1 h2
 
 add :: (Eq a, Unbox a) => Hist1D a -> Hist1D a -> Hist1D a
 add = combine (+)
@@ -64,11 +66,11 @@ combine :: (Eq a, Unbox a) =>
 combine _ (Hist1D Nothing)   hist               = hist
 combine _ hist               (Hist1D Nothing)   = hist
 combine f (Hist1D (Just h1)) (Hist1D (Just h2)) =
-  let (bin1, x1) = V.unzip h1
-      (bin2, x2) = V.unzip h2
-  in Hist1D $ if bin1 /= bin2
-              then Nothing
-              else Just $ V.zip bin1 (V.zipWith f x1 x2)
+    let (bin1, x1) = V.unzip h1
+        (bin2, x2) = V.unzip h2
+    in Hist1D $ if bin1 /= bin2
+                then Nothing
+                else Just $ V.zip bin1 (V.zipWith f x1 x2)
 
 histogram :: (Fractional a, Ord a, Unbox a) =>
              Int  -- ^ Number of bins
@@ -77,11 +79,11 @@ histogram :: (Fractional a, Ord a, Unbox a) =>
           -> [a]  -- ^ Data
           -> Hist1D a
 histogram nbin lo hi xs
-  | hi <= lo  = Hist1D Nothing
-  | otherwise = let !binVector = binList nbin lo hi
-                    !lowhigh = V.zip binVector (V.tail binVector)
-                    !hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
-                in Hist1D $ Just (V.zip binVector hist)
+    | hi <= lo  = Hist1D Nothing
+    | otherwise = let !binVector = binList nbin lo hi
+                      !lowhigh = V.zip binVector (V.tail binVector)
+                      !hist = V.map (flip (uncurry count) (V.fromList xs)) lowhigh
+                  in Hist1D $ Just (V.zip binVector hist)
 
 -- | Histogram for single element.
 histogram1 :: (Fractional a, Ord a, Unbox a) => Int -> a -> a -> a -> Hist1D a
@@ -113,11 +115,11 @@ showHist1D (Hist1D (Just h)) = unlines . map toStr $ V.toList h
 
 bins :: Unbox a => Hist1D a -> [a]
 bins (Hist1D Nothing)  = []
-bins (Hist1D (Just h)) = map fst $ V.toList h
+bins (Hist1D (Just h)) = map fst (V.toList h)
 
 contents :: Unbox a => Hist1D a -> [Double]
 contents (Hist1D Nothing)  = []
-contents (Hist1D (Just h)) = map snd $ V.toList h
+contents (Hist1D (Just h)) = map snd (V.toList h)
 
 consHist :: (MonadIO m, Fractional a, Ord a, Unbox a) =>
             Parser a -> Int -> a -> a -> Handle -> m (Hist1D a)

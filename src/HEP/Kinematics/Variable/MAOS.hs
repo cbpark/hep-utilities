@@ -1,22 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE Strict          #-}
 
 module HEP.Kinematics.Variable.MAOS
-  (
-    SolutionType (..)
-  , maosMomenta
-  , momentumSolution
-  ) where
+    (
+      SolutionType (..)
 
-import           Control.Monad                        (unless)
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.Reader
-import           Control.Monad.Trans.State
-import           Data.Maybe                           (mapMaybe)
+    , maosMomenta
+    , momentumSolution
+    ) where
 
-import           HEP.Kinematics
-import           HEP.Kinematics.Vector.LorentzTVector (setXYT)
-import           HEP.Kinematics.Vector.LorentzVector  (setXYZT)
-import           HEP.Kinematics.Vector.TwoVector      (setXY)
+import HEP.Kinematics
+import HEP.Kinematics.Vector.LorentzTVector (setXYT)
+import HEP.Kinematics.Vector.LorentzVector  (setXYZT)
+import HEP.Kinematics.Vector.TwoVector      (setXY)
+
+import Control.Monad                        (unless)
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.State
+import Data.Maybe                           (mapMaybe)
 
 data SolutionType = Balanced | Unbalanced | Unknown deriving (Eq, Show)
 
@@ -63,9 +65,9 @@ data Input = Input { visible1    :: FourMomentum
 
 -- | Determines whether it's balanced.
 --
---   If the event kinematics is in an unbalanced configuration,
---   the MT2 value is determined by larger unconstrained minimum,
---   which is m_Visible + m_Invisible.
+-- If the event kinematics is in an unbalanced configuration,
+-- the MT2 value is determined by larger unconstrained minimum,
+-- which is m_Visible + m_Invisible.
 balanced :: Mass -> (FourMomentum, Mass) -> (FourMomentum, Mass) -> Bool
 balanced mT2 (vis1, mX1) (vis2, mX2) =
     let mMin1 = mass vis1 + mX1
@@ -131,7 +133,7 @@ startingPoint kLower = do
             Just (kx1a, kx1b) -> do
                 let (kx1, deltaM) = runReader (deltaMT kx1a kx1b kLower) input
                 return $ Just (kx1, kLower, deltaM)
-            Nothing -> startingPoint $! kLower + scale / 1.0e+7
+            Nothing -> startingPoint $ kLower + scale / 1.0e+7
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mT2 mInv =
@@ -170,15 +172,15 @@ deltaMT kx1a kx1b ky1 = do
     let mX1Sq = mInvisible1 ** 2
         mX2Sq = mInvisible2 ** 2
         ky1Sq = ky1 ** 2
-        inv1a = setXYT kx1a ky1 (sqrt $! kx1a ** 2 + ky1Sq + mX1Sq)
-        inv1b = setXYT kx1b ky1 (sqrt $! kx1b ** 2 + ky1Sq + mX2Sq)
+        inv1a = setXYT kx1a ky1 (sqrt $ kx1a ** 2 + ky1Sq + mX1Sq)
+        inv1b = setXYT kx1b ky1 (sqrt $ kx1b ** 2 + ky1Sq + mX2Sq)
         (missX, missY) = pxpy missing
         kx2a = missX - kx1a
         kx2b = missX - kx1b
         ky2  = missY - ky1
         ky2Sq = ky2 ** 2
-        inv2a = setXYT kx2a ky2 (sqrt $! kx2a ** 2 + ky2Sq + mX1Sq)
-        inv2b = setXYT kx2b ky2 (sqrt $! kx2b ** 2 + ky2Sq + mX2Sq)
+        inv2a = setXYT kx2a ky2 (sqrt $ kx2a ** 2 + ky2Sq + mX1Sq)
+        inv2b = setXYT kx2b ky2 (sqrt $ kx2b ** 2 + ky2Sq + mX2Sq)
         mTrans1a = transverseMass1 visible1 inv1a
         mTrans1b = transverseMass1 visible1 inv1b
         mTrans2a = transverseMass1 visible2 inv2a
@@ -226,24 +228,24 @@ momentumSolution :: FourMomentum        -- ^ four-momentum of visible particle
 momentumSolution vis invis mY mX = let (kx, ky) = pxpy invis
                                        kz = longitudinalP vis invis mY mX
                                    in mapMaybe (setMomentum kx ky) kz
-  where setMomentum _ _ Nothing  = Nothing
-        setMomentum x y (Just z) =
-          let t = sqrt $! x ** 2 + y ** 2 + z ** 2 + mX ** 2
-          in Just (setXYZT x y z t)
+  where
+    setMomentum _ _ Nothing  = Nothing
+    setMomentum x y (Just z) = let t = sqrt $ x ** 2 + y ** 2 + z ** 2 + mX ** 2
+                               in Just (setXYZT x y z t)
 
 longitudinalP :: FourMomentum -> TransverseMomentum -> Double -> Double
               -> [Maybe Double]
 longitudinalP vis invis mY mX =
-  let visMass = mass vis
-      visTrans = transverseVector vis
-      mXSq = mX ** 2
-      d = 0.5 * (mY ** 2 - mXSq - visMass ** 2) + visTrans `dot` invis
-      visEt = transverseEnergy vis
-      invisEt = sqrt $! pt invis ** 2 + mXSq
-      disc = d ** 2 - (visEt * invisEt) ** 2
-      disc' = if abs disc < 1.0e-4 then 0 else disc
-  in if disc' < 0
-     then [Nothing]
-     else let term1 = pz vis * d
-              term2 = energy vis * sqrt disc'
-          in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]
+    let visMass = mass vis
+        visTrans = transverseVector vis
+        mXSq = mX ** 2
+        d = 0.5 * (mY ** 2 - mXSq - visMass ** 2) + visTrans `dot` invis
+        visEt = transverseEnergy vis
+        invisEt = sqrt $ pt invis ** 2 + mXSq
+        disc = d ** 2 - (visEt * invisEt) ** 2
+        disc' = if abs disc < 1.0e-4 then 0 else disc
+    in if disc' < 0
+       then [Nothing]
+       else let term1 = pz vis * d
+                term2 = energy vis * sqrt disc'
+            in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]

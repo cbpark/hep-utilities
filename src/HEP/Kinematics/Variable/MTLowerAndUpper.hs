@@ -1,19 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE Strict          #-}
 
 module HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound) where
 
-import           Control.Monad                       (replicateM, when)
-import           Control.Monad.IO.Class              (MonadIO (..))
-import           Control.Monad.ST                    (runST)
-import           Control.Monad.Trans.Class           (MonadTrans (..))
-import           Control.Monad.Trans.Reader
-import           Control.Monad.Trans.State
-import           Data.Maybe                          (mapMaybe)
-import           System.Random.MWC
+import HEP.Kinematics
+import HEP.Kinematics.Vector.LorentzVector (setXYZT)
+import HEP.Kinematics.Vector.TwoVector     (setXY)
 
-import           HEP.Kinematics
-import           HEP.Kinematics.Vector.LorentzVector (setXYZT)
-import           HEP.Kinematics.Vector.TwoVector     (setXY)
+import Control.Monad                       (replicateM, when)
+import Data.Maybe                          (mapMaybe)
+
+import Control.Monad.IO.Class              (MonadIO (..))
+import Control.Monad.ST                    (runST)
+import Control.Monad.Trans.Class           (MonadTrans (..))
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.State
+import System.Random.MWC
 
 type Mass = Double
 type Splitting = TransverseMomentum

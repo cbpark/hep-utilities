@@ -1,15 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE Strict          #-}
 
 module HEP.Kinematics.Variable.MT2 (mT2) where
 
-import           Control.Lens                    ((^.))
-import           Control.Monad.Trans.Class       (MonadTrans (..))
-import           Control.Monad.Trans.Reader
-import           Control.Monad.Trans.State
-import           Linear.Matrix                   (M33, det33)
-import           Linear.V3
+import HEP.Kinematics
 
-import           HEP.Kinematics
+import Control.Lens               ((^.))
+import Control.Monad.Trans.Class  (MonadTrans (..))
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.State
+import Linear.Matrix              (M33, det33)
+import Linear.V3
 
 type Mass = Double
 
@@ -59,7 +60,7 @@ growUpper mUpper = do
     case ellipsesAreDisjoint side1 side2 of
         Nothing    -> return Nothing
         Just False -> return (Just mUpper)
-        Just _     -> growUpper $! mUpper * 2
+        Just _     -> growUpper $ mUpper * 2
 
 bisect :: Bool -> StateT (Mass, Mass) (Reader Input) Mass
 bisect sec = do
