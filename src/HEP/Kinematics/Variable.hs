@@ -1,7 +1,9 @@
+{-# LANGUAGE Strict #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Variable
--- Copyright   :  (c) 2015 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2015-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -12,22 +14,20 @@
 --------------------------------------------------------------------------------
 
 module HEP.Kinematics.Variable
-       (
-         mT2Symm
-       , mT2Asymm
-       , mTLowerBound
-       , maosMomenta
-       , maosMomentaSymmetric
-       , maosMomentaSymmetric2
-       , SolutionType (..)
-       ) where
+    (
+      mT2Symm
+    , mT2Asymm
+    , mTLowerBound
+    , maosMomenta
+    , maosMomentaSymmetric
+    , maosMomentaSymmetric2
+    , SolutionType (..)
+    ) where
 
-import           HEP.Kinematics                          (FourMomentum,
-                                                          TransverseMomentum)
-import           HEP.Kinematics.Variable.MAOS            (SolutionType (..),
-                                                          maosMomenta)
-import           HEP.Kinematics.Variable.MT2             (mT2)
-import           HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound)
+import HEP.Kinematics
+import HEP.Kinematics.Variable.MAOS            (SolutionType (..), maosMomenta)
+import HEP.Kinematics.Variable.MT2             (mT2)
+import HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound)
 
 mT2Symm :: FourMomentum       -- ^ four-momentum of the first visible system
         -> FourMomentum       -- ^ four-momentum of the second visible system
