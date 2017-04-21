@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics
--- Copyright   :  (c) 2014 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2014-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -38,11 +38,12 @@ module HEP.Kinematics
        , gamma
        ) where
 
-import           Control.Lens                         ((^.))
 import           Data.Foldable                        as Foldable
 import           Data.Function                        (on)
 import           Data.Functor.Identity                (Identity (..))
 import           Data.Traversable                     (fmapDefault)
+
+import           Control.Lens                         ((^.))
 import           Linear.Metric                        as LM
 import           Linear.V2
 import           Linear.V3                            (R3 (..), V3 (..))

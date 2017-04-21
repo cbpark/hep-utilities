@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Analysis.Histogram1D
--- Copyright   :  (c) 2015 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2015-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -29,6 +29,10 @@ module HEP.Analysis.Histogram1D
        , printHist
        ) where
 
+import           Control.Arrow                    (second)
+import           System.IO                        (Handle, IOMode (..),
+                                                   withFile)
+
 import           Control.Monad.Trans.State.Strict (StateT (..))
 import           Data.Attoparsec.ByteString       (Parser)
 import           Data.ByteString.Char8            (ByteString)
@@ -38,7 +42,6 @@ import           Pipes
 import qualified Pipes.Attoparsec                 as PA
 import           Pipes.ByteString                 (fromHandle)
 import qualified Pipes.Prelude                    as P
-import           System.IO
 
 newtype Hist1D a = Hist1D { getHist :: Maybe (Vector (a, Double)) }
                  deriving Show
@@ -84,7 +87,7 @@ histogram nbin lo hi xs
 histogram1 :: (Fractional a, Ord a, Unbox a) => Int -> a -> a -> a -> Hist1D a
 histogram1 nbin lo hi x = histogram nbin lo hi [x]
 
-binList :: (Fractional a, Num a, Unbox a) => Int -> a -> a -> Vector a
+binList :: (Fractional a, Unbox a) => Int -> a -> a -> Vector a
 binList nbin lo hi = V.iterateN (nbin + 1) (+ binsize) lo
   where binsize = (hi - lo) / fromIntegral nbin
 
@@ -93,15 +96,15 @@ count lo hi = fromIntegral . V.length . V.filter ((&&) <$> (>= lo) <*> (< hi))
 
 scaleHist :: Unbox a => Double -> Hist1D a -> Hist1D a
 scaleHist _ (Hist1D Nothing)  = Hist1D Nothing
-scaleHist s (Hist1D (Just h)) = Hist1D $ (Just . V.map (\(b, x) -> (b, s*x))) h
+scaleHist s (Hist1D (Just h)) = Hist1D $ (Just . V.map (second (s *))) h
 
 integrate :: Unbox a => Hist1D a -> Double
 integrate (Hist1D Nothing)  = 0
 integrate (Hist1D (Just h)) = V.foldr (\(_, x) i -> x + i) 0 h
 
 unitNormalize :: Unbox a => Hist1D a -> Hist1D a
-unitNormalize (Hist1D Nothing)  = Hist1D Nothing
-unitNormalize hist              = scaleHist (1.0 / integrate hist) hist
+unitNormalize (Hist1D Nothing) = Hist1D Nothing
+unitNormalize hist             = scaleHist (1.0 / integrate hist) hist
 
 showHist1D :: (Show a, Unbox a) => Hist1D a -> String
 showHist1D (Hist1D Nothing)  = ""
@@ -109,7 +112,7 @@ showHist1D (Hist1D (Just h)) = unlines . map toStr $ V.toList h
   where toStr (b, x) = show b ++ ", " ++ show x
 
 bins :: Unbox a => Hist1D a -> [a]
-bins (Hist1D Nothing) = []
+bins (Hist1D Nothing)  = []
 bins (Hist1D (Just h)) = map fst $ V.toList h
 
 contents :: Unbox a => Hist1D a -> [Double]
