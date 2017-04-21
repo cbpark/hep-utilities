@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics
@@ -12,33 +13,41 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics
-       (
-         HasFourMomentum (..)
-       , FourMomentum
-       , TransverseMomentum
-       , module LM
-       , module LV
+    (
+      HasFourMomentum (..)
+    , FourMomentum
+    , TransverseMomentum
+    , module LM
+    , module LV
 
-       , invariantMass
-       , transverseMass
-       , transverseMass1
-       , transverseMassCluster
-       , transverseVector
-       , transverseEnergy
-       , ptCompare
-       , ptScalarSum
-       , ptVectorSum
-       , momentumSum
-       , deltaEta
-       , deltaPhi
-       , deltaR
-       , cosTheta
-       , cosThetaBeam
-       , beta
-       , gamma
-       ) where
+    , invariantMass
+    , transverseMass
+    , transverseMass1
+    , transverseMassCluster
+    , transverseVector
+    , transverseEnergy
+    , ptCompare
+    , ptScalarSum
+    , ptVectorSum
+    , momentumSum
+    , deltaEta
+    , deltaPhi
+    , deltaR
+    , cosTheta
+    , cosThetaBeam
+    , beta
+    , gamma
+    ) where
 
-import           Data.Foldable                        as Foldable
+import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector)
+import qualified HEP.Kinematics.Vector.LorentzTVector as TV
+import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector)
+import qualified HEP.Kinematics.Vector.LorentzVector  as LV
+import           HEP.Kinematics.Vector.ThreeVector    (ThreeVector)
+import qualified HEP.Kinematics.Vector.ThreeVector    as ThreeVector
+import           HEP.Kinematics.Vector.TwoVector      (TwoVector)
+
+import           Data.Foldable                        (foldl')
 import           Data.Function                        (on)
 import           Data.Functor.Identity                (Identity (..))
 import           Data.Traversable                     (fmapDefault)
@@ -49,14 +58,6 @@ import           Linear.V2
 import           Linear.V3                            (R3 (..), V3 (..))
 import           Linear.V4                            (R4 (..), V4 (..))
 import           Linear.Vector                        as LV
-
-import           HEP.Kinematics.Vector.LorentzTVector (LorentzTVector)
-import qualified HEP.Kinematics.Vector.LorentzTVector as TV
-import           HEP.Kinematics.Vector.LorentzVector  (LorentzVector)
-import qualified HEP.Kinematics.Vector.LorentzVector  as LV
-import           HEP.Kinematics.Vector.ThreeVector    (ThreeVector)
-import qualified HEP.Kinematics.Vector.ThreeVector    as ThreeVector
-import           HEP.Kinematics.Vector.TwoVector      (TwoVector)
 
 type FourMomentum = LorentzVector Double
 
@@ -173,7 +174,7 @@ ptCompare = flip compare `on` pt
 
 -- | Scalar sum of transverse momenta.
 ptScalarSum :: (Foldable f, HasFourMomentum a) => f a -> Double
-ptScalarSum = Foldable.foldl' (\acc p -> acc + pt p) 0
+ptScalarSum = foldl' (\acc p -> acc + pt p) 0
 
 -- | Vector sum of transverse momenta.
 ptVectorSum :: (Traversable f, HasFourMomentum a) => f a -> Double

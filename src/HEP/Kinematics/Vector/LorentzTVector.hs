@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.LorentzTVector
--- Copyright   :  (c) 2014 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2014-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -11,16 +11,17 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.LorentzTVector
-       ( -- * Type
-         LorentzTVector
+    ( -- * Type
+      LorentzTVector
 
-         -- * Function
-       , setXYM
-       , setXYT
-       , invariantMass
-       ) where
+      -- * Function
+    , setXYM
+    , setXYT
+    , invariantMass
+    ) where
 
 import           Control.Applicative
+
 import           Linear.Metric       (Metric (..))
 import           Linear.V2           (V2 (..))
 import           Linear.V3           (R1 (..), R2 (..), V3 (..))
@@ -61,7 +62,7 @@ instance R2 LorentzTVector where
         (\(V2 x' y') -> LorentzTVector (V3 t x' y')) <$> f (V2 x y)
 
 -- | Makes 'LorentzTVector' out of components based on x, y, t coordinates.
-setXYT :: Floating a => a -> a -> a -> LorentzTVector a
+setXYT :: a -> a -> a -> LorentzTVector a
 setXYT px py et = LorentzTVector (V3 et px py)
 
 -- | Makes 'LorentzTVector' out of components based on x, y, m coordinates.

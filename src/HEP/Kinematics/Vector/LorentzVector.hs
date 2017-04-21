@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.LorentzVector
--- Copyright   :  (c) 2014 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2014-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -12,31 +12,36 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.LorentzVector
-       ( -- * Type
-         LorentzVector
+    ( -- * Type
+      LorentzVector
 
-         -- * Function
-       , setXYZT
-       , setEtaPhiPtM
+      -- * Function
+    , setXYZT
+    , setEtaPhiPtM
 
-       , vectorSum
-       , invariantMass
-       , transV
+    , vectorSum
+    , invariantMass
+    , transV
 
-       , pt
-       , eta
-       , phi
+    , pt
+    , eta
+    , phi
 
-       , deltaEta
-       , deltaPhi
-       , deltaR
-       , deltaTheta
-       , cosTheta
+    , deltaEta
+    , deltaPhi
+    , deltaR
+    , deltaTheta
+    , cosTheta
 
-       , boostVector
-       , beta
-       , gamma
-       ) where
+    , boostVector
+    , beta
+    , gamma
+    ) where
+
+import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
+import qualified HEP.Kinematics.Vector.ThreeVector as V3
+import           HEP.Kinematics.Vector.TwoVector   (TwoVector)
+import qualified HEP.Kinematics.Vector.TwoVector   as V2
 
 import           Control.Applicative
 import           Control.Lens                      ((^.))
@@ -47,11 +52,6 @@ import           Linear.V2                         (V2 (..))
 import           Linear.V3                         (V3 (..))
 import           Linear.V4
 import           Linear.Vector                     (Additive (..), sumV, (^/))
-
-import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
-import qualified HEP.Kinematics.Vector.ThreeVector as V3
-import           HEP.Kinematics.Vector.TwoVector   (TwoVector)
-import qualified HEP.Kinematics.Vector.TwoVector   as V2
 
 -- | The Lorentz vector type. Its metric is defined as diag [1, -1, -1, -1].
 newtype LorentzVector a = LorentzVector (V4 a) deriving (Eq, Show)
@@ -108,10 +108,11 @@ setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
 -- azimuthal angle, transverse momentum, and mass coordinates.
 setEtaPhiPtM :: Floating a => a -> a -> a -> a -> LorentzVector a
 setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
-  where e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
-        px = pt' * cos phi'
-        py = pt' * sin phi'
-        pz = pt' * sinh eta'
+  where
+    e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
+    px = pt' * cos phi'
+    py = pt' * sin phi'
+    pz = pt' * sinh eta'
 
 -- | Vector sum of Lorentz vectors.
 --
@@ -131,7 +132,7 @@ transV (LorentzVector (V4 _ x y _)) = V2.setXY x y
 pt :: Floating a => LorentzVector a -> a
 pt = norm . transV
 
-spatialV :: Num a => LorentzVector a -> ThreeVector a
+spatialV :: LorentzVector a -> ThreeVector a
 spatialV (LorentzVector (V4 _ x y z)) = V3.setXYZ x y z
 
 -- | Pseudorapidity.

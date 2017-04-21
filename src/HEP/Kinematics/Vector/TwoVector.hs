@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.TwoVector
--- Copyright   :  (c) 2014 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2014-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -11,19 +11,20 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.TwoVector
-       ( -- * Type
-         TwoVector
+    ( -- * Type
+      TwoVector
 
-         -- * Function
-       , setXY
-       , setPtPhi
-       , phi2MPiPi
-       ) where
+      -- * Function
+    , setXY
+    , setPtPhi
+    , phi2MPiPi
+    ) where
 
-import           Control.Applicative
-import           Linear.Metric       (Metric (..))
-import           Linear.V2           (R1 (..), R2 (..), V2 (..))
-import           Linear.Vector       (Additive (..))
+import Control.Applicative
+
+import Linear.Metric       (Metric (..))
+import Linear.V2           (R1 (..), R2 (..), V2 (..))
+import Linear.Vector       (Additive (..))
 
 -- | Two-dimensional vector type.
 newtype TwoVector a = TwoVector (V2 a) deriving (Eq, Show)

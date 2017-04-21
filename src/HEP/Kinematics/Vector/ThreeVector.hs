@@ -2,7 +2,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.ThreeVector
--- Copyright   :  (c) 2014 - 2016 Chan Beom Park
+-- Copyright   :  (c) 2014-2017 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -12,25 +12,26 @@
 --
 --------------------------------------------------------------------------------
 module HEP.Kinematics.Vector.ThreeVector
-       (
-         -- * Type
-         ThreeVector
+    (
+      -- * Type
+      ThreeVector
 
-         -- * Function
-       , setXYZ
-       , angle
-       , cosTheta
-       , pseudoRapidity
-       , phi
-       ) where
+      -- * Function
+    , setXYZ
+    , angle
+    , cosTheta
+    , pseudoRapidity
+    , phi
+    ) where
 
-import           Control.Applicative
-import           Control.Lens        ((^.))
-import           Data.Function       (on)
-import           Linear.Metric       (Metric (..))
-import           Linear.V2           (V2 (..))
-import           Linear.V3           (R1 (..), R2 (..), R3 (..), V3 (..))
-import           Linear.Vector       (Additive (..))
+import Control.Applicative
+import Data.Function       (on)
+
+import Control.Lens        ((^.))
+import Linear.Metric       (Metric (..))
+import Linear.V2           (V2 (..))
+import Linear.V3           (R1 (..), R2 (..), R3 (..), V3 (..))
+import Linear.Vector       (Additive (..))
 
 -- | Three-dimensional vector type.
 newtype ThreeVector a = ThreeVector (V3 a) deriving (Eq, Show)
