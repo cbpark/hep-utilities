@@ -127,7 +127,7 @@ instance HasFourMomentum SpatialMomentum where
                       in LV.setXYZT x y z (sqrt $ x ** 2 + y ** 2 + z ** 2)
     {-# INLINE fourMomentum #-}
     pxpypz v3 = (v3 ^._x, v3^._y, v3^._z)
-    {-# INLINE pxpy #-}
+    {-# INLINE pxpypz #-}
     px = (^._x)
     {-# INLINE px #-}
     py = (^._y)
