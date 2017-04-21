@@ -3,6 +3,8 @@
 dist
 cabal.sandbox.config
 .cabal-sandbox
+cabal.project.local
+dist-newstyle
 .#*
 .*.swp
 TAGS
