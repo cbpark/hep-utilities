@@ -8,7 +8,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Chan Beom Park
 maintainer:          Chan Beom Park <cbpark@gmail.com>
-copyright:           (c) 2014 - 2016 Chan Beom Park
+copyright:           (c) 2014-2017 Chan Beom Park
 category:            Data, Physics
 build-type:          Simple
 cabal-version:       >=1.10
@@ -33,7 +33,7 @@ library
   other-modules:       HEP.Kinematics.Variable.MAOS
                        HEP.Kinematics.Variable.MT2
                        HEP.Kinematics.Variable.MTLowerAndUpper
-  build-depends:       base >=4.8
+  build-depends:       base >=4.9
                      , attoparsec
                      , bytestring
                      , lens
