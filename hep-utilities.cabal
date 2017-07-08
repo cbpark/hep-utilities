@@ -11,11 +11,12 @@ maintainer:          Chan Beom Park <cbpark@gmail.com>
 copyright:           (c) 2014-2017 Chan Beom Park
 category:            Data, Physics
 build-type:          Simple
+extra-source-files:  README.md
 cabal-version:       >=1.10
 
 source-repository head
   type:                git
-  location:            git@github.com:cbpark/hep-utilities.git
+  location:            https://github.com/cbpark/hep-utilities
 
 flag devel
   description:         Create small test executables
@@ -46,7 +47,10 @@ library
                      , vector
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -Wall -O2 -funbox-strict-fields
+  if flag(devel)
+    ghc-options: -O2 -funbox-strict-fields
+  else
+    ghc-options: -Wall -Wno-unused-do-bind -O0
 
 executable test_mt2
   main-is:             test_mt2.hs
@@ -54,7 +58,7 @@ executable test_mt2
                      , hep-utilities
   hs-source-dirs:      test
   default-language:    Haskell2010
-  ghc-options:         -Wall -O2
+  ghc-options:         -Wall
   if flag(devel)
     buildable:         True
   else
@@ -66,7 +70,7 @@ executable test_mtbound
                      , hep-utilities
   hs-source-dirs:      test
   default-language:    Haskell2010
-  ghc-options:         -Wall -O2
+  ghc-options:         -Wall
   if flag(devel)
     buildable:         True
   else
