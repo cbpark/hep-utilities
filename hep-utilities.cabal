@@ -11,6 +11,7 @@ maintainer:          Chan Beom Park <cbpark@gmail.com>
 copyright:           (c) 2014-2017 Chan Beom Park
 category:            Data, Physics
 build-type:          Simple
+extra-source-files:  README.md
 cabal-version:       >=1.10
 
 source-repository head
