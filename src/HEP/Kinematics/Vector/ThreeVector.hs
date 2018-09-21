@@ -26,6 +26,7 @@ module HEP.Kinematics.Vector.ThreeVector
 
 import Control.Applicative
 import Data.Function       (on)
+import Data.Semigroup      (Semigroup (..))
 
 import Control.Lens        ((^.))
 import Linear.Metric       (Metric (..))
@@ -59,9 +60,11 @@ instance Metric ThreeVector where
     (ThreeVector (V3 x y z)) `dot` (ThreeVector (V3 x' y' z')) =
         x * x' + y * y' + z * z'
 
+instance Num a => Semigroup (ThreeVector a) where
+    ThreeVector v3 <> ThreeVector v3' = ThreeVector (v3 ^+^ v3')
+
 instance Num a => Monoid (ThreeVector a) where
     mempty = zero
-    ThreeVector v3 `mappend` ThreeVector v3' = ThreeVector (v3 ^+^ v3')
 
 instance R1 ThreeVector where
     _x f (ThreeVector (V3 x y z)) = (\x' -> ThreeVector (V3 x' y z)) <$> f x

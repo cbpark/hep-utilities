@@ -31,6 +31,7 @@ module HEP.Analysis.Histogram1D
     ) where
 
 import           Control.Arrow                    (second)
+import           Data.Semigroup                   (Semigroup (..))
 import           System.IO
 
 import           Control.Monad.Trans.State.Strict (StateT (..))
@@ -48,12 +49,11 @@ newtype Hist1D a = Hist1D (Maybe (Vector (a, Double))) deriving Show
 emptyHist :: Hist1D a
 emptyHist = Hist1D Nothing
 
-instance (Eq a, Unbox a) => Monoid (Hist1D a) where
-    -- mempty :: Hist1D a
-    mempty = emptyHist
+instance (Eq a, Unbox a) => Semigroup (Hist1D a) where
+    h1 <> h2 = h1 `seq` h2 `seq` add h1 h2
 
-    -- mappend :: Hist1D a -> Hist1D a -> Hist1D a
-    mappend h1 h2 = h1 `seq` h2 `seq` add h1 h2
+instance (Eq a, Unbox a) => Monoid (Hist1D a) where
+    mempty = emptyHist
 
 add :: (Eq a, Unbox a) => Hist1D a -> Hist1D a -> Hist1D a
 add = combine (+)

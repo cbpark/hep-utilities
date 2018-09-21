@@ -34,6 +34,7 @@ library
   other-modules:       HEP.Kinematics.Variable.MAOS
                        HEP.Kinematics.Variable.MT2
                        HEP.Kinematics.Variable.MTLowerAndUpper
+
   build-depends:       base             >= 4.8 && < 5
                      , attoparsec       >= 0.12
                      , bytestring       >= 0.10
@@ -45,9 +46,12 @@ library
                      , pipes-bytestring >= 2.1
                      , transformers     >= 0.3
                      , vector
+  if !impl(ghc > 8.0)
+    build-depends:     semigroups       >= 0.18 && < 0.19
+
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -Wall -funbox-strict-fields
+  ghc-options:         -Wcompat -Wall -funbox-strict-fields
 
 executable test_mt2
   main-is:             test_mt2.hs

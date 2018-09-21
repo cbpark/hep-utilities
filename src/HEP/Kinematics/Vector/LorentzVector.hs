@@ -46,6 +46,7 @@ import qualified HEP.Kinematics.Vector.TwoVector   as V2
 import           Control.Applicative
 import           Control.Lens                      ((^.))
 import           Data.Function                     (on)
+import           Data.Semigroup                    (Semigroup (..))
 import           Data.Traversable                  (fmapDefault)
 import           Linear.Metric                     (Metric (..))
 import           Linear.V2                         (V2 (..))
@@ -79,9 +80,11 @@ instance Metric LorentzVector where
     (LorentzVector (V4 t x y z)) `dot` (LorentzVector (V4 t' x' y' z')) =
         t * t' - x * x' - y * y' - z * z'
 
+instance Num a => Semigroup (LorentzVector a) where
+    LorentzVector v4 <> LorentzVector v4' = LorentzVector (v4 ^+^ v4')
+
 instance Num a => Monoid (LorentzVector a) where
     mempty = zero
-    LorentzVector v4 `mappend` LorentzVector v4' = LorentzVector (v4 ^+^ v4')
 
 instance R1 LorentzVector where
     _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x
@@ -92,7 +95,7 @@ instance R2 LorentzVector where
         (\(V2 x' y') -> LorentzVector (V4 t x' y' z)) <$> f (V2 x y)
 
 instance R3 LorentzVector where
-    _z f (LorentzVector (V4 t x y z)) = (LorentzVector . V4 t x y) <$> f z
+    _z f (LorentzVector (V4 t x y z)) = LorentzVector . V4 t x y <$> f z
     _xyz f (LorentzVector (V4 t x y z)) =
         (\(V3 x' y' z') -> LorentzVector (V4 t x' y' z')) <$> f (V3 x y z)
 
