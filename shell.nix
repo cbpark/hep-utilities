@@ -1,1 +1,1 @@
-(import ./release.nix).hep-utilities.env
+(import ./release.nix {}).hep-utilities.env
