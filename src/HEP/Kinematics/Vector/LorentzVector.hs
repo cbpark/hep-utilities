@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.LorentzVector
@@ -85,6 +87,10 @@ instance Num a => Semigroup (LorentzVector a) where
 
 instance Num a => Monoid (LorentzVector a) where
     mempty = zero
+
+#if !(MIN_VERSION_base(4,11,0))
+    mappend = (<>)
+#endif
 
 instance R1 LorentzVector where
     _x f (LorentzVector (V4 t x y z)) = (\x' -> LorentzVector (V4 t x' y z)) <$> f x

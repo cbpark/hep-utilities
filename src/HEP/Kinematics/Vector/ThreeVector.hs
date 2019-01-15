@@ -1,4 +1,6 @@
+{-# LANGUAGE CPP        #-}
 {-# LANGUAGE MultiWayIf #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.ThreeVector
@@ -66,6 +68,10 @@ instance Num a => Semigroup (ThreeVector a) where
 instance Num a => Monoid (ThreeVector a) where
     mempty = zero
 
+#if !(MIN_VERSION_base(4,11,0))
+    mappend = (<>)
+#endif
+
 instance R1 ThreeVector where
     _x f (ThreeVector (V3 x y z)) = (\x' -> ThreeVector (V3 x' y z)) <$> f x
     {-# INLINE _x #-}
@@ -78,7 +84,7 @@ instance R2 ThreeVector where
     {-# INLINE _xy #-}
 
 instance R3 ThreeVector where
-    _z f (ThreeVector (V3 x y z)) = (ThreeVector . V3 x y) <$> f z
+    _z f (ThreeVector (V3 x y z)) = ThreeVector . V3 x y <$> f z
     {-# INLINE _z #-}
     _xyz f (ThreeVector v3) = ThreeVector <$> f v3
     {-# INLINE _xyz #-}

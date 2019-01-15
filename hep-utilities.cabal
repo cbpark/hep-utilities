@@ -8,7 +8,7 @@ license:             BSD3
 license-file:        LICENSE
 author:              Chan Beom Park
 maintainer:          Chan Beom Park <cbpark@gmail.com>
-copyright:           (c) 2014-2017 Chan Beom Park
+copyright:           (c) 2014-2019 Chan Beom Park
 category:            Data, Physics
 build-type:          Simple
 extra-source-files:  README.md
@@ -24,6 +24,10 @@ flag devel
 
 library
   exposed-modules:     HEP.Analysis.Histogram1D
+                       HEP.Data.LHEF
+                       HEP.Data.LHEF.Parser
+                       HEP.Data.LHEF.PipesUtil
+                       HEP.Data.LHEF.Type
                        HEP.Kinematics
                        HEP.Kinematics.Variable
                        HEP.Kinematics.Vector.TwoVector
@@ -31,33 +35,40 @@ library
                        HEP.Kinematics.Vector.LorentzTVector
                        HEP.Kinematics.Vector.LorentzVector
                        HEP.Particle.ID
-  other-modules:       HEP.Kinematics.Variable.MAOS
+  other-modules:       HEP.Data.ParserUtil
+                       HEP.Kinematics.Variable.MAOS
                        HEP.Kinematics.Variable.MT2
                        HEP.Kinematics.Variable.MTLowerAndUpper
 
   build-depends:       base             >= 4.8 && < 5
                      , attoparsec       >= 0.12
                      , bytestring       >= 0.10
-                     , lens
-                     , linear
-                     , mwc-random
+                     , containers       >= 0.5
+                     , lens             >= 4.13
+                     , linear           >= 1.20
+                     , mwc-random       >= 0.13
                      , pipes            >= 4.1
                      , pipes-attoparsec >= 0.5
                      , pipes-bytestring >= 2.1
                      , transformers     >= 0.3
-                     , vector
-  if !impl(ghc > 8.0)
-    build-depends:     semigroups       >= 0.18 && < 0.19
+                     , vector           >= 0.11
+
+  if impl(ghc >= 8.0)
+    ghc-options: -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
+  else
+    build-depends:     fail == 4.9.*, semigroups == 0.18.*
 
   hs-source-dirs:      src
   default-language:    Haskell2010
-  ghc-options:         -Wcompat -Wall -funbox-strict-fields
+  ghc-options:         -Wall -fno-warn-unused-do-bind -funbox-strict-fields
 
-executable test_mt2
-  main-is:             test_mt2.hs
-  build-depends:       base >=4.8
+executable lhef_parse
+  main-is:             lhef_parse.hs
+  build-depends:       base          >= 4.8
+                     , attoparsec
+                     , bytestring
                      , hep-utilities
-  hs-source-dirs:      test
+  hs-source-dirs:      examples
   default-language:    Haskell2010
   ghc-options:         -Wall
   if flag(devel)
@@ -65,11 +76,36 @@ executable test_mt2
   else
     buildable:         False
 
-executable test_mtbound
-  main-is:             test_mtbound.hs
-  build-depends:       base >=4.8
+executable lhef_pipesparse
+  main-is:             lhef_pipesparse.hs
+  build-depends:       base          >= 4.8
+                     , pipes
                      , hep-utilities
-  hs-source-dirs:      test
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable mt2
+  main-is:             mt2.hs
+  build-depends:       base          >= 4.8
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable mtbound
+  main-is:             mtbound.hs
+  build-depends:       base          >= 4.8
+                     , hep-utilities
+  hs-source-dirs:      examples
   default-language:    Haskell2010
   ghc-options:         -Wall
   if flag(devel)

@@ -1,5 +1,4 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE Strict          #-}
 
 module HEP.Kinematics.Variable.MT2 (mT2) where
 

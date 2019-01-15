@@ -1,5 +1,4 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE Strict          #-}
 
 module HEP.Kinematics.Variable.MTLowerAndUpper (mTLowerBound) where
 
@@ -65,13 +64,13 @@ findMinimum dist =
             split = splitting0 + delta
         input <- lift ask
         case runReader (recoMass split) input of
-            Nothing              -> do put (r0, s)
-                                       findMinimum (dist * shrinkageFactor)
-            Just (r@Result {..}) -> if recomass < recomass0
-                                    then do put (r, s)
-                                            findMinimum (dist * growthFactor)
-                                    else do put (r0, s)
-                                            findMinimum (dist * shrinkageFactor)
+            Nothing            -> do put (r0, s)
+                                     findMinimum (dist * shrinkageFactor)
+            Just r@Result {..} -> if recomass < recomass0
+                                  then do put (r, s)
+                                          findMinimum (dist * growthFactor)
+                                  else do put (r0, s)
+                                          findMinimum (dist * shrinkageFactor)
           where
             tolerance = 1.0e-8 / typicalScale
             growthFactor = 1.1

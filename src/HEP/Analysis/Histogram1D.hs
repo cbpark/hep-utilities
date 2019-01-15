@@ -1,4 +1,6 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP          #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Analysis.Histogram1D
@@ -54,6 +56,10 @@ instance (Eq a, Unbox a) => Semigroup (Hist1D a) where
 
 instance (Eq a, Unbox a) => Monoid (Hist1D a) where
     mempty = emptyHist
+
+#if !(MIN_VERSION_base(4,11,0))
+    mappend = (<>)
+#endif
 
 add :: (Eq a, Unbox a) => Hist1D a -> Hist1D a -> Hist1D a
 add = combine (+)

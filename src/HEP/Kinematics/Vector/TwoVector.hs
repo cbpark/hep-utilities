@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.TwoVector
@@ -58,6 +60,10 @@ instance Num a => Semigroup (TwoVector a) where
 instance Num a => Monoid (TwoVector a) where
     mempty = zero
 
+#if !(MIN_VERSION_base(4,11,0))
+    mappend = (<>)
+#endif
+
 instance R1 TwoVector where
     _x f (TwoVector (V2 x y)) = (\x' -> TwoVector (V2 x' y)) <$> f x
     {-# INLINE _x #-}
@@ -80,6 +86,7 @@ setPtPhi pt phi = let px = pt * cos phi
 --
 -- >>> phi2MPiPi (2 * pi)
 -- 0.0
+--
 -- >>> phi2MPiPi (-pi)
 -- -3.141592653589793
 phi2MPiPi :: (Floating a, Ord a) => a -> a
