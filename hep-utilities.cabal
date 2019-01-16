@@ -13,6 +13,11 @@ category:            Data, Physics
 build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
+tested-with:         GHC == 8.6.3
+                   , GHC == 8.4.4
+                   , GHC == 8.2.2
+                   , GHC == 8.0.2
+                   , GHC == 7.10.3
 
 source-repository head
   type:                git
@@ -24,6 +29,7 @@ flag devel
 
 library
   exposed-modules:     HEP.Analysis.Histogram1D
+                       HEP.Data.LHCO.Type
                        HEP.Data.LHEF
                        HEP.Data.LHEF.Parser
                        HEP.Data.LHEF.PipesUtil
