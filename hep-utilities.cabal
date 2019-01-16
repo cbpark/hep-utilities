@@ -29,6 +29,13 @@ flag devel
 
 library
   exposed-modules:     HEP.Analysis.Histogram1D
+                       HEP.Data.HepMC
+                       HEP.Data.HepMC.Parser
+                       HEP.Data.HepMC.PipesUtil
+                       HEP.Data.HepMC.Type
+                       HEP.Data.LHCO
+                       HEP.Data.LHCO.Parser
+                       HEP.Data.LHCO.PipesUtil
                        HEP.Data.LHCO.Type
                        HEP.Data.LHEF
                        HEP.Data.LHEF.Parser
@@ -60,13 +67,67 @@ library
                      , vector           >= 0.11
 
   if impl(ghc >= 8.0)
-    ghc-options: -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
+    ghc-options:       -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
   else
     build-depends:     fail == 4.9.*, semigroups == 0.18.*
 
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Wall -fno-warn-unused-do-bind -funbox-strict-fields
+
+executable hepmc_parse
+  main-is:             hepmc_parse.hs
+  build-depends:       base          >= 4.8
+                     , attoparsec
+                     , bytestring
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable hepmc_pipesparse
+  main-is:             hepmc_pipesparse.hs
+  build-depends:       base          >= 4.8
+                     , pipes
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable lhco_parse
+  main-is:             lhco_parse.hs
+  build-depends:       base          >= 4.8
+                     , attoparsec
+                     , bytestring
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable lhco_pipesparse
+  main-is:             lhco_pipesparse.hs
+  build-depends:       base          >= 4.8
+                     , pipes
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
 
 executable lhef_parse
   main-is:             lhef_parse.hs
