@@ -42,6 +42,7 @@ library
                        HEP.Data.LHEF.PipesUtil
                        HEP.Data.LHEF.Type
                        HEP.Kinematics
+                       HEP.Kinematics.TwoBody
                        HEP.Kinematics.Variable
                        HEP.Kinematics.Vector.TwoVector
                        HEP.Kinematics.Vector.ThreeVector
@@ -171,6 +172,19 @@ executable mt2
 executable mtbound
   main-is:             mtbound.hs
   build-depends:       base          >= 4.8
+                     , hep-utilities
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  if flag(devel)
+    buildable:         True
+  else
+    buildable:         False
+
+executable twobody
+  main-is:             twobody.hs
+  build-depends:       base          >= 4.8
+                     , mwc-random
                      , hep-utilities
   hs-source-dirs:      examples
   default-language:    Haskell2010
