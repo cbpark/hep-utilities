@@ -38,6 +38,7 @@ module HEP.Kinematics.Vector.LorentzVector
     , boostVector
     , beta
     , gamma
+    , boost
     ) where
 
 import           HEP.Kinematics.Vector.ThreeVector (ThreeVector)
@@ -181,3 +182,17 @@ beta v@(LorentzVector (V4 t _ _ _)) = (norm . spatialV) v / t
 
 gamma :: LorentzVector Double -> Double
 gamma v = let b = beta v in 1.0 / sqrt (1.0 - b * b)
+
+boost :: LorentzVector Double -> Double -> Double -> Double -> LorentzVector Double
+boost (LorentzVector (V4 t x y z)) bx by bz =
+    let b2 = bx * bx + by * by + bz * bz
+        ga = 1.0 / sqrt (1 - b2)
+        bp = bx * x + by * y + bz * z
+        ga2 = if b2 > 0 then (ga - 1.0) / b2 else 0
+
+        x' = x + ga2 * bp * bx + ga * bx * t
+        y' = y + ga2 * bp * by + ga * by * t
+        z' = z + ga2 * bp * bz + ga * bz * t
+        t' = ga * (t + bp)
+        v' = setXYZT x' y' z' t'
+    in v'
