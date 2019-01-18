@@ -32,23 +32,24 @@ maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
     let visM1 = mass vis1
         visM2 = mass vis2
         getScale v = pt v ** 2
-        scale = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
-                        + visM1 ** 2 + mX1 ** 2 + visM2 ** 2 + mX2 ** 2) / 8.0
-    in case scale of
-        0 -> ([], [], Unknown)
-        s -> let vis1' = fmap (/ s) vis1
-                 vis2' = fmap (/ s) vis2
-                 miss' = fmap (/ s) miss
-                 mT2' = mT2 / s
-                 mY1' = mY1 / s
-                 mX1' = mX1 / s
-                 mY2' = mY2 / s
-                 mX2' = mX2 / s
-                 soltype = if balanced mT2 (vis1', mX1') (vis2', mX2')
-                           then Balanced else Unbalanced
-                 input = Input vis1' vis2' miss' mY1' mY2' mX1' mX2' mT2' s
-                 (sol1, sol2) = runReader (maosMomenta' soltype) input
-             in (map (fmap (* s)) sol1, map (fmap (* s)) sol2, soltype)
+        s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
+                    + visM1 ** 2 + mX1 ** 2 + visM2 ** 2 + mX2 ** 2) / 8.0
+
+        vis1' = fmap (/ s) vis1
+        vis2' = fmap (/ s) vis2
+        miss' = fmap (/ s) miss
+        mT2' = mT2 / s
+        mY1' = mY1 / s
+        mX1' = mX1 / s
+        mY2' = mY2 / s
+        mX2' = mX2 / s
+
+        soltype = if balanced mT2 (vis1', mX1') (vis2', mX2')
+                  then Balanced
+                  else Unbalanced
+        input = Input vis1' vis2' miss' mY1' mY2' mX1' mX2' mT2' s
+        (sol1, sol2) = runReader (maosMomenta' soltype) input
+    in (map (fmap (* s)) sol1, map (fmap (* s)) sol2, soltype)
 
 type Mass = Double
 
