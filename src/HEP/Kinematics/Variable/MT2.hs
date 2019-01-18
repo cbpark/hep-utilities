@@ -13,13 +13,13 @@ import Linear.V3
 
 type Mass = Double
 
-data Input = Input { visible1        :: FourMomentum
-                   , visible2        :: FourMomentum
-                   , missing         :: TransverseMomentum
-                   , mInvisible1     :: Mass
-                   , mInvisible2     :: Mass
-                   , precision       :: Double
-                   , useDeciSections :: Bool }
+data Input = Input { visible1        :: {-# UNPACK #-} !FourMomentum
+                   , visible2        :: {-# UNPACK #-} !FourMomentum
+                   , missing         :: {-# UNPACK #-} !TransverseMomentum
+                   , mInvisible1     :: {-# UNPACK #-} !Mass
+                   , mInvisible2     :: {-# UNPACK #-} !Mass
+                   , precision       :: {-# UNPACK #-} !Double
+                   , useDeciSections :: {-# UNPACK #-} !Bool }
 
 -- | calculates MT2.
 --
@@ -31,16 +31,13 @@ mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
     let mVis1 = mass vis1
         mVis2 = mass vis2
         getScale v = pt v ** 2
-        scale = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
-                       + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
-    in case scale of 0 -> 0
-                     s -> let m1Min = mVis1 + mInv1
-                              m2Min = mVis2 + mInv2
-                          in if m2Min > m1Min
-                             then mT2' m2Min s
-                                  (Input vis1 vis2 miss mInv1 mInv2 pre sec)
-                             else mT2' m1Min s
-                                  (Input vis2 vis1 miss mInv2 mInv1 pre sec)
+        s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
+                    + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
+        m1Min = mVis1 + mInv1
+        m2Min = mVis2 + mInv2
+    in if m2Min > m1Min
+       then mT2' m2Min s (Input vis1 vis2 miss mInv1 mInv2 pre sec)
+       else mT2' m1Min s (Input vis2 vis1 miss mInv2 mInv1 pre sec)
 
 mT2' :: Mass -> Double -> Input -> Mass
 mT2' mMin scale input@Input {..} =
