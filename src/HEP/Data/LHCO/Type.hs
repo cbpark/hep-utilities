@@ -38,15 +38,15 @@ data RawObject = RawObject { -- | type of object.
                              --     * 4 = jet
                              --
                              --     * 6 = missing transverse energy
-                             lhcoTyp   :: Int
-                           , lhcoEta   :: Double -- ^ pseudorapidity.
-                           , lhcoPhi   :: Double -- ^ azimuthal angle.
-                           , lhcoPt    :: Double -- ^ transverse momentum.
+                             lhcoTyp   :: {-# UNPACK #-} !Int
+                           , lhcoEta   :: {-# UNPACK #-} !Double  -- ^ pseudorapidity.
+                           , lhcoPhi   :: {-# UNPACK #-} !Double  -- ^ azimuthal angle.
+                           , lhcoPt    :: {-# UNPACK #-} !Double  -- ^ transverse momentum.
                              -- | invariant mass of the object.
                              --
                              -- For a jet, it is constructed from all energy and
                              -- momentum that are contained within it.
-                           , lhcoJmass :: Double
+                           , lhcoJmass :: {-# UNPACK #-} !Double
                              -- | number of tracks associated with the object.
                              --
                              -- In the case of a lepton, the number is multiplied
@@ -54,7 +54,7 @@ data RawObject = RawObject { -- | type of object.
                            , lhcoNtrk  :: Double
                              -- | either 1 or 2 for a jet that has been tagged as
                              -- containing a b-quark.
-                           , lhcoBtag  :: Double
+                           , lhcoBtag  :: {-# UNPACK #-} !Double
                              -- | ratio of the hadronic /vs/ electromagnetic
                              -- energy deposited in the calorimeter cells.
                            , lhcoHadem :: Double
