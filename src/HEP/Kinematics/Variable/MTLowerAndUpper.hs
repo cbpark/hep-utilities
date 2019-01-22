@@ -22,10 +22,10 @@ data Result = Result { recomass :: Mass, splitting :: TransverseMomentum }
 
 type StepSize = Double
 
-data Input = Input { visible1      :: FourMomentum
-                   , visible2      :: FourMomentum
-                   , missing       :: TransverseMomentum
-                   , mIntermediate :: Mass }
+data Input = Input { visible1      :: !FourMomentum
+                   , visible2      :: !FourMomentum
+                   , missing       :: !TransverseMomentum
+                   , mIntermediate :: !Mass }
 
 mTLowerBound :: FourMomentum        -- ^ four-momentum of the first visible system
              -> FourMomentum        -- ^ four-momentum of the second visible system

@@ -13,13 +13,13 @@ import Linear.V3
 
 type Mass = Double
 
-data Input = Input { visible1        :: {-# UNPACK #-} !FourMomentum
-                   , visible2        :: {-# UNPACK #-} !FourMomentum
-                   , missing         :: {-# UNPACK #-} !TransverseMomentum
-                   , mInvisible1     :: {-# UNPACK #-} !Mass
-                   , mInvisible2     :: {-# UNPACK #-} !Mass
-                   , precision       :: {-# UNPACK #-} !Double
-                   , useDeciSections :: {-# UNPACK #-} !Bool }
+data Input = Input { visible1        :: !FourMomentum
+                   , visible2        :: !FourMomentum
+                   , missing         :: !TransverseMomentum
+                   , mInvisible1     :: !Mass
+                   , mInvisible2     :: !Mass
+                   , precision       :: !Double
+                   , useDeciSections :: !Bool }
 
 -- | calculates MT2.
 --
