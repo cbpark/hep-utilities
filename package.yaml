@@ -1,0 +1,141 @@
+name:         hep-utilities
+version:      "0.1.0.0"
+synopsis:     Utilities for analyzing high energy physics data
+description:  Types and functions for various vectors, kinematics variables, and utilities for collider studies
+author:       Chan Beom Park
+maintainer:   cbpark@gmail.com
+license-file: LICENSE
+copyright:    (c) 2014-2020 Chan Beom Park
+github:       cbpark/hep-utilities
+category:     Data, Physics
+
+flags:
+  devel:
+    description: Create small test executables
+    manual:      True
+    default:     False
+
+ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+
+dependencies:
+  - base >= 4.12.0.0 && < 5
+  - attoparsec
+  - bytestring
+  - containers
+  - lens
+  - linear
+  - mwc-random
+  - pipes
+  - pipes-attoparsec
+  - pipes-bytestring
+  - transformers
+  - vector
+
+library:
+  other-modules:
+    - HEP.Data.ParserUtil
+    - HEP.Kinematics.Variable.MAOS
+    - HEP.Kinematics.Variable.MT2
+    - HEP.Kinematics.Variable.MTLowerAndUpper
+  source-dirs: src
+  ghc-options: -fno-warn-unused-do-bind
+
+executables:
+  hepmc_parse:
+    main: hepmc_parse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  hepmc_pipesparse:
+    main: hepmc_pipesparse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  lhco_parse:
+    main: lhco_parse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  lhco_pipesparse:
+    main: lhco_pipesparse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  lhef_parse:
+    main: lhef_parse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  lhef_pipesparse:
+    main: lhef_pipesparse.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  mt2:
+    main: mt2.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  mtbound:
+    main: mtbound.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False
+
+  twobody:
+    main: twobody.hs
+    source-dirs: examples
+    dependencies: [hep-utilities]
+    when:
+      - condition: flag(devel)
+        then:
+          buildable: True
+        else:
+          buildable: False

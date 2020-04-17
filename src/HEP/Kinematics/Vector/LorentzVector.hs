@@ -49,7 +49,6 @@ import qualified HEP.Kinematics.Vector.TwoVector   as V2
 import           Control.Applicative
 import           Control.Lens                      ((^.))
 import           Data.Function                     (on)
-import           Data.Semigroup                    (Semigroup (..))
 import           Data.Traversable                  (fmapDefault)
 import           Linear.Metric                     (Metric (..))
 import           Linear.V2                         (V2 (..))

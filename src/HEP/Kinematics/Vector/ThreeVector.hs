@@ -28,7 +28,6 @@ module HEP.Kinematics.Vector.ThreeVector
 
 import Control.Applicative
 import Data.Function       (on)
-import Data.Semigroup      (Semigroup (..))
 
 import Control.Lens        ((^.))
 import Linear.Metric       (Metric (..))

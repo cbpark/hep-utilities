@@ -33,7 +33,6 @@ module HEP.Analysis.Histogram1D
     ) where
 
 import           Control.Arrow                    (second)
-import           Data.Semigroup                   (Semigroup (..))
 import           System.IO
 
 import           Control.Monad.Trans.State.Strict (StateT (..))

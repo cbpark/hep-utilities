@@ -1,195 +1,319 @@
-name:                hep-utilities
-version:             0.1.0.0
-synopsis:            Utilities for analyzing high energy physics data
-description:         Types and functions for various vectors, kinematics variables, and utilities for collider studies
-homepage:            https://github.com/cbpark/hep-utilities
-bug-reports:         https://github.com/cbpark/hep-utilities/issues
-license:             BSD3
-license-file:        LICENSE
-author:              Chan Beom Park
-maintainer:          Chan Beom Park <cbpark@gmail.com>
-copyright:           (c) 2014-2019 Chan Beom Park
-category:            Data, Physics
-build-type:          Simple
-extra-source-files:  README.md
-cabal-version:       >=1.10
-tested-with:         GHC == 8.6.3
-                   , GHC == 8.4.4
-                   , GHC == 8.2.2
-                   , GHC == 8.0.2
-                   , GHC == 7.10.3
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: ffc429d92f1aad9471a3b61dc4ec69be0c5bf57d94cb79c8865ab12fe0e5b01e
+
+name:           hep-utilities
+version:        0.1.0.0
+synopsis:       Utilities for analyzing high energy physics data
+description:    Types and functions for various vectors, kinematics variables, and utilities for collider studies
+category:       Data, Physics
+homepage:       https://github.com/cbpark/hep-utilities#readme
+bug-reports:    https://github.com/cbpark/hep-utilities/issues
+author:         Chan Beom Park
+maintainer:     cbpark@gmail.com
+copyright:      (c) 2014-2020 Chan Beom Park
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
 
 source-repository head
-  type:                git
-  location:            https://github.com/cbpark/hep-utilities
+  type: git
+  location: https://github.com/cbpark/hep-utilities
 
 flag devel
-  description:         Create small test executables
-  default:             False
+  description: Create small test executables
+  manual: True
+  default: False
 
 library
-  exposed-modules:     HEP.Analysis.Histogram1D
-                       HEP.Data.HepMC
-                       HEP.Data.HepMC.Parser
-                       HEP.Data.HepMC.PipesUtil
-                       HEP.Data.HepMC.Type
-                       HEP.Data.LHCO
-                       HEP.Data.LHCO.Parser
-                       HEP.Data.LHCO.PipesUtil
-                       HEP.Data.LHCO.Type
-                       HEP.Data.LHEF
-                       HEP.Data.LHEF.Parser
-                       HEP.Data.LHEF.PipesUtil
-                       HEP.Data.LHEF.Type
-                       HEP.Kinematics
-                       HEP.Kinematics.TwoBody
-                       HEP.Kinematics.Variable
-                       HEP.Kinematics.Vector.TwoVector
-                       HEP.Kinematics.Vector.ThreeVector
-                       HEP.Kinematics.Vector.LorentzTVector
-                       HEP.Kinematics.Vector.LorentzVector
-                       HEP.Particle.ID
-  other-modules:       HEP.Data.ParserUtil
-                       HEP.Kinematics.Variable.MAOS
-                       HEP.Kinematics.Variable.MT2
-                       HEP.Kinematics.Variable.MTLowerAndUpper
-
-  build-depends:       base             >= 4.8 && < 5
-                     , attoparsec       >= 0.12
-                     , bytestring       >= 0.10
-                     , containers       >= 0.5
-                     , lens             >= 4.13
-                     , linear           >= 1.20
-                     , mwc-random       >= 0.13
-                     , pipes            >= 4.1
-                     , pipes-attoparsec >= 0.5
-                     , pipes-bytestring >= 2.1
-                     , transformers     >= 0.3
-                     , vector           >= 0.11
-
-  if impl(ghc >= 8.0)
-    ghc-options:       -Wcompat -Wnoncanonical-monad-instances -Wnoncanonical-monadfail-instances
-  else
-    build-depends:     fail == 4.9.*, semigroups == 0.18.*
-
-  hs-source-dirs:      src
-  default-language:    Haskell2010
-  ghc-options:         -Wall -fno-warn-unused-do-bind -funbox-strict-fields
+  exposed-modules:
+      HEP.Analysis.Histogram1D
+      HEP.Data.HepMC
+      HEP.Data.HepMC.Parser
+      HEP.Data.HepMC.PipesUtil
+      HEP.Data.HepMC.Type
+      HEP.Data.LHCO
+      HEP.Data.LHCO.Parser
+      HEP.Data.LHCO.PipesUtil
+      HEP.Data.LHCO.Type
+      HEP.Data.LHEF
+      HEP.Data.LHEF.Parser
+      HEP.Data.LHEF.PipesUtil
+      HEP.Data.LHEF.Type
+      HEP.Kinematics
+      HEP.Kinematics.TwoBody
+      HEP.Kinematics.Variable
+      HEP.Kinematics.Vector.LorentzTVector
+      HEP.Kinematics.Vector.LorentzVector
+      HEP.Kinematics.Vector.ThreeVector
+      HEP.Kinematics.Vector.TwoVector
+      HEP.Particle.ID
+  other-modules:
+      HEP.Data.ParserUtil
+      HEP.Kinematics.Variable.MAOS
+      HEP.Kinematics.Variable.MT2
+      HEP.Kinematics.Variable.MTLowerAndUpper
+  hs-source-dirs:
+      src
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fno-warn-unused-do-bind
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
+  default-language: Haskell2010
 
 executable hepmc_parse
-  main-is:             hepmc_parse.hs
-  build-depends:       base          >= 4.8
-                     , attoparsec
-                     , bytestring
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: hepmc_parse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable hepmc_pipesparse
-  main-is:             hepmc_pipesparse.hs
-  build-depends:       base          >= 4.8
-                     , pipes
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: hepmc_pipesparse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable lhco_parse
-  main-is:             lhco_parse.hs
-  build-depends:       base          >= 4.8
-                     , attoparsec
-                     , bytestring
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: lhco_parse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable lhco_pipesparse
-  main-is:             lhco_pipesparse.hs
-  build-depends:       base          >= 4.8
-                     , pipes
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: lhco_pipesparse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable lhef_parse
-  main-is:             lhef_parse.hs
-  build-depends:       base          >= 4.8
-                     , attoparsec
-                     , bytestring
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: lhef_parse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable lhef_pipesparse
-  main-is:             lhef_pipesparse.hs
-  build-depends:       base          >= 4.8
-                     , pipes
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: lhef_pipesparse.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable mt2
-  main-is:             mt2.hs
-  build-depends:       base          >= 4.8
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: mt2.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable mtbound
-  main-is:             mtbound.hs
-  build-depends:       base          >= 4.8
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: mtbound.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010
 
 executable twobody
-  main-is:             twobody.hs
-  build-depends:       base          >= 4.8
-                     , mwc-random
-                     , hep-utilities
-  hs-source-dirs:      examples
-  default-language:    Haskell2010
-  ghc-options:         -Wall
+  main-is: twobody.hs
+  other-modules:
+      Paths_hep_utilities
+  hs-source-dirs:
+      examples
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  build-depends:
+      attoparsec
+    , base >=4.12.0.0 && <5
+    , bytestring
+    , containers
+    , hep-utilities
+    , lens
+    , linear
+    , mwc-random
+    , pipes
+    , pipes-attoparsec
+    , pipes-bytestring
+    , transformers
+    , vector
   if flag(devel)
-    buildable:         True
+    buildable: True
   else
-    buildable:         False
+    buildable: False
+  default-language: Haskell2010

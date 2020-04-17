@@ -10,7 +10,9 @@ dist-newstyle
 .*.swp
 TAGS
 .stack-work
+stack.yaml.lock
 result
 *.hepmc
 *.lhco
 *.lhe
+*.old

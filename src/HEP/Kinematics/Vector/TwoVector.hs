@@ -23,7 +23,6 @@ module HEP.Kinematics.Vector.TwoVector
     ) where
 
 import Control.Applicative
-import Data.Semigroup      (Semigroup (..))
 
 import Linear.Metric       (Metric (..))
 import Linear.V2           (R1 (..), R2 (..), V2 (..))
