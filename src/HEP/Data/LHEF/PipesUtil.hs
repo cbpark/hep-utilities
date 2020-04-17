@@ -19,35 +19,41 @@ module HEP.Data.LHEF.PipesUtil
        , groupByMother
        ) where
 
-import           Control.Monad        (forever)
-import           Data.Function        (on)
-import qualified Data.IntMap          as M
-import           Data.List            (groupBy)
-import           Pipes
-import           Pipes.ByteString     (fromHandle)
-import qualified Pipes.Prelude        as P
-import           System.IO            (Handle)
-
 import           HEP.Data.LHEF.Parser (lhefEvent)
 import           HEP.Data.LHEF.Type
 import           HEP.Data.ParserUtil  (parseEvent)
+
+import           Data.ByteString      (ByteString)
+import qualified Data.IntMap          as M
+import           Pipes
+import qualified Pipes.Prelude        as P
+
+import           Control.Monad        (forever)
+import           Data.Function        (on)
+import           Data.List            (groupBy)
 
 -- | Parsing LHEF event, 'Event'
 --
 -- Example usage:
 --
--- > import           Pipes
--- > import qualified Pipes.Prelude      as P
--- > import           System.Environment
--- > import           System.IO
 -- > import           HEP.Data.LHEF      (getLHEFEvent)
+-- > import           Pipes              (runEffect, (>->))
+-- > import           Pipes.ByteString   (fromHandle)
+-- > import qualified Pipes.Prelude      as P
+-- > import           System.Environment (getArgs)
+-- > import           System.IO          (IOMode (..), withFile)
 -- >
+-- > main :: IO ()
 -- > main = do
--- >     infile <- head <$> getArgs
--- >     withFile infile ReadMode $ \hin ->
--- >         runEffect $ getLHEFEvent hin >-> P.print
-getLHEFEvent :: MonadIO m => Handle -> Producer Event m ()
-getLHEFEvent = parseEvent lhefEvent . fromHandle
+-- >    infile <- head <$> getArgs
+-- >    withFile infile ReadMode $ \hin ->
+-- >        runEffect $ getLHEFEvent fromHandle hin >-> P.take 3 >-> P.print
+-- >    putStrLn "-- Done parsing."
+getLHEFEvent :: Monad m
+             => (a -> Producer ByteString m ())
+             -> a
+             -> Producer Event m ()
+getLHEFEvent produce = parseEvent lhefEvent . produce
 
 getParticles :: Monad m => (Particle -> Bool) -> Pipe EventEntry [Particle] m ()
 getParticles f = forever $ particles >-> getSome
