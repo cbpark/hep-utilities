@@ -10,19 +10,22 @@ See codes in [examples](examples). If you're going to use [pipes](http://hackage
 ``` haskell
 module Main where
 
-import           Pipes              (runEffect, (>->))
+import           HEP.Data.LHEF      (getLHEFEvent)
+
+import           Pipes
+import           Pipes.ByteString   (fromHandle)
 import qualified Pipes.Prelude      as P
+
 import           System.Environment (getArgs)
 import           System.IO          (IOMode (..), withFile)
-
-import           HEP.Data.LHEF      (getLHEFEvent)
 
 main :: IO ()
 main = do
     infile <- head <$> getArgs
+
     putStrLn $ "-- Parsing " ++ show infile ++ "."
     withFile infile ReadMode $ \hin ->
-        runEffect $ getLHEFEvent hin >-> P.take 3 >-> P.print
+        runEffect $ getLHEFEvent fromHandle hin >-> P.take 3 >-> P.print
     putStrLn "-- Done parsing."
 ```
 
