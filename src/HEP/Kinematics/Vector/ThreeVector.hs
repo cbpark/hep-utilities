@@ -92,7 +92,7 @@ setXYZ :: a -> a -> a -> ThreeVector a
 setXYZ x y z = ThreeVector (V3 x y z)
 
 -- | Angle of the 3-vector with respect to another 3-vector.
-angle :: (Floating a, Ord a) => ThreeVector a -> ThreeVector a -> a
+angle :: ThreeVector Double -> ThreeVector Double -> Double
 angle v v' = let ptot2 = ((*) `on` (quadrance . (^._xyz))) v v'
              in if ptot2 <= 0
                 then 0
@@ -102,12 +102,12 @@ angle v v' = let ptot2 = ((*) `on` (quadrance . (^._xyz))) v v'
                            | otherwise -> acos arg
 
 -- | Cosine of the angle with respect to the z-direction.
-cosTheta :: (Floating a, Ord a) => ThreeVector a -> a
+cosTheta :: ThreeVector Double -> Double
 cosTheta (ThreeVector v@(V3 _ _ z)) = let ptot = norm v
                                       in if ptot > 0 then z / ptot else 1
 
 -- | Pseudorapidity.
-pseudoRapidity :: (Floating a, Ord a) => ThreeVector a -> a
+pseudoRapidity :: ThreeVector Double -> Double
 pseudoRapidity v@(ThreeVector (V3 _ _ z))
     | ct * ct < 1 = -0.5 * log ((1.0 - ct) / (1.0 + ct))
     | z == 0      =  0
@@ -116,6 +116,6 @@ pseudoRapidity v@(ThreeVector (V3 _ _ z))
   where ct = cosTheta v
 
 -- | Azimuthal angle from -pi to pi.
-phi :: RealFloat a => ThreeVector a -> a
+phi :: ThreeVector Double -> Double
 phi (ThreeVector (V3 x y _)) | x == 0 && y == 0 = 0
                              | otherwise        = atan2 y x

@@ -88,7 +88,7 @@ setPtPhi pt phi = let px = pt * cos phi
 --
 -- >>> phi2MPiPi (-pi)
 -- -3.141592653589793
-phi2MPiPi :: (Floating a, Ord a) => a -> a
+phi2MPiPi :: Double -> Double
 phi2MPiPi x | x >= pi   = phi2MPiPi $! x - 2*pi
             | x < -pi   = phi2MPiPi $! x + 2*pi
             | otherwise = x
