@@ -68,8 +68,11 @@ initialStates = M.elems . M.filter (\Particle {..} -> fst mothup == 1)
 finalStates :: EventEntry -> [Particle]
 finalStates = M.elems . M.filter (\Particle {..} -> istup == 1)
 
-particlesFrom :: ParticleType -> Reader EventEntry [[Particle]]
-particlesFrom pid = asks (M.keys . M.filter (`is` pid)) >>= mapM getDaughters
+particlesFrom :: ParticleType -> EventEntry -> [[Particle]]
+particlesFrom pid = runReader (particlesFrom' pid)
+
+particlesFrom' :: ParticleType -> Reader EventEntry [[Particle]]
+particlesFrom' pid = asks (M.keys . M.filter (`is` pid)) >>= mapM getDaughters
 
 getDaughters :: Int -> Reader EventEntry [Particle]
 getDaughters i = do
