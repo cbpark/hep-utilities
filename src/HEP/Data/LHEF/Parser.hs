@@ -28,8 +28,8 @@ import qualified Data.IntMap                      as M
 import           HEP.Data.LHEF.Type
 import           HEP.Data.ParserUtil              (skipTillEnd)
 
-eventInfo :: Parser EventInfo
-eventInfo = do
+evInfo :: Parser EventInfo
+evInfo = do
     skipSpace
     nup'    <- signed decimal <* skipSpace
     idprup' <- signed decimal <* skipSpace
@@ -72,12 +72,12 @@ lhefEvent :: Parser Event
 lhefEvent = do
     skipSpace
     manyTill' skipTillEnd (string "<event>" >> endOfLine)
-    evInfo     <- eventInfo         <* endOfLine
+    info       <- evInfo            <* endOfLine
     parEntries <- many1' $ particle <* endOfLine
     opEvInfo
     string "</event>" >> endOfLine
     finalLine
-    return (evInfo, M.fromList $ zip [1..] parEntries)
+    return (info, M.fromList $ zip [1..] parEntries)
   where
     opEvInfo = many' $ char '#' >> skipTillEnd
     finalLine = many' $ string "</LesHouchesEvents>" >> endOfLine

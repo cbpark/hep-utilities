@@ -91,4 +91,12 @@ type EventEntry = IntMap Particle
 
 type Event = (EventInfo, EventEntry)
 
+eventInfo :: Event -> EventInfo
+eventInfo = fst
+{-# INLINE eventInfo #-}
+
+eventEntry :: Event -> EventEntry
+eventEntry = snd
+{-# INLINE eventEntry #-}
+
 newtype ParticleType = ParticleType { getType :: [Int] } deriving (Show, Eq)

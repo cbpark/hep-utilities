@@ -23,6 +23,7 @@ module HEP.Data.LHEF
     , module TV
     , module PI
 
+    , getParticles
     , energyOf
     , idOf
     , is
@@ -43,6 +44,9 @@ import           HEP.Particle.ID                      as PI
 import           HEP.Data.LHEF.Parser                 as LP
 import           HEP.Data.LHEF.PipesUtil              as LPU (getLHEFEvent)
 import           HEP.Data.LHEF.Type                   as LT
+
+getParticles :: Event -> [Particle]
+getParticles = M.elems . eventEntry
 
 energyOf :: Particle -> Double
 energyOf Particle { pup = (_, _, _, e, _) } = e
