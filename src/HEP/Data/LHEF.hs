@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Data.LHEF
--- Copyright   :  (c) 2017 Chan Beom Park
+-- Copyright   :  (c) 2017-2020 Chan Beom Park
 -- License     :  BSD-style
 -- Maintainer  :  Chan Beom Park <cbpark@gmail.com>
 -- Stability   :  experimental
@@ -24,7 +24,7 @@ module HEP.Data.LHEF
     , module PI
 
     , getParticles
-    , energyOf
+    , pT
     , idOf
     , is
     , finalStates
@@ -33,8 +33,6 @@ module HEP.Data.LHEF
     , particlesFrom
     ) where
 
-import           Control.Monad.Trans.Reader
-import qualified Data.IntMap                          as M
 import           HEP.Kinematics                       as HK
 import           HEP.Kinematics.Vector.LorentzTVector as TV (setXYM)
 import           HEP.Kinematics.Vector.LorentzVector  as LV (setEtaPhiPtM,
@@ -45,23 +43,30 @@ import           HEP.Data.LHEF.Parser                 as LP
 import           HEP.Data.LHEF.PipesUtil              as LPU (getLHEFEvent)
 import           HEP.Data.LHEF.Type                   as LT
 
+import           Control.Monad.Trans.Reader
+import qualified Data.IntMap                          as M
+
 getParticles :: Event -> [Particle]
 getParticles = M.elems . eventEntry
 
-energyOf :: Particle -> Double
-energyOf Particle { pup = (_, _, _, e, _) } = e
+pT :: Particle -> Double
+pT Particle { pup = (pupx, pupy, _, _, _) } = sqrt (pupx * pupx + pupy * pupy)
 
 idOf :: Particle -> Int
-idOf Particle { .. } = idup
+idOf Particle {..} = idup
 
 is :: Particle -> ParticleType -> Bool
 p `is` pid = ((`elem` getType pid) . abs . idup) p
 
-initialStates :: Reader EventEntry [Particle]
-initialStates = M.elems <$> asks (M.filter (\Particle { .. } -> fst mothup == 1))
+-- initialStates :: Reader EventEntry [Particle]
+-- initialStates = M.elems <$> asks (M.filter (\Particle {..} -> fst mothup == 1))
+initialStates :: EventEntry -> [Particle]
+initialStates = M.elems . M.filter (\Particle {..} -> fst mothup == 1)
 
-finalStates :: Reader EventEntry [Particle]
-finalStates = M.elems <$> asks (M.filter (\Particle { .. } -> istup == 1))
+-- finalStates :: Reader EventEntry [Particle]
+-- finalStates = M.elems <$> asks (M.filter (\Particle { .. } -> istup == 1))
+finalStates :: EventEntry -> [Particle]
+finalStates = M.elems . M.filter (\Particle {..} -> istup == 1)
 
 particlesFrom :: ParticleType -> Reader EventEntry [[Particle]]
 particlesFrom pid = asks (M.keys . M.filter (`is` pid)) >>= mapM getDaughters
@@ -69,9 +74,9 @@ particlesFrom pid = asks (M.keys . M.filter (`is` pid)) >>= mapM getDaughters
 getDaughters :: Int -> Reader EventEntry [Particle]
 getDaughters i = do
     pm <- ask
-    daughters <- asks $ M.filter (\Particle { .. } -> fst mothup == i)
+    daughters <- asks $ M.filter (\Particle {..} -> fst mothup == i)
     return $ M.foldrWithKey
         (\k p acc -> case istup p of
                 1 -> p : acc
-                _ -> runReader (getDaughters k) pm ++ acc) []
+                _ -> runReader (getDaughters k) pm <> acc) mempty
         daughters
