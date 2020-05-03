@@ -11,6 +11,7 @@ dist-newstyle
 TAGS
 .stack-work
 stack.yaml.lock
+*.prof
 result
 *.hepmc
 *.lhco

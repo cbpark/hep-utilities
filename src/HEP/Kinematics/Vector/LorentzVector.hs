@@ -114,6 +114,7 @@ instance R4 LorentzVector where
 -- | Makes 'LorentzVector' out of components based on x, y, z, t coordinates.
 setXYZT :: a -> a -> a -> a -> LorentzVector a
 setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
+{-# INLINE setXYZT #-}
 
 -- | Makes 'LorentzVector' out of components based on pseudorapidity,
 -- azimuthal angle, transverse momentum, and mass coordinates.
@@ -131,17 +132,21 @@ setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
 -- LorentzVector (V4 16 6 8 10)
 vectorSum :: (Traversable f, Num a) => f (LorentzVector a) -> LorentzVector a
 vectorSum = LorentzVector . sumV . fmapDefault (^._xyzw)
+{-# INLINE vectorSum #-}
 
 -- | Invariant mass.
-invariantMass :: Floating a => LorentzVector a -> a
+invariantMass :: LorentzVector Double -> Double
 invariantMass = norm
+{-# INLINE invariantMass #-}
 
 transV :: LorentzVector a -> TwoVector a
 transV (LorentzVector (V4 _ x y _)) = V2.setXY x y
+{-# INLINE transV #-}
 
 -- | Magnitude of transverse momentum.
-pt :: Floating a => LorentzVector a -> a
+pt :: LorentzVector Double -> Double
 pt = norm . transV
+{-# INLINE pt #-}
 
 spatialV :: LorentzVector a -> ThreeVector a
 spatialV (LorentzVector (V4 _ x y z)) = V3.setXYZ x y z
@@ -175,7 +180,7 @@ cosTheta :: LorentzVector Double -> LorentzVector Double -> Double
 cosTheta v v' = cos $! deltaTheta v v'
 
 -- | Boost vector. It returns 'ThreeVector'.
-boostVector :: Fractional a => LorentzVector a -> ThreeVector a
+boostVector :: LorentzVector Double -> ThreeVector Double
 boostVector v@(LorentzVector (V4 t _ _ _)) = spatialV v ^/ t
 
 beta :: LorentzVector Double -> Double

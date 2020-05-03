@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns      #-}
 {-# LANGUAGE FlexibleInstances #-}
 
 --------------------------------------------------------------------------------
@@ -113,7 +114,7 @@ type TransverseMomentum = TwoVector Double
 
 instance HasFourMomentum TransverseMomentum where
     fourMomentum v2 = let (V2 x y) = v2 ^._xy
-                      in LV.setXYZT x y 0 (sqrt $ x ** 2 + y ** 2)
+                      in LV.setXYZT x y 0 (sqrt $! x ** 2 + y ** 2)
     {-# INLINE fourMomentum #-}
     pxpy v2 = (v2 ^._x, v2^._y)
     {-# INLINE pxpy #-}
@@ -126,7 +127,7 @@ type SpatialMomentum = ThreeVector Double
 
 instance HasFourMomentum SpatialMomentum where
     fourMomentum v3 = let (V3 x y z) = v3 ^._xyz
-                      in LV.setXYZT x y z (sqrt $ x ** 2 + y ** 2 + z ** 2)
+                      in LV.setXYZT x y z (sqrt $! x ** 2 + y ** 2 + z ** 2)
     {-# INLINE fourMomentum #-}
     pxpypz v3 = (v3 ^._x, v3^._y, v3^._z)
     {-# INLINE pxpypz #-}
@@ -140,16 +141,19 @@ instance HasFourMomentum SpatialMomentum where
 -- | Invariant mass.
 invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
 invariantMass = LV.invariantMass . momentumSum
+{-# INLINE invariantMass #-}
 
 -- | Transverse mass of the visible + invisible particle system.
-transverseMass :: (Traversable f, HasFourMomentum a) =>
-                  f a -> LorentzTVector Double -> Double
+transverseMass :: (Traversable f, HasFourMomentum a)
+               => f a -> LorentzTVector Double -> Double
 transverseMass p = TV.invariantMass ((makeTV . fourMomentum . momentumSum) p)
-  where makeTV v4 = let (e', px', py', pz') = epxpypz v4
+  where makeTV v4 = let !(e', px', py', pz') = epxpypz v4
                     in TV.setXYT px' py' (sqrt (e' ** 2 - pz' ** 2))
+{-# INLINE transverseMass #-}
 
 transverseMass1 :: HasFourMomentum a => a -> LorentzTVector Double -> Double
 transverseMass1 = transverseMass . Identity
+{-# INLINE transverseMass1 #-}
 
 -- | Cluster transverse mass.
 -- This is the same as mTtrue in
@@ -183,6 +187,7 @@ ptVectorSum = LV.pt . momentumSum
 -- | Total four-momentum.
 momentumSum :: (Traversable f, HasFourMomentum a) => f a -> FourMomentum
 momentumSum = LV.vectorSum . fmapDefault fourMomentum
+{-# INLINE momentumSum #-}
 
 -- | Pseudorapidity difference.
 deltaEta :: HasFourMomentum a => a -> a -> Double

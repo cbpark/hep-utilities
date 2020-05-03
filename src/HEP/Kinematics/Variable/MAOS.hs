@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module HEP.Kinematics.Variable.MAOS
@@ -14,9 +15,8 @@ import HEP.Kinematics.Vector.LorentzVector  (setXYZT)
 import HEP.Kinematics.Vector.TwoVector      (setXY)
 
 import Control.Monad                        (unless)
-import Control.Monad.Trans.Class
 import Control.Monad.Trans.Reader
-import Control.Monad.Trans.State
+import Control.Monad.Trans.State.Strict
 import Data.Maybe                           (mapMaybe)
 
 -- import Debug.Trace
@@ -50,20 +50,20 @@ maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
                   then Balanced
                   else Unbalanced
         input = Input vis1' vis2' miss' mY1' mY2' mX1' mX2' mT2' s
-        (sol1, sol2) = runReader (maosMomenta' soltype) input
+        (sol1, sol2) = maosMomenta' soltype input
     in (map (fmap (* s)) sol1, map (fmap (* s)) sol2, soltype)
 
 type Mass = Double
 
-data Input = Input { visible1    :: FourMomentum
-                   , visible2    :: FourMomentum
-                   , missing     :: TransverseMomentum
-                   , mParent1    :: Mass
-                   , mParent2    :: Mass
-                   , mInvisible1 :: Mass
-                   , mInvisible2 :: Mass
-                   , mT2value    :: Mass
-                   , scale       :: Double }
+data Input = Input { visible1    :: !FourMomentum
+                   , visible2    :: !FourMomentum
+                   , missing     :: !TransverseMomentum
+                   , mParent1    :: !Mass
+                   , mParent2    :: !Mass
+                   , mInvisible1 :: !Mass
+                   , mInvisible2 :: !Mass
+                   , mT2value    :: !Mass
+                   , scale       :: !Double }
 
 -- | Determines whether it's balanced.
 --
@@ -90,55 +90,54 @@ coeffky vis mT2 mInv =
         visEtSq = transverseEnergy vis ** 2
         (px', py') = pxpy vis
         d = mT2 ** 2 - visMSq - mInvSq
-        a = - 4 * visMSq * visEtSq
-        b = 2 * d * py' * visEtSq
-        c = (d ** 2 - 4 * (visEtSq - px' ** 2) * mInvSq) * visEtSq
+        !a = - 4 * visMSq * visEtSq
+        !b = 2 * d * py' * visEtSq
+        !c = (d ** 2 - 4 * (visEtSq - px' ** 2) * mInvSq) * visEtSq
     in (a, b, c)
 
-maosMomenta' :: SolutionType -> Reader Input ([FourMomentum], [FourMomentum])
-maosMomenta' soltype = do
-    input@Input {..} <- ask
-    return $
-        case runReader (mT2Solution soltype) input of
-            Nothing         -> ([], [])
-            Just (kT1, kT2) -> do
-                let kSol1 = momentumSolution visible1 kT1 mParent1 mInvisible1
-                    kSol2 = momentumSolution visible2 kT2 mParent2 mInvisible2
-                if null kSol1 || null kSol2  -- failed to find a real solution!
-                    then ([], [])
-                    else (kSol1, kSol2)
+maosMomenta' :: SolutionType -> Input -> ([FourMomentum], [FourMomentum])
+maosMomenta' soltype input@Input {..} =
+    case mT2Solution soltype input of
+        Nothing         -> ([], [])
+        Just (kT1, kT2) ->
+            let kSol1 = momentumSolution visible1 kT1 mParent1 mInvisible1
+                kSol2 = momentumSolution visible2 kT2 mParent2 mInvisible2
+            in if null kSol1 || null kSol2  -- failed to find a real solution!
+               then ([], [])
+               else (kSol1, kSol2)
 
-data Input' = Input' { userInput :: Input, upperBound :: Double }
+data Input' = Input' { userInput :: Input, upperBound :: !Double }
 
 mT2Solution :: SolutionType
-            -> Reader Input (Maybe (TransverseMomentum, TransverseMomentum))
-mT2Solution soltype = do
-    input@Input {..} <- ask
+            -> Input
+            -> Maybe (TransverseMomentum, TransverseMomentum)
+mT2Solution soltype input@Input {..} = do
     kSol <- if soltype == Unbalanced
-            then return (runReader mT2UnbalSol input)
+            then return (mT2UnbalSol input)
             else do let (kLower, kUpper) = kLowerUpper visible1 mT2value mInvisible1
                     case runReader (startingPoint kLower) (input, kUpper) of
-                        Nothing -> return Nothing
+                        Nothing                -> Nothing
                         Just (kx1, ky, deltaM) -> do
-                            let (kSol, _, _) =
-                                    runReader (execStateT mT2BalSol
-                                              (Just (kx1, ky), ky, deltaM))
-                                              (Input' input kUpper)
-                            return kSol
-    case kSol of Nothing         -> return Nothing
-                 Just (kx0, ky0) -> do let kT = setXY kx0 ky0
-                                       return $ Just (kT, missing - kT)
+                            let (kSol', _, _) =
+                                    execState (mT2BalSol (Input' input kUpper))
+                                    (Just (kx1, ky), ky, deltaM)
+                            return kSol'
+
+    case kSol of
+        Nothing         -> Nothing
+        Just (kx0, ky0) -> do let !kT = setXY kx0 ky0
+                              return (kT, missing - kT)
 
 startingPoint :: Double -> Reader (Input, Double) (Maybe (Double, Double, Mass))
 startingPoint kLower = do
     (input@Input {..}, kUpper) <- ask
     if kLower > kUpper
         then return Nothing
-        else case runReader (newkxFrom kLower) input of
-            Just (kx1a, kx1b) -> do
-                let (kx1, deltaM) = runReader (deltaMT kx1a kx1b kLower) input
-                return $ Just (kx1, kLower, deltaM)
-            Nothing -> startingPoint $ kLower + scale / 1.0e+7
+        else case newkxFrom kLower input of
+                 Just (kx1a, kx1b) -> do
+                     let (kx1, deltaM) = deltaMT kx1a kx1b kLower input
+                     return $ Just (kx1, kLower, deltaM)
+                 Nothing -> startingPoint $! kLower + scale / 1.0e+7
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mT2 mInv =
@@ -152,72 +151,70 @@ kLowerUpper vis mT2 mInv =
 -- |
 -- kx can be obtained analytically for a given ky value
 -- using the definition of the transverse mass.
-newkxFrom :: Double -> Reader Input (Maybe (Double, Double))
-newkxFrom ky = do
-    Input {..} <- ask
-    let visM = mass visible1
-        (px', py') = pxpy visible1
-        visEtSq = transverseEnergy visible1 ** 2
-        mInvSq = mInvisible1 ** 2
-        d = mParent1 ** 2 - visM ** 2 - mInvSq
+newkxFrom :: Double -> Input -> Maybe (Double, Double)
+newkxFrom ky Input {..} = do
+    let !visM = mass visible1
+        !(px', py') = pxpy visible1
+        !visEtSq = transverseEnergy visible1 ** 2
+        !mInvSq = mInvisible1 ** 2
+        !d = mParent1 ** 2 - visM ** 2 - mInvSq
         a = 4 * (visEtSq - px' ** 2)
         b = - 2 * px' * d - 4 * px' * py' * ky
         c = 4 * (visEtSq - py' ** 2) * ky ** 2 - 4 * d * py' * ky
             + 4 * visEtSq * mInvSq - d ** 2
         term2Sq = b ** 2 - a * c
     if term2Sq < 0
-        then return Nothing
-        else do let term1 = - b / a
-                    term2 = sqrt term2Sq / a
-                return $ Just (term1 + term2, term1 - term2)
+        then Nothing
+        else do let a' = a + eps
+                    !term1 = - b / a'
+                    !term2 = sqrt term2Sq / a'
+                return (term1 + term2, term1 - term2)
 
-deltaMT :: Double -> Double -> Double -> Reader Input (Double, Mass)
-deltaMT kx1a kx1b ky1 = do
-    Input {..} <- ask
+deltaMT :: Double -> Double -> Double -> Input -> (Double, Mass)
+deltaMT kx1a kx1b ky1 Input {..} =
     let mX1Sq = mInvisible1 ** 2
         mX2Sq = mInvisible2 ** 2
         ky1Sq = ky1 ** 2
-        inv1a = setXYT kx1a ky1 (sqrt $ kx1a ** 2 + ky1Sq + mX1Sq)
-        inv1b = setXYT kx1b ky1 (sqrt $ kx1b ** 2 + ky1Sq + mX2Sq)
-        (missX, missY) = pxpy missing
+        !inv1a = setXYT kx1a ky1 (sqrt $ kx1a ** 2 + ky1Sq + mX1Sq)
+        !inv1b = setXYT kx1b ky1 (sqrt $ kx1b ** 2 + ky1Sq + mX2Sq)
+        !(missX, missY) = pxpy missing
         kx2a = missX - kx1a
         kx2b = missX - kx1b
         ky2  = missY - ky1
         ky2Sq = ky2 ** 2
-        inv2a = setXYT kx2a ky2 (sqrt $ kx2a ** 2 + ky2Sq + mX1Sq)
-        inv2b = setXYT kx2b ky2 (sqrt $ kx2b ** 2 + ky2Sq + mX2Sq)
-        mTrans1a = transverseMass1 visible1 inv1a
-        mTrans1b = transverseMass1 visible1 inv1b
-        mTrans2a = transverseMass1 visible2 inv2a
-        mTrans2b = transverseMass1 visible2 inv2b
+        !inv2a = setXYT kx2a ky2 (sqrt $ kx2a ** 2 + ky2Sq + mX1Sq)
+        !inv2b = setXYT kx2b ky2 (sqrt $ kx2b ** 2 + ky2Sq + mX2Sq)
+        !mTrans1a = transverseMass1 visible1 inv1a
+        !mTrans1b = transverseMass1 visible1 inv1b
+        !mTrans2a = transverseMass1 visible2 inv2a
+        !mTrans2b = transverseMass1 visible2 inv2b
         deltaMTa = abs (mTrans1a - mTrans2a)
         deltaMTb = abs (mTrans1b - mTrans2b)
-    return $ if deltaMTa < deltaMTb then (kx1a, deltaMTa) else (kx1b, deltaMTb)
+    in if deltaMTa < deltaMTb then (kx1a, deltaMTa) else (kx1b, deltaMTb)
 
-mT2BalSol :: StateT (Maybe (Double, Double), Double, Mass) (Reader Input') ()
-mT2BalSol = do
-    Input' {..} <- lift ask
+mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
+mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
         let ky' = ky + scale userInput / 1.0e+5
-        case runReader (newkxFrom ky') userInput of
-            Nothing -> put (k0, ky', deltaM)
+        case newkxFrom ky' userInput of
+            Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
-                let (kx1', deltaM') = runReader (deltaMT kx1a kx1b ky') userInput
+                let (kx1', deltaM') = deltaMT kx1a kx1b ky' userInput
                 if deltaM' < deltaM
                     then put (Just (kx1', ky'), ky', deltaM')
                     else put (              k0, ky', deltaM )
-        mT2BalSol
+        mT2BalSol input
 
 -- |
 -- See Eq. (14) in <http://arxiv.org/abs/0711.4526 arXiv:0711.4526>.
-mT2UnbalSol :: Reader Input (Maybe (Double, Double))
-mT2UnbalSol = do Input {..} <- ask
-                 case mass visible1 of
-                     0     -> return Nothing
-                     visM1 -> do let r = mInvisible1 / visM1
-                                     (px1, py1) = pxpy visible1
-                                 return $ Just (r * px1, r * py1)
+mT2UnbalSol :: Input -> Maybe (Double, Double)
+mT2UnbalSol Input {..} =
+    case mass visible1 of
+        0     -> Nothing
+        visM1 -> do let r = mInvisible1 / visM1
+                        (px1, py1) = pxpy visible1
+                    return (r * px1, r * py1)
 
 -- |
 -- calculates the possible momentum solutions for the decay topology of
@@ -230,8 +227,8 @@ momentumSolution :: FourMomentum        -- ^ four-momentum of visible particle
                  -> Double              -- ^ mass of the parent particle
                  -> Double              -- ^ mass of the invisible particle
                  -> [FourMomentum]
-momentumSolution vis invis mY mX = let (kx, ky) = pxpy invis
-                                       kz = longitudinalP vis invis mY mX
+momentumSolution vis invis mY mX = let !(kx, ky) = pxpy invis
+                                       !kz = longitudinalP vis invis mY mX
                                    in mapMaybe (setMomentum kx ky) kz
   where
     setMomentum _ _ Nothing  = Nothing
@@ -251,6 +248,9 @@ longitudinalP vis invis mY mX =
         disc' = if abs disc < 1.0e-4 then 0 else disc
     in if disc' < 0
        then [Nothing]
-       else let term1 = pz vis * d
-                term2 = energy vis * sqrt disc'
-            in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]
+       else let !term1 = pz vis * d
+                !term2 = energy vis * sqrt disc'
+            in Just . (/ (visEt ** 2)) <$> [term1 + term2, term1 - term2]
+
+eps :: Double
+eps = 1.0e-12
