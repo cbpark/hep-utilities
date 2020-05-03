@@ -19,6 +19,8 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 import Data.Maybe                           (mapMaybe)
 
+-- import Debug.Trace
+
 data SolutionType = Balanced | Unbalanced | Unknown deriving (Eq, Show)
 
 maosMomenta :: Double                          -- ^ the MT2 value
@@ -96,12 +98,15 @@ coeffky vis mT2 mInv =
 maosMomenta' :: SolutionType -> Reader Input ([FourMomentum], [FourMomentum])
 maosMomenta' soltype = do
     input@Input {..} <- ask
-    case runReader (mT2Solution soltype) input of
-        Nothing         -> return ([], [])
-        Just (kT1, kT2) -> do
-            let kSol1 = momentumSolution visible1 kT1 mParent1 mInvisible1
-                kSol2 = momentumSolution visible2 kT2 mParent2 mInvisible2
-            return (kSol1, kSol2)
+    return $
+        case runReader (mT2Solution soltype) input of
+            Nothing         -> ([], [])
+            Just (kT1, kT2) -> do
+                let kSol1 = momentumSolution visible1 kT1 mParent1 mInvisible1
+                    kSol2 = momentumSolution visible2 kT2 mParent2 mInvisible2
+                if null kSol1 || null kSol2  -- failed to find a real solution!
+                    then ([], [])
+                    else (kSol1, kSol2)
 
 data Input' = Input' { userInput :: Input, upperBound :: Double }
 
