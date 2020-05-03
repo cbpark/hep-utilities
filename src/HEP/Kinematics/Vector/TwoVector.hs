@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Kinematics.Vector.TwoVector
@@ -12,6 +10,10 @@
 -- Two-dimensional vector.
 --
 --------------------------------------------------------------------------------
+
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP          #-}
+
 module HEP.Kinematics.Vector.TwoVector
     ( -- * Type
       TwoVector
@@ -75,11 +77,13 @@ instance R2 TwoVector where
 
 setXY :: a -> a -> TwoVector a
 setXY x y = TwoVector (V2 x y)
+{-# INLINE setXY #-}
 
-setPtPhi :: Floating a => a -> a -> TwoVector a
-setPtPhi pt phi = let px = pt * cos phi
-                      py = pt * sin phi
+setPtPhi :: Double -> Double -> TwoVector Double
+setPtPhi pt phi = let !px = pt * cos phi
+                      !py = pt * sin phi
                   in TwoVector (V2 px py)
+{-# INLINE setPtPhi #-}
 
 -- | Angle in the interval [-pi, pi).
 --

@@ -10,6 +10,9 @@
 -- (2+1)-dimensional vector.
 --
 --------------------------------------------------------------------------------
+
+{-# LANGUAGE BangPatterns #-}
+
 module HEP.Kinematics.Vector.LorentzTVector
     ( -- * Type
       LorentzTVector
@@ -20,12 +23,12 @@ module HEP.Kinematics.Vector.LorentzTVector
     , invariantMass
     ) where
 
-import           Control.Applicative
+import Control.Applicative
 
-import           Linear.Metric       (Metric (..))
-import           Linear.V2           (V2 (..))
-import           Linear.V3           (R1 (..), R2 (..), V3 (..))
-import           Linear.Vector       (Additive (..))
+import Linear.Metric       (Metric (..))
+import Linear.V2           (V2 (..))
+import Linear.V3           (R1 (..), R2 (..), V3 (..))
+import Linear.Vector       (Additive (..))
 
 -- | Type for (2+1)-dimensional vector.
 newtype LorentzTVector a = LorentzTVector (V3 a) deriving (Eq, Show)
@@ -64,12 +67,15 @@ instance R2 LorentzTVector where
 -- | Makes 'LorentzTVector' out of components based on x, y, t coordinates.
 setXYT :: a -> a -> a -> LorentzTVector a
 setXYT px py et = LorentzTVector (V3 et px py)
+{-# INLINE setXYT #-}
 
 -- | Makes 'LorentzTVector' out of components based on x, y, m coordinates.
-setXYM :: Floating a => a -> a -> a -> LorentzTVector a
-setXYM px py m = let et = sqrt $ px ** 2 + py ** 2 + m ** 2
+setXYM :: Double -> Double -> Double -> LorentzTVector Double
+setXYM px py m = let !et = sqrt $ px ** 2 + py ** 2 + m ** 2
                  in setXYT px py et
+{-# INLINE setXYM #-}
 
 -- | Invariant mass. It would be a transverse mass in (3+1)-dimensional space.
-invariantMass :: Floating a => LorentzTVector a -> LorentzTVector a -> a
+invariantMass :: LorentzTVector Double -> LorentzTVector Double -> Double
 invariantMass v v' = norm (v ^+^ v')
+{-# INLINE invariantMass #-}

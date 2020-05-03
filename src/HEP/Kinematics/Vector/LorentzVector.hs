@@ -150,6 +150,7 @@ pt = norm . transV
 
 spatialV :: LorentzVector a -> ThreeVector a
 spatialV (LorentzVector (V4 _ x y z)) = V3.setXYZ x y z
+{-# INLINE spatialV #-}
 
 -- | Pseudorapidity.
 eta :: LorentzVector Double -> Double

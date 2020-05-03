@@ -15,7 +15,6 @@ import HEP.Kinematics.Vector.LorentzVector  (setXYZT)
 import HEP.Kinematics.Vector.TwoVector      (setXY)
 
 import Control.Monad                        (unless)
-import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 import Data.Maybe                           (mapMaybe)
 
@@ -115,7 +114,7 @@ mT2Solution soltype input@Input {..} = do
     kSol <- if soltype == Unbalanced
             then return (mT2UnbalSol input)
             else do let (kLower, kUpper) = kLowerUpper visible1 mT2value mInvisible1
-                    case runReader (startingPoint kLower) (input, kUpper) of
+                    case startingPoint kLower (input, kUpper) of
                         Nothing                -> Nothing
                         Just (kx1, ky, deltaM) -> do
                             let (kSol', _, _) =
@@ -128,22 +127,22 @@ mT2Solution soltype input@Input {..} = do
         Just (kx0, ky0) -> do let !kT = setXY kx0 ky0
                               return (kT, missing - kT)
 
-startingPoint :: Double -> Reader (Input, Double) (Maybe (Double, Double, Mass))
-startingPoint kLower = do
-    (input@Input {..}, kUpper) <- ask
+startingPoint :: Double -> (Input, Double) -> Maybe (Double, Double, Mass)
+startingPoint kLower inp@(input@Input {..}, kUpper) =
     if kLower > kUpper
-        then return Nothing
+        then Nothing
         else case newkxFrom kLower input of
                  Just (kx1a, kx1b) -> do
                      let (kx1, deltaM) = deltaMT kx1a kx1b kLower input
-                     return $ Just (kx1, kLower, deltaM)
-                 Nothing -> startingPoint $! kLower + scale / 1.0e+7
+                     return (kx1, kLower, deltaM)
+                 Nothing -> do let !kLower' = kLower + scale / 1.0e+7
+                               startingPoint kLower' inp
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mT2 mInv =
     let (a, b, c) = coeffky vis mT2 mInv
-        term1 = - b / a
-        term2 = sqrt (b ** 2 - a * c) / a
+        !term1 = - b / a
+        !term2 = sqrt (b ** 2 - a * c) / a
         termP = term1 + term2
         termN = term1 - term2
     in if termP > termN then (termN, termP) else (termP, termN)
@@ -172,22 +171,20 @@ newkxFrom ky Input {..} = do
 
 deltaMT :: Double -> Double -> Double -> Input -> (Double, Mass)
 deltaMT kx1a kx1b ky1 Input {..} =
-    let mX1Sq = mInvisible1 ** 2
-        mX2Sq = mInvisible2 ** 2
-        ky1Sq = ky1 ** 2
+    let !mX1Sq = mInvisible1 ** 2
+        !mX2Sq = mInvisible2 ** 2
+        !ky1Sq = ky1 ** 2
         !inv1a = setXYT kx1a ky1 (sqrt $ kx1a ** 2 + ky1Sq + mX1Sq)
         !inv1b = setXYT kx1b ky1 (sqrt $ kx1b ** 2 + ky1Sq + mX2Sq)
         !(missX, missY) = pxpy missing
-        kx2a = missX - kx1a
-        kx2b = missX - kx1b
-        ky2  = missY - ky1
-        ky2Sq = ky2 ** 2
+        !kx2a = missX - kx1a
+        !kx2b = missX - kx1b
+        !ky2  = missY - ky1
+        !ky2Sq = ky2 ** 2
         !inv2a = setXYT kx2a ky2 (sqrt $ kx2a ** 2 + ky2Sq + mX1Sq)
         !inv2b = setXYT kx2b ky2 (sqrt $ kx2b ** 2 + ky2Sq + mX2Sq)
-        !mTrans1a = transverseMass1 visible1 inv1a
-        !mTrans1b = transverseMass1 visible1 inv1b
-        !mTrans2a = transverseMass1 visible2 inv2a
-        !mTrans2b = transverseMass1 visible2 inv2b
+        [mTrans1a, mTrans1b] = transverseMass1 visible1 <$> [inv1a, inv1b]
+        [mTrans2a, mTrans2b] = transverseMass1 visible2 <$> [inv2a, inv2b]
         deltaMTa = abs (mTrans1a - mTrans2a)
         deltaMTb = abs (mTrans1b - mTrans2b)
     in if deltaMTa < deltaMTb then (kx1a, deltaMTa) else (kx1b, deltaMTb)
@@ -196,7 +193,7 @@ mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
 mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
-        let ky' = ky + scale userInput / 1.0e+5
+        let !ky' = ky + scale userInput / 1.0e+5
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do

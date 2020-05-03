@@ -1,14 +1,15 @@
+{-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE RecordWildCards #-}
 
 module HEP.Kinematics.Variable.MT2 (mT2) where
 
 import HEP.Kinematics
 
-import Control.Lens               ((^.))
-import Control.Monad.Trans.Class  (MonadTrans (..))
+import Control.Lens                     ((^.))
+import Control.Monad.Trans.Class        (MonadTrans (..))
 import Control.Monad.Trans.Reader
-import Control.Monad.Trans.State
-import Linear.Matrix              (M33, det33)
+import Control.Monad.Trans.State.Strict
+import Linear.Matrix                    (M33, det33)
 import Linear.V3
 
 type Mass = Double
@@ -28,11 +29,11 @@ data Input = Input { visible1        :: !FourMomentum
 mT2 :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass -> Mass
     -> Double -> Bool -> Mass
 mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
-    let mVis1 = mass vis1
-        mVis2 = mass vis2
+    let !mVis1 = mass vis1
+        !mVis2 = mass vis2
         getScale v = pt v ** 2
-        s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
-                    + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
+        !s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
+                     + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
         m1Min = mVis1 + mInv1
         m2Min = mVis2 + mInv2
     in if m2Min > m1Min
@@ -56,7 +57,7 @@ growUpper mUpper = do
     case ellipsesAreDisjoint side1 side2 of
         Nothing    -> return Nothing
         Just False -> return (Just mUpper)
-        Just _     -> growUpper $ mUpper * 2
+        Just _     -> growUpper $! mUpper * 2
 
 bisect :: Bool -> StateT (Mass, Mass) (Reader Input) Mass
 bisect sec = do
@@ -83,27 +84,27 @@ mkEllipse :: Mass -- ^ The test parent mass
           -> Mass -- ^ The mass of the inivisible particle
           -> FourMomentum -> TransverseMomentum -> Maybe CoeffMatrix
 mkEllipse m mInv vis inv =
-    let mVis = mass vis
+    let !mVis = mass vis
         mVisSq = mVis ** 2
         mInvSq = mInv ** 2
         mSq = m ** 2
-        (px', py') = pxpy vis
-        (kx', ky') = pxpy inv
-        axx = 4 * mVis ** 2 + 4 * py' ** 2
-        ayy = 4 * mVis ** 2 + 4 * px' ** 2
-        axy = - 4 * px' * py'
-        ax  = - 4 * mVisSq * kx' - 2 * mInvSq * px' + 2 * mSq * px'
-              - 2 * mVisSq * px' + 4 * ky' * px' * py' - 4 * kx' * py' ** 2
-        ay  = - 4 * mVisSq * ky' - 4 * ky' * px' ** 2 - 2 * mInvSq * py'
-              + 2 * mSq * py' - 2 * mVisSq * py' + 4 * kx' * px' * py'
-        az  = - mInvSq ** 2 + 2 * mInvSq * mSq - mSq ** 2 + 2 * mInvSq * mVisSq
-              + 2 * mSq * mVisSq - mVisSq ** 2 + 4 * mVisSq * kx' ** 2
-              + 4 * mVisSq * ky' ** 2 + 4 * mInvSq * kx' * px'
-              - 4 * mSq * kx' * px' + 4 * mVisSq * kx' * px'
-              + 4 * mInvSq * px' ** 2 + 4 * (ky' ** 2) * (px' ** 2)
-              + 4 * mInvSq * ky' * py' - 4 * mSq * ky' * py'
-              + 4 * mVisSq * ky' * py' - 8 * kx' * ky' * px' * py'
-              + 4 * mInvSq * py' ** 2 + 4 * (kx' ** 2) * (py' ** 2)
+        !(px', py') = pxpy vis
+        !(kx', ky') = pxpy inv
+        !axx = 4 * mVis ** 2 + 4 * py' ** 2
+        !ayy = 4 * mVis ** 2 + 4 * px' ** 2
+        !axy = - 4 * px' * py'
+        !ax  = - 4 * mVisSq * kx' - 2 * mInvSq * px' + 2 * mSq * px'
+               - 2 * mVisSq * px' + 4 * ky' * px' * py' - 4 * kx' * py' ** 2
+        !ay  = - 4 * mVisSq * ky' - 4 * ky' * px' ** 2 - 2 * mInvSq * py'
+               + 2 * mSq * py' - 2 * mVisSq * py' + 4 * kx' * px' * py'
+        !az  = - mInvSq ** 2 + 2 * mInvSq * mSq - mSq ** 2 + 2 * mInvSq * mVisSq
+               + 2 * mSq * mVisSq - mVisSq ** 2 + 4 * mVisSq * kx' ** 2
+               + 4 * mVisSq * ky' ** 2 + 4 * mInvSq * kx' * px'
+               - 4 * mSq * kx' * px' + 4 * mVisSq * kx' * px'
+               + 4 * mInvSq * px' ** 2 + 4 * (ky' ** 2) * (px' ** 2)
+               + 4 * mInvSq * ky' * py' - 4 * mSq * ky' * py'
+               + 4 * mVisSq * ky' * py' - 8 * kx' * ky' * px' * py'
+               + 4 * mInvSq * py' ** 2 + 4 * (kx' ** 2) * (py' ** 2)
     in mkCoeffMatrix axx ayy axy ax ay az
 
 mkCoeffMatrix :: Double -> Double -> Double -> Double -> Double -> Double
