@@ -14,8 +14,9 @@ import HEP.Kinematics.Vector.LorentzTVector (setXYT)
 import HEP.Kinematics.Vector.LorentzVector  (invariantMassSq, setXYZT)
 import HEP.Kinematics.Vector.TwoVector      (setXY)
 
-import Control.Monad                        (join, unless)
 import Control.Monad.Trans.State.Strict
+
+import Control.Monad                        (join, unless)
 import Data.Maybe                           (mapMaybe)
 
 -- import Debug.Trace
@@ -100,11 +101,11 @@ coeffky vis mVis mInv mT2 =
         visEtSq = let eT = transverseEnergy vis in eT `seq` eT * eT
         (px', py') = pxpy vis
         d = mT2 * mT2 - visMSq - mInvSq
-        ![a, b, c] = (* visEtSq) <$>
-                     [ - 4 * visMSq
-                     , 2 * d * py'
-                     , d * d - 4 * (visEtSq - px' * px') * mInvSq ]
-    in (a, b, c)
+        [a, b, c] = (* visEtSq) <$>
+                    [ - 4 * visMSq
+                    , 2 * d * py'
+                    , d * d - 4 * (visEtSq - px' * px') * mInvSq ]
+    in a `seq` b `seq` c `seq` (a, b, c)
 
 maosMomenta' :: SolutionType -> Input -> ([FourMomentum], [FourMomentum])
 maosMomenta' soltype input@Input {..} =
@@ -131,11 +132,11 @@ mT2Solution soltyp input@Input {..} = do
     mT2Solution' =
         if soltyp == Unbalanced
         then return (mT2UnbalSol input)
-        else do let !(kLower, kUpper) =
+        else do let (!kLower, !kUpper) =
                         kLowerUpper visible1 mVisible1 mInvisible1 mT2value
                 case startingPoint kLower (input, kUpper) of
                     Nothing                -> Nothing
-                    Just (kx1, ky, deltaM) -> do
+                    Just (kx1, ky, !deltaM) -> do
                         let (kSol', _, _) =
                                 execState (mT2BalSol (Input' input kUpper))
                                 (Just (kx1, ky), ky, deltaM)
@@ -154,7 +155,7 @@ startingPoint kLower inp@(input@Input {..}, kUpper) =
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mVis mInv mT2 =
-    let (a, b, c) = coeffky vis mVis mInv mT2
+    let (!a, !b, !c) = coeffky vis mVis mInv mT2
         a' = a + eps
         !term1 = - b / a'
         !term2 = sqrt (b * b - a * c) / a'
@@ -207,11 +208,11 @@ mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
 mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
-        let ky' = ky + scale userInput / 1.0e+5
+        let !ky' = ky + scale userInput / 1.0e+5
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
-                let (kx1', deltaM') = deltaMT kx1a kx1b ky' userInput
+                let (kx1', !deltaM') = deltaMT kx1a kx1b ky' userInput
                 if deltaM' < deltaM
                     then put (Just (kx1', ky'), ky', deltaM')
                     else put (              k0, ky', deltaM )
@@ -222,7 +223,7 @@ mT2BalSol input@Input' {..} = do
 mT2UnbalSol :: Input -> Maybe (Double, Double)
 mT2UnbalSol Input {..}
     | mVisible1 < eps = Nothing
-    | otherwise       = do let !r = mInvisible1 / mVisible1
+    | otherwise       = do let r = mInvisible1 / mVisible1
                                (px1, py1) = pxpy visible1
                            return (r * px1, r * py1)
 
@@ -237,8 +238,8 @@ momentumSolution :: FourMomentum        -- ^ four-momentum of visible particle
                  -> Double              -- ^ mass of the parent particle
                  -> Double              -- ^ mass of the invisible particle
                  -> [FourMomentum]
-momentumSolution vis invis mY mX = let !(kx, ky) = pxpy invis
-                                       !kz = longitudinalP vis invis mY mX
+momentumSolution vis invis mY mX = let (kx, ky) = pxpy invis
+                                       kz = longitudinalP vis invis mY mX
                                    in mapMaybe (setMomentum kx ky) kz
   where
     setMomentum _ _ Nothing  = Nothing
@@ -251,10 +252,10 @@ longitudinalP vis invis mY mX =
     let visMassSq = invariantMassSq vis
         visTrans = transverseVector vis
         mXSq = mX * mX
-        d = 0.5 * (mY * mY - mXSq - visMassSq) + visTrans `dot` invis
-        visEt = transverseEnergy vis
+        !d = 0.5 * (mY * mY - mXSq - visMassSq) + visTrans `dot` invis
+        !visEt = transverseEnergy vis
         ptInv = pt invis
-        invisEt = sqrt $ ptInv * ptInv + mXSq
+        !invisEt = sqrt $ ptInv * ptInv + mXSq
         disc = d * d - visEt * visEt * invisEt * invisEt
         disc' = if abs disc < 1.0e-4 then 0 else disc
     in if disc' < 0
