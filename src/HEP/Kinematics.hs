@@ -113,10 +113,11 @@ instance HasFourMomentum FourMomentum where
 type TransverseMomentum = TwoVector Double
 
 instance HasFourMomentum TransverseMomentum where
-    fourMomentum v2 = let (V2 x y) = v2 ^._xy
-                      in LV.setXYZT x y 0 (sqrt $! x ** 2 + y ** 2)
+    fourMomentum v2 = let (x, y) = pxpy v2
+                          eT = sqrt (x * x + y * y)
+                      in eT `seq` LV.setXYZT x y 0 eT
     {-# INLINE fourMomentum #-}
-    pxpy v2 = (v2 ^._x, v2^._y)
+    pxpy v2 = let (V2 x y) = v2 ^._xy in (x, y)
     {-# INLINE pxpy #-}
     px = (^._x)
     {-# INLINE px #-}
@@ -126,10 +127,11 @@ instance HasFourMomentum TransverseMomentum where
 type SpatialMomentum = ThreeVector Double
 
 instance HasFourMomentum SpatialMomentum where
-    fourMomentum v3 = let (V3 x y z) = v3 ^._xyz
-                      in LV.setXYZT x y z (sqrt $! x ** 2 + y ** 2 + z ** 2)
+    fourMomentum v3 = let (x, y, z) = pxpypz v3
+                          e = sqrt (x * x + y * y + z * z)
+                      in e `seq` LV.setXYZT x y z e
     {-# INLINE fourMomentum #-}
-    pxpypz v3 = (v3 ^._x, v3^._y, v3^._z)
+    pxpypz v3 = let (V3 x y z) = v3 ^._xyz in (x, y, z)
     {-# INLINE pxpypz #-}
     px = (^._x)
     {-# INLINE px #-}
@@ -147,8 +149,9 @@ invariantMass = LV.invariantMass . momentumSum
 transverseMass :: (Traversable f, HasFourMomentum a)
                => f a -> LorentzTVector Double -> Double
 transverseMass p = TV.invariantMass ((makeTV . fourMomentum . momentumSum) p)
-  where makeTV v4 = let !(e', px', py', pz') = epxpypz v4
-                    in TV.setXYT px' py' (sqrt (e' ** 2 - pz' ** 2))
+  where makeTV v4 = let (e', px', py', pz') = epxpypz v4
+                        eT = sqrt (e' * e' - pz' * pz')
+                    in eT `seq` TV.setXYT px' py' eT
 {-# INLINE transverseMass #-}
 
 transverseMass1 :: HasFourMomentum a => a -> LorentzTVector Double -> Double

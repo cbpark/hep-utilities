@@ -157,7 +157,7 @@ instance HasFourMomentum GenParticle where
     fourMomentum GenParticle { pMomentum = (x, y, z, e) } = setXYZT x y z e
     {-# INLINE fourMomentum #-}
 
-    pt GenParticle { pMomentum = (x, y, _, _) } = sqrt (x ** 2 + y ** 2)
+    pt GenParticle { pMomentum = (x, y, _, _) } = sqrt (x * x + y * y)
     {-# INLINE pt #-}
 
     mass GenParticle { pMass = m } = m

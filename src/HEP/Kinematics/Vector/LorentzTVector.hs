@@ -71,7 +71,7 @@ setXYT px py et = LorentzTVector (V3 et px py)
 
 -- | Makes 'LorentzTVector' out of components based on x, y, m coordinates.
 setXYM :: Double -> Double -> Double -> LorentzTVector Double
-setXYM px py m = let !et = sqrt $ px ** 2 + py ** 2 + m ** 2
+setXYM px py m = let !et = sqrt $ px * px + py * py + m * m
                  in setXYT px py et
 {-# INLINE setXYM #-}
 

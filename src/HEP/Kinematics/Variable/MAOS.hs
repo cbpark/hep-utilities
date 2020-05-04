@@ -253,7 +253,8 @@ longitudinalP vis invis mY mX =
         mXSq = mX * mX
         d = 0.5 * (mY * mY - mXSq - visMass * visMass) + visTrans `dot` invis
         visEt = transverseEnergy vis
-        invisEt = sqrt $ pt invis ** 2 + mXSq
+        ptInv = pt invis
+        invisEt = sqrt $ ptInv * ptInv + mXSq
         disc = d * d - visEt * visEt * invisEt * invisEt
         disc' = if abs disc < 1.0e-4 then 0 else disc
     in if disc' < 0

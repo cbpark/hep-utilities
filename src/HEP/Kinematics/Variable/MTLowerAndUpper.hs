@@ -43,7 +43,7 @@ mTLowerBound vis1 vis2 miss m = do
     return (recomass * scale)
   where
     getScale v = let (px', py', pz') = pxpypz v
-                 in px' ** 2 + py' ** 2 + pz' ** 2
+                 in px' * px' + py' * py' + pz' * pz'
 
 mTLowerBound' :: MonadIO m => ReaderT Input m Result
 mTLowerBound' = do
@@ -127,19 +127,19 @@ kNeutrino vis invis m = let (kx, ky) = pxpy invis
                             kz = kNeutrinoL vis invis m
                         in mapMaybe (setMomentum kx ky) kz
   where setMomentum _ _ Nothing  = Nothing
-        setMomentum x y (Just z) = let t = sqrt $ x ** 2 + y ** 2 + z ** 2
+        setMomentum x y (Just z) = let t = sqrt $ x * x + y * y + z * z
                                    in Just (setXYZT x y z t)
 
 kNeutrinoL :: FourMomentum -> TransverseMomentum -> Mass -> [Maybe Double]
 kNeutrinoL vis invis m =
     let visMass = mass vis
         visTrans = transverseVector vis
-        disc' = 0.5 * (m ** 2 - visMass ** 2) + invis `dot` visTrans
+        disc' = 0.5 * (m * m - visMass * visMass) + invis `dot` visTrans
         visEt = transverseEnergy vis
         invisEt = norm invis
-        disc = disc' ** 2 - (visEt * invisEt) ** 2
+        disc = disc' * disc' - visEt * visEt * invisEt * invisEt
     in if disc < 0
        then [Nothing]
        else let term1 = pz vis * disc'
                 term2 = energy vis * sqrt disc
-            in map (Just . (/ (visEt ** 2))) [term1 + term2, term1 - term2]
+            in map (Just . (/ (visEt * visEt))) [term1 + term2, term1 - term2]

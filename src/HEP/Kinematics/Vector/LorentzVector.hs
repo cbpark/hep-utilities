@@ -121,7 +121,7 @@ setXYZT px' py' pz' e' = LorentzVector (V4 e' px' py' pz')
 setEtaPhiPtM :: Double -> Double -> Double -> Double -> LorentzVector Double
 setEtaPhiPtM eta' phi' pt' m' = setXYZT px py pz e
   where
-    !e = sqrt $ px ** 2 + py ** 2 + pz ** 2 + m' ** 2
+    !e = sqrt $ px * px + py * py + pz * pz + m' * m'
     !px = pt' * cos phi'
     !py = pt' * sin phi'
     !pz = pt' * sinh eta'
@@ -170,7 +170,9 @@ deltaPhi v v' = V2.phi2MPiPi $! phi v - phi v'
 
 -- | Size of the cone spanned by two Lorentz vectors.
 deltaR :: LorentzVector Double -> LorentzVector Double -> Double
-deltaR v v' = sqrt $! deltaEta v v' ** 2 + deltaPhi v v' ** 2
+deltaR v v' = let deta = deltaEta v v'
+                  dphi = deltaPhi v v'
+              in sqrt (deta * deta + dphi * dphi)
 
 -- | Separation angle between two Lorentz vectors.
 deltaTheta :: LorentzVector Double -> LorentzVector Double -> Double

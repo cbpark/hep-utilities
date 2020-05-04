@@ -60,7 +60,7 @@ instance HasFourMomentum Particle where
     fourMomentum Particle { pup = (x, y, z, e, _) } = setXYZT x y z e
     {-# INLINE fourMomentum #-}
 
-    pt Particle { pup = (x, y, _, _, _) } = sqrt (x ** 2 + y ** 2)
+    pt Particle { pup = (x, y, _, _, _) } = sqrt (x * x + y * y)
     {-# INLINE pt #-}
 
     mass Particle { pup = (_, _, _, _, m) } = m
