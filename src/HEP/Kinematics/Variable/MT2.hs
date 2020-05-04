@@ -4,12 +4,13 @@
 module HEP.Kinematics.Variable.MT2 (mT2) where
 
 import HEP.Kinematics
+import HEP.Kinematics.Vector.LorentzVector (invariantMassSq)
 
-import Control.Lens                     ((^.))
-import Control.Monad.Trans.Class        (MonadTrans (..))
+import Control.Lens                        ((^.))
+import Control.Monad.Trans.Class           (MonadTrans (..))
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
-import Linear.Matrix                    (M33, det33)
+import Linear.Matrix                       (M33, det33)
 import Linear.V3
 
 type Mass = Double
@@ -29,8 +30,8 @@ data Input = Input { visible1        :: !FourMomentum
 mT2 :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass -> Mass
     -> Double -> Bool -> Mass
 mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
-    let !mVis1 = mass vis1
-        !mVis2 = mass vis2
+    let mVis1 = mass vis1
+        mVis2 = mass vis2
         getScale v = let !ptv = pt v in ptv * ptv
         !s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
                         + mVis1 * mVis1 + mInv1 * mInv1
@@ -85,8 +86,7 @@ mkEllipse :: Mass -- ^ The test parent mass
           -> Mass -- ^ The mass of the inivisible particle
           -> FourMomentum -> TransverseMomentum -> Maybe CoeffMatrix
 mkEllipse m mInv vis inv =
-    let mVis = mass vis
-        mVisSq = mVis * mVis
+    let mVisSq = invariantMassSq vis
         mInvSq = mInv * mInv
         mSq = m * m
         !(px', py') = pxpy vis

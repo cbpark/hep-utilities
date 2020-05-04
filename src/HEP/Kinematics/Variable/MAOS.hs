@@ -11,7 +11,7 @@ module HEP.Kinematics.Variable.MAOS
 
 import HEP.Kinematics
 import HEP.Kinematics.Vector.LorentzTVector (setXYT)
-import HEP.Kinematics.Vector.LorentzVector  (setXYZT)
+import HEP.Kinematics.Vector.LorentzVector  (invariantMassSq, setXYZT)
 import HEP.Kinematics.Vector.TwoVector      (setXY)
 
 import Control.Monad                        (join, unless)
@@ -242,16 +242,16 @@ momentumSolution vis invis mY mX = let !(kx, ky) = pxpy invis
                                    in mapMaybe (setMomentum kx ky) kz
   where
     setMomentum _ _ Nothing  = Nothing
-    setMomentum x y (Just z) = let !t = sqrt $ x * x + y * y + z * z + mX * mX
-                               in Just (setXYZT x y z t)
+    setMomentum x y (Just z) = let t = sqrt (x * x + y * y + z * z + mX * mX)
+                               in t `seq` Just (setXYZT x y z t)
 
 longitudinalP :: FourMomentum -> TransverseMomentum -> Double -> Double
               -> [Maybe Double]
 longitudinalP vis invis mY mX =
-    let visMass = mass vis
+    let visMassSq = invariantMassSq vis
         visTrans = transverseVector vis
         mXSq = mX * mX
-        d = 0.5 * (mY * mY - mXSq - visMass * visMass) + visTrans `dot` invis
+        d = 0.5 * (mY * mY - mXSq - visMassSq) + visTrans `dot` invis
         visEt = transverseEnergy vis
         ptInv = pt invis
         invisEt = sqrt $ ptInv * ptInv + mXSq

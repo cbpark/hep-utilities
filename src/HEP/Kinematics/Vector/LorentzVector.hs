@@ -24,6 +24,7 @@ module HEP.Kinematics.Vector.LorentzVector
 
     , vectorSum
     , invariantMass
+    , invariantMassSq
     , transV
 
     , pt
@@ -138,6 +139,10 @@ vectorSum = LorentzVector . sumV . fmapDefault (^._xyzw)
 invariantMass :: LorentzVector Double -> Double
 invariantMass = norm
 {-# INLINE invariantMass #-}
+
+invariantMassSq :: LorentzVector Double -> Double
+invariantMassSq = quadrance
+{-# INLINE invariantMassSq #-}
 
 transV :: LorentzVector a -> TwoVector a
 transV (LorentzVector (V4 _ x y _)) = V2.setXY x y
