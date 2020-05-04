@@ -165,11 +165,13 @@ transverseMassCluster p v2 = let (V2 x y) = v2 ^._xy
 
 transverseVector :: HasFourMomentum a => a -> TransverseMomentum
 transverseVector = LV.transV . fourMomentum
+{-# INLINE transverseVector #-}
 
 transverseEnergy :: HasFourMomentum a => a -> Double
-transverseEnergy v = let m = mass v
-                         pt' = pt v
+transverseEnergy v = let !m = mass v
+                         !pt' = pt v
                      in sqrt $! m * m + pt' * pt'
+{-# INLINE transverseEnergy #-}
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.

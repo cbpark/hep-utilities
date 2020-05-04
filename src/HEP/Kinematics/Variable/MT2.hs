@@ -31,9 +31,10 @@ mT2 :: FourMomentum -> FourMomentum -> TransverseMomentum -> Mass -> Mass
 mT2 vis1 vis2 miss mInv1 mInv2 pre sec =
     let !mVis1 = mass vis1
         !mVis2 = mass vis2
-        getScale v = pt v ** 2
+        getScale v = let !ptv = pt v in ptv * ptv
         !s = sqrt $ (getScale vis1 + getScale vis2 + getScale miss
-                     + mVis1 ** 2 + mInv1 ** 2 + mVis2 ** 2 + mInv2 ** 2) / 8.0
+                        + mVis1 * mVis1 + mInv1 * mInv1
+                        + mVis2 * mVis2 + mInv2 * mInv2) / 8.0
         m1Min = mVis1 + mInv1
         m2Min = mVis2 + mInv2
     in if m2Min > m1Min
@@ -64,10 +65,10 @@ bisect sec = do
     (mLower, mUpper) <- get
     Input {..} <- lift ask
     if mUpper - mLower <= precision
-        then return $ (mLower + mUpper) / 2.0
+        then return $! (mLower + mUpper) * 0.5
         else do let trialM = if sec
                              then (mLower * 15 + mUpper) / 16
-                             else (mLower + mUpper) / 2
+                             else (mLower + mUpper) * 0.5
                 if trialM <= mLower || trialM >= mUpper
                     then return trialM
                     else do
@@ -84,36 +85,37 @@ mkEllipse :: Mass -- ^ The test parent mass
           -> Mass -- ^ The mass of the inivisible particle
           -> FourMomentum -> TransverseMomentum -> Maybe CoeffMatrix
 mkEllipse m mInv vis inv =
-    let !mVis = mass vis
-        mVisSq = mVis ** 2
-        mInvSq = mInv ** 2
-        mSq = m ** 2
+    let mVis = mass vis
+        mVisSq = mVis * mVis
+        mInvSq = mInv * mInv
+        mSq = m * m
         !(px', py') = pxpy vis
         !(kx', ky') = pxpy inv
-        !axx = 4 * mVis ** 2 + 4 * py' ** 2
-        !ayy = 4 * mVis ** 2 + 4 * px' ** 2
+        !axx = 4 * (mVisSq + py' * py')
+        !ayy = 4 * (mVisSq + px' * px')
         !axy = - 4 * px' * py'
         !ax  = - 4 * mVisSq * kx' - 2 * mInvSq * px' + 2 * mSq * px'
-               - 2 * mVisSq * px' + 4 * ky' * px' * py' - 4 * kx' * py' ** 2
-        !ay  = - 4 * mVisSq * ky' - 4 * ky' * px' ** 2 - 2 * mInvSq * py'
+               - 2 * mVisSq * px' + 4 * ky' * px' * py' - 4 * kx' * py' * py'
+        !ay  = - 4 * mVisSq * ky' - 4 * ky' * px' * px' - 2 * mInvSq * py'
                + 2 * mSq * py' - 2 * mVisSq * py' + 4 * kx' * px' * py'
-        !az  = - mInvSq ** 2 + 2 * mInvSq * mSq - mSq ** 2 + 2 * mInvSq * mVisSq
-               + 2 * mSq * mVisSq - mVisSq ** 2 + 4 * mVisSq * kx' ** 2
-               + 4 * mVisSq * ky' ** 2 + 4 * mInvSq * kx' * px'
-               - 4 * mSq * kx' * px' + 4 * mVisSq * kx' * px'
-               + 4 * mInvSq * px' ** 2 + 4 * (ky' ** 2) * (px' ** 2)
-               + 4 * mInvSq * ky' * py' - 4 * mSq * ky' * py'
-               + 4 * mVisSq * ky' * py' - 8 * kx' * ky' * px' * py'
-               + 4 * mInvSq * py' ** 2 + 4 * (kx' ** 2) * (py' ** 2)
+        !az  = - mInvSq * mInvSq + 2 * mInvSq * mSq
+               - mSq * mSq + 2 * mInvSq * mVisSq
+               + 2 * mSq * mVisSq - mVisSq * mVisSq
+               - 4 * mSq * (kx' * px' + ky' * py')
+               + 4 * mVisSq * (kx' * kx' + ky' * ky' + kx' * px' + ky' * py')
+               + 4 * mInvSq * (px' * px' + py' * py' + kx' * px' + ky' * py')
+               + 4 * (ky' * ky' * px' * px' + kx' * kx' * py' * py')
+               - 8 * kx' * ky' * px' * py'
     in mkCoeffMatrix axx ayy axy ax ay az
 
 mkCoeffMatrix :: Double -> Double -> Double -> Double -> Double -> Double
               -> Maybe CoeffMatrix
-mkCoeffMatrix axx ayy axy ax ay az =
-    let row1 = V3 axx axy ax
-        row2 = V3 axy ayy ay
-        row3 = V3 ax  ay  az
-    in if axx < 0 || ayy < 0 then Nothing else Just (V3 row1 row2 row3)
+mkCoeffMatrix axx ayy axy ax ay az | axx < 0 || ayy < 0 = Nothing
+                                   | otherwise          = do
+                                         let row1 = V3 axx axy ax
+                                             row2 = V3 axy ayy ay
+                                             row3 = V3 ax  ay  az
+                                         return (V3 row1 row2 row3)
 
 cxx, cxy, cx, cyy, cy, cz :: CoeffMatrix -> Double
 cxx = (^._x._x)
@@ -141,21 +143,20 @@ coeffLamPow m1 m2 =
                       in axx * ayy * b + 2.0 * axy * ay * bx - 2 * ax * ayy * bx
                          + a * ayy * bxx - 2 * a * axy * bxy + 2 * ax * ay * bxy
                          + 2 * ax * axy * by - 2 * axx * ay * by + a * axx * byy
-                         - byy * ax ** 2 - b * axy ** 2 - bxx * ay ** 2
+                         - byy * ax * ax - b * axy * axy - bxx * ay * ay
 
 ellipsesAreDisjoint :: Maybe CoeffMatrix -> Maybe CoeffMatrix -> Maybe Bool
 ellipsesAreDisjoint Nothing   _         = Nothing
 ellipsesAreDisjoint _         Nothing   = Nothing
 ellipsesAreDisjoint (Just m1) (Just m2)
-    | m1 == m2 = Just False
-    | otherwise =
+    | m1 == m2 = return False
+    | otherwise = do
       let [c3, c2, c1, c0] = coeffLamPow m1 m2
-      in case c3 of
+      case c3 of
           0 -> Nothing
-          _ -> let [a, b, c] = map (/ c3) [c2, c1, c0]
-                   s2 = - 3 * b + a ** 2
-                   s4 = - 27 * c ** 2 + 18 * c * a * b + (a ** 2) * (b ** 2)
-                        - 4 * c * a ** 3 - 4 * b ** 3
-               in if s2 <= 0 || s4 <= 0
-                  then Just False
-                  else Just (a < 0 || 3 * a * c + b * a ** 2 - 4 * b ** 2 < 0)
+          _ -> do let [a, b, c] = map (/ c3) [c2, c1, c0]
+                      s2 = - 3 * b + a * a
+                      s4 = - 27 * c * c + 18 * c * a * b + a * a * b * b
+                           - 4 * c * a ** 3 - 4 * b ** 3
+                  return $ not (s2 <= 0 || s4 <= 0)
+                      && (a < 0 || 3 * a * c + b * a * a - 4 * b * b < 0)
