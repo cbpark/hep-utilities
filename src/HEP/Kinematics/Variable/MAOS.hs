@@ -168,12 +168,12 @@ kLowerUpper vis mVis mInv mT2 =
 newkxFrom :: Double -> Input -> Maybe (Double, Double)
 newkxFrom ky Input {..} = do
     let (px', py') = pxpy visible1
-        !visEtSq = transverseEnergy visible1 ** 2
+        !visEtSq = let eT = transverseEnergy visible1 in eT * eT
         !mInvSq = mInvisible1 * mInvisible1
         !d = mParent1 * mParent1 - mVisible1 * mVisible1 - mInvSq
-        a = 4 * (visEtSq - px' ** 2)
+        a = 4 * (visEtSq - px' * px')
         b = - 2 * px' * d - 4 * px' * py' * ky
-        c = 4 * (visEtSq - py' ** 2) * ky * ky - 4 * d * py' * ky
+        c = 4 * (visEtSq - py' * py') * ky * ky - 4 * d * py' * ky
             + 4 * visEtSq * mInvSq - d * d
         term2Sq = b * b - a * c
     if term2Sq < 0
@@ -207,7 +207,7 @@ mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
 mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
-        let !ky' = ky + scale userInput / 1.0e+5
+        let ky' = ky + scale userInput / 1.0e+5
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
@@ -254,7 +254,7 @@ longitudinalP vis invis mY mX =
         d = 0.5 * (mY * mY - mXSq - visMass * visMass) + visTrans `dot` invis
         visEt = transverseEnergy vis
         invisEt = sqrt $ pt invis ** 2 + mXSq
-        disc = d * d - (visEt * invisEt) ** 2
+        disc = d * d - visEt * visEt * invisEt * invisEt
         disc' = if abs disc < 1.0e-4 then 0 else disc
     in if disc' < 0
        then [Nothing]
