@@ -33,7 +33,7 @@ maosMomenta :: Double                          -- ^ the MT2 value
 maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
     let visM1 = mass vis1
         visM2 = mass vis2
-        getScale v = let !ptv = pt v in ptv * ptv
+        getScale v = let ptv = pt v in ptv * ptv
         !s = sqrt $
              (getScale vis1 + getScale vis2 + getScale miss
               + visM1 * visM1 + mX1 * mX1 + visM2 * visM2 + mX2 * mX2) / 8.0
@@ -155,10 +155,10 @@ startingPoint kLower inp@(input@Input {..}, kUpper) =
 
 kLowerUpper :: FourMomentum -> Mass -> Mass -> Mass -> (Double, Double)
 kLowerUpper vis mVis mInv mT2 =
-    let (!a, !b, !c) = coeffky vis mVis mInv mT2
+    let (a, b, c) = coeffky vis mVis mInv mT2
         a' = a + eps
-        !term1 = - b / a'
-        !term2 = sqrt (b * b - a * c) / a'
+        term1 = - b / a'
+        term2 = sqrt (b * b - a * c) / a'
         termP = term1 + term2
         termN = term1 - term2
     in if termP > termN then (termN, termP) else (termP, termN)
@@ -169,9 +169,9 @@ kLowerUpper vis mVis mInv mT2 =
 newkxFrom :: Double -> Input -> Maybe (Double, Double)
 newkxFrom ky Input {..} = do
     let (px', py') = pxpy visible1
-        !visEtSq = let eT = transverseEnergy visible1 in eT * eT
-        !mInvSq = mInvisible1 * mInvisible1
-        !d = mT2value * mT2value - mVisible1 * mVisible1 - mInvSq
+        visEtSq = let eT = transverseEnergy visible1 in eT `seq` eT * eT
+        mInvSq = mInvisible1 * mInvisible1
+        d = mT2value * mT2value - mVisible1 * mVisible1 - mInvSq
         a = 4 * (visEtSq - px' * px')
         b = - 2 * px' * d - 4 * px' * py' * ky
         c = 4 * (visEtSq - py' * py') * ky * ky - 4 * d * py' * ky
@@ -212,7 +212,7 @@ mT2BalSol input@Input' {..} = do
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
-                let (kx1', !deltaM') = deltaMT kx1a kx1b ky' userInput
+                let (kx1', deltaM') = deltaMT kx1a kx1b ky' userInput
                 if deltaM' < deltaM
                     then put (Just (kx1', ky'), ky', deltaM')
                     else put (              k0, ky', deltaM )
@@ -223,7 +223,7 @@ mT2BalSol input@Input' {..} = do
 mT2UnbalSol :: Input -> Maybe (Double, Double)
 mT2UnbalSol Input {..}
     | mVisible1 < eps = Nothing
-    | otherwise       = do let r = mInvisible1 / mVisible1
+    | otherwise       = do let !r = mInvisible1 / mVisible1
                                (px1, py1) = pxpy visible1
                            return (r * px1, r * py1)
 
