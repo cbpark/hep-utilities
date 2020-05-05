@@ -171,7 +171,7 @@ newkxFrom ky Input {..} = do
     let (px', py') = pxpy visible1
         !visEtSq = let eT = transverseEnergy visible1 in eT * eT
         !mInvSq = mInvisible1 * mInvisible1
-        !d = mParent1 * mParent1 - mVisible1 * mVisible1 - mInvSq
+        !d = mT2value * mT2value - mVisible1 * mVisible1 - mInvSq
         a = 4 * (visEtSq - px' * px')
         b = - 2 * px' * d - 4 * px' * py' * ky
         c = 4 * (visEtSq - py' * py') * ky * ky - 4 * d * py' * ky
