@@ -208,7 +208,7 @@ mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
 mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
-        let !ky' = ky + scale userInput / 1.0e+5
+        let !ky' = ky + scale userInput / 2.0e+5
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
