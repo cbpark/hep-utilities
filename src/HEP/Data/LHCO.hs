@@ -61,7 +61,6 @@ numJet = numObjs jet
 numBjet :: (PhyObj Bjet -> Bool) -> Reader Event Int
 numBjet = numObjs bjet
 
-missingET :: Reader Event TransverseMomentum
-missingET = do e <- ask
-               let ObjMet (phi', pt') = met e
-               return (setPtPhi pt' phi')
+missingET :: Event -> TransverseMomentum
+missingET ev = let ObjMet (phi', pt') = met ev in setPtPhi pt' phi'
+{-# INLINE missingET #-}
