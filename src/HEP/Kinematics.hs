@@ -27,6 +27,7 @@ module HEP.Kinematics
     , transverseMassCluster
     , transverseVector
     , transverseEnergy
+    , promoteTV
     , ptCompare
     , ptScalarSum
     , ptVectorSum
@@ -175,6 +176,11 @@ transverseEnergy v = let !m = mass v
                          !pt' = pt v
                      in sqrt $! m * m + pt' * pt'
 {-# INLINE transverseEnergy #-}
+
+promoteTV :: TransverseMomentum -> Double -> LorentzTVector Double
+promoteTV v2 m = let eT = sqrt $ quadrance v2 + m * m
+                 in eT `seq` TV.setXYT (px v2) (py v2) eT
+{-# INLINE promoteTV #-}
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.
