@@ -16,7 +16,6 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 import System.Random.MWC
 
-type Mass = Double
 type Splitting = TransverseMomentum
 data Result = Result { recomass :: Mass, splitting :: TransverseMomentum }
 

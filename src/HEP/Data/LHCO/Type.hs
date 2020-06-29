@@ -18,7 +18,7 @@
 
 module HEP.Data.LHCO.Type where
 
-import HEP.Kinematics                      (HasFourMomentum (..))
+import HEP.Kinematics                      (HasFourMomentum (..), Mass)
 import HEP.Kinematics.Vector.LorentzVector (setEtaPhiPtM)
 
 data Header = Header { lhcoNumEve      :: Int -- ^ event number.
@@ -82,7 +82,6 @@ data Unknown
 type Eta = Double
 type Phi = Double
 type Pt = Double
-type Mass = Double
 type Ntrk = Int
 
 newtype Track = Track (Eta, Phi, Pt) deriving Eq

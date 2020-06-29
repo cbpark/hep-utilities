@@ -17,19 +17,22 @@ module HEP.Kinematics
     (
       HasFourMomentum (..)
     , FourMomentum
+    , Mass
     , SpatialMomentum
     , TransverseMomentum
     , module LM
     , module LV
 
     , invariantMass
+    , invariantMassSq
     , transverseMass
     , transverseMass1
     , transverseMassCluster
     , transverseVector
     , transverseEnergy
-    , promoteTV
-    , promoteV
+    , promote2TV
+    , promote2V3
+    , promote2V4
     , ptCompare
     , ptScalarSum
     , ptVectorSum
@@ -64,6 +67,8 @@ import           Linear.V4                            (R4 (..), V4 (..))
 import           Linear.Vector                        as LV
 
 type FourMomentum = LorentzVector Double
+
+type Mass = Double
 
 -- | Type class for four-momentum objects in high-energy processes.
 --
@@ -148,6 +153,11 @@ invariantMass :: (Traversable f, HasFourMomentum a) => f a -> Double
 invariantMass = LV.invariantMass . momentumSum
 {-# INLINE invariantMass #-}
 
+-- | Invariant mass squared.
+invariantMassSq :: (Traversable f, HasFourMomentum a) => f a -> Double
+invariantMassSq = quadrance . momentumSum
+{-# INLINE invariantMassSq #-}
+
 -- | Transverse mass of the visible + invisible particle system.
 transverseMass :: (Traversable f, HasFourMomentum a)
                => f a -> LorentzTVector Double -> Double
@@ -179,15 +189,25 @@ transverseEnergy v = let !m = mass v
                      in sqrt $! m * m + pt' * pt'
 {-# INLINE transverseEnergy #-}
 
-promoteTV :: TransverseMomentum -> Double -> LorentzTVector Double
-promoteTV v2 m = let eT = sqrt $ quadrance v2 + m * m
-                 in eT `seq` TV.setXYT (px v2) (py v2) eT
-{-# INLINE promoteTV #-}
+promote2TV :: TransverseMomentum
+           -> Mass  -- ^ mass
+           -> LorentzTVector Double
+promote2TV v2 m = let eT = sqrt $ quadrance v2 + m * m
+                  in eT `seq` TV.setXYT (px v2) (py v2) eT
+{-# INLINE promote2TV #-}
 
-promoteV :: SpatialMomentum -> Double -> FourMomentum
-promoteV v3 m = let e = sqrt $ quadrance v3 + m * m
-                in e `seq` LV.setXYZT (px v3) (py v3) (pz v3) e
-{-# INLINE promoteV #-}
+promote2V3 :: TransverseMomentum
+           -> Double  -- ^ the longitudinal component
+           -> SpatialMomentum
+promote2V3 v2 = ThreeVector.setXYZ (px v2) (py v2)
+{-# INLINE promote2V3 #-}
+
+promote2V4 :: SpatialMomentum
+           -> Mass  -- ^ mass
+           -> FourMomentum
+promote2V4 v3 m = let e = sqrt $ quadrance v3 + m * m
+                  in e `seq` LV.setXYZT (px v3) (py v3) (pz v3) e
+{-# INLINE promote2V4 #-}
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.

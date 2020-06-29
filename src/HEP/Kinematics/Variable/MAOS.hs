@@ -9,7 +9,7 @@ module HEP.Kinematics.Variable.MAOS
     , momentumSolution
     ) where
 
-import HEP.Kinematics
+import HEP.Kinematics                       hiding (invariantMassSq)
 import HEP.Kinematics.Vector.LorentzTVector (setXYT)
 import HEP.Kinematics.Vector.LorentzVector  (invariantMassSq, setXYZT)
 import HEP.Kinematics.Vector.TwoVector      (setXY)
@@ -56,8 +56,6 @@ maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
                       miss' mY1' mY2' mX1' mX2' mT2' s
         (sol1, sol2) = maosMomenta' soltype input
     in (map (fmap (* s)) sol1, map (fmap (* s)) sol2, soltype)
-
-type Mass = Double
 
 data Input = Input { visible1    :: !FourMomentum
                    , visible2    :: !FourMomentum

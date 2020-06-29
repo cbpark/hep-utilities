@@ -3,7 +3,7 @@
 
 module HEP.Kinematics.Variable.MT2 (mT2) where
 
-import HEP.Kinematics
+import HEP.Kinematics                      hiding (invariantMassSq)
 import HEP.Kinematics.Vector.LorentzVector (invariantMassSq)
 
 import Control.Lens                        ((^.))
@@ -12,8 +12,6 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State.Strict
 import Linear.Matrix                       (M33, det33)
 import Linear.V3
-
-type Mass = Double
 
 data Input = Input { visible1        :: !FourMomentum
                    , visible2        :: !FourMomentum
