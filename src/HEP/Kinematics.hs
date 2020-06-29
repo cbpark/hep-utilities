@@ -17,6 +17,7 @@ module HEP.Kinematics
     (
       HasFourMomentum (..)
     , FourMomentum
+    , SpatialMomentum
     , TransverseMomentum
     , module LM
     , module LV
@@ -28,6 +29,7 @@ module HEP.Kinematics
     , transverseVector
     , transverseEnergy
     , promoteTV
+    , promoteV
     , ptCompare
     , ptScalarSum
     , ptVectorSum
@@ -181,6 +183,11 @@ promoteTV :: TransverseMomentum -> Double -> LorentzTVector Double
 promoteTV v2 m = let eT = sqrt $ quadrance v2 + m * m
                  in eT `seq` TV.setXYT (px v2) (py v2) eT
 {-# INLINE promoteTV #-}
+
+promoteV :: SpatialMomentum -> Double -> FourMomentum
+promoteV v3 m = let e = sqrt $ quadrance v3 + m * m
+                in e `seq` LV.setXYZT (px v3) (py v3) (pz v3) e
+{-# INLINE promoteV #-}
 
 -- | Comparison of objects by the magnitude of transverse momentum
 -- in descending order.
