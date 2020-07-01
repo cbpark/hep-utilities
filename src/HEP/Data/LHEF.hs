@@ -27,6 +27,8 @@ module HEP.Data.LHEF
     , pT
     , idOf
     , is
+    , momentumWithId
+
     , finalStates
     , initialStates
     , getDaughters
@@ -48,25 +50,35 @@ import qualified Data.IntMap                          as M
 
 getParticles :: Event -> [Particle]
 getParticles = M.elems . eventEntry
+{-# INLINE getParticles #-}
 
 pT :: Particle -> Double
 pT Particle { pup = (pupx, pupy, _, _, _) } = sqrt (pupx * pupx + pupy * pupy)
+{-# INLINE pT #-}
 
 idOf :: Particle -> Int
 idOf Particle {..} = idup
+{-# INLINE idOf #-}
 
 is :: Particle -> ParticleType -> Bool
 p `is` pid = ((`elem` getType pid) . abs . idup) p
+{-# INLINE is #-}
+
+momentumWithId :: Particle -> (Int, FourMomentum)
+momentumWithId p@Particle {..} = (idup, fourMomentum p)
+{-# INLINE momentumWithId #-}
 
 -- initialStates :: Reader EventEntry [Particle]
 -- initialStates = M.elems <$> asks (M.filter (\Particle {..} -> fst mothup == 1))
 initialStates :: EventEntry -> [Particle]
 initialStates = M.elems . M.filter (\Particle {..} -> fst mothup == 1)
+{-# INLINE initialStates #-}
 
 -- finalStates :: Reader EventEntry [Particle]
 -- finalStates = M.elems <$> asks (M.filter (\Particle { .. } -> istup == 1))
 finalStates :: EventEntry -> [Particle]
 finalStates = M.elems . M.filter (\Particle {..} -> istup == 1)
+{-# INLINE finalStates #-}
 
 particlesFrom :: ParticleType -> EventEntry -> [[Particle]]
 particlesFrom pid = runReader (particlesFrom' pid)
