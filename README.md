@@ -1,4 +1,7 @@
-# hep-utilities
+hep-utilities
+=============
+
+[![Build Status](https://travis-ci.com/cbpark/hep-utilities.svg?branch=master)](https://travis-ci.com/cbpark/hep-utilities)
 
 Types and functions for various vectors, kinematics variables, and utilities for collider studies. It also contains tools for analyzing data of Monte Carlo event generators in high energy physics such as [Les Houches Event File](http://home.thep.lu.se/~leif/LHEF/) (LHEF), LHC Olympics (LHCO), and [HepMC](http://hepmc.web.cern.ch/hepmc/)
 using Haskell.

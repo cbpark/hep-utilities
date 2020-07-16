@@ -1,0 +1,24 @@
+language: generic
+
+sudo: false
+cache:
+  directories:
+    - "$HOME/.stack"
+    - "$TRAVIS_BUILD_DIR/.stack-work"
+
+addons:
+  apt:
+    packages:
+      - libgsl-dev
+      - liblapack-dev
+
+before_install:
+  - mkdir -p ~/.local/bin
+  - export PATH=$HOME/.local/bin:$PATH
+  - travis_retry curl -L https://get.haskellstack.org/stable/linux-x86_64.tar.gz | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
+
+install:
+  - stack -j 2 build --only-snapshot --no-terminal
+
+script:
+  - stack -j 2 build --no-terminal --fast --flag mantler:hep-utilities
