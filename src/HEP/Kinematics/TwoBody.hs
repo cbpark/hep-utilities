@@ -24,11 +24,11 @@ import HEP.Kinematics.Vector.LorentzVector (setXYZT)
 import Control.Monad                       (guard)
 import Linear.Metric                       (Metric (..))
 
-data TwoBodyEvent = TwoBodyEvent { initial      :: TwoBodyStates
-                                 , final        :: TwoBodyStates
-                                 , scale        :: Double
-                                 , cosAngle     :: Double
-                                 , azimuthAngle :: Double
+data TwoBodyEvent = TwoBodyEvent { initial      :: !TwoBodyStates
+                                 , final        :: !TwoBodyStates
+                                 , scale        :: !Double
+                                 , cosAngle     :: !Double
+                                 , azimuthAngle :: !Double
                                  } deriving Show
 
 type TwoBodyStates = (FourMomentum, FourMomentum)
@@ -43,7 +43,7 @@ mkTwoBodyEvent s (m1, m2, m3, m4) (r1, r2) = do
          && r1 >= 0 && r1 < 1 && r2 >= 0 && r2 < 1
 
     let scaleSq = s * s
-        (m1Sq, m2Sq, m3Sq, m4Sq) = (m1 * m1, m2 * m2, m3 * m3, m4 * m4)
+        [m1Sq, m2Sq, m3Sq, m4Sq] = (\m -> m * m) <$> [m1, m2, m3, m4]
         costh = -1 + 2 * r1
         sinth = sqrt (1 - costh * costh)
         phi = 2 * pi * r2

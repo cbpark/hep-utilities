@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 749c051206a788f27b21475da707291987fbec759a5da9dc9af581d4f0e841f5
+-- hash: cbd7935a158ab5f4bd75c4f527c8d947f0159455f79be1c6cb9795a409359a05
 
 name:           hep-utilities
 version:        0.1.0.0
@@ -64,7 +64,7 @@ library
       HEP.Util.Polynomial
   hs-source-dirs:
       src
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fno-warn-unused-do-bind
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie -fno-warn-unused-do-bind
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -87,7 +87,7 @@ executable hepmc_parse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -110,7 +110,7 @@ executable hepmc_pipesparse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -133,7 +133,7 @@ executable lhco_parse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -156,7 +156,7 @@ executable lhco_pipesparse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -179,7 +179,7 @@ executable lhef_parse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -202,7 +202,7 @@ executable lhef_pipesparse
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -225,7 +225,7 @@ executable mat
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -248,7 +248,7 @@ executable mt2
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -271,7 +271,7 @@ executable mtbound
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5
@@ -294,7 +294,7 @@ executable twobody
       Paths_hep_utilities
   hs-source-dirs:
       examples
-  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields
+  ghc-options: -Wall -Wcompat -O2 -funbox-strict-fields -fwrite-ide-info -hiedir=.hie
   build-depends:
       attoparsec
     , base >=4.12.0.0 && <5

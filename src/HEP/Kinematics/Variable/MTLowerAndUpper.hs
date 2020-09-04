@@ -17,7 +17,7 @@ import Control.Monad.Trans.State
 import System.Random.MWC
 
 type Splitting = TransverseMomentum
-data Result = Result { recomass :: Mass, splitting :: TransverseMomentum }
+data Result = Result { recomass :: !Mass, splitting :: !TransverseMomentum }
 
 type StepSize = Double
 

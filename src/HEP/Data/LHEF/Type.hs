@@ -1,3 +1,5 @@
+{-# LANGUAGE StrictData #-}
+
 --------------------------------------------------------------------------------
 -- |
 -- Module      :  HEP.Data.LHEF.Type
@@ -22,7 +24,7 @@ import HEP.Kinematics.Vector.LorentzVector (setXYZT)
 
 data EventInfo = EventInfo
                  { -- | Number of particle entries in the event.
-                   nup    :: {-# UNPACK #-} !Int
+                   nup    :: Int
                    -- | ID of the process for the event.
                  , idprup :: Int
                    -- | Event weight.
@@ -37,16 +39,16 @@ data EventInfo = EventInfo
 
 data Particle = Particle
                 { -- | Particle ID according to Particle Data Group convention.
-                  idup   :: {-# UNPACK #-} !Int
+                  idup   :: Int
                   -- | Status code.
-                , istup  :: {-# UNPACK #-} !Int
+                , istup  :: Int
                   -- | Index of first and last mother.
-                , mothup :: {-# UNPACK #-} !(Int, Int)
+                , mothup :: (Int, Int)
                   -- | Integer tag for the color flow line passing through the
                   -- (anti-)color of the particle.
                 , icolup :: (Int, Int)
                   -- | Lab frame momentum (P_x, P_y, P_z, E, M) of particle in GeV.
-                , pup    :: {-# UNPACK #-} !(Double, Double, Double, Double, Double)
+                , pup    :: (Double, Double, Double, Double, Double)
                   -- | Invariant lifetime (distance from production to decay) in mm.
                 , vtimup :: Double
                   -- | Consine of the angle between the spin-vector of particle and

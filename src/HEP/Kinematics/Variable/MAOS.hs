@@ -116,7 +116,7 @@ maosMomenta' soltype input@Input {..} =
                then ([], [])
                else (kSol1, kSol2)
 
-data Input' = Input' { userInput :: Input, upperBound :: !Double }
+data Input' = Input' { userInput :: !Input, upperBound :: !Double }
 
 mT2Solution :: SolutionType
             -> Input
