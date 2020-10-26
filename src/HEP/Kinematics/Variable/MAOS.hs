@@ -115,7 +115,7 @@ maosMomenta' soltype input@Input {..} =
                then ([], [])
                else (kSol1, kSol2)
 
-data Input' = Input' { userInput :: !Input, upperBound :: !Double }
+data Input' = Input' { userInput :: !Input, upperBound :: !Double, deltaK :: !Double }
 
 mT2Solution :: SolutionType
             -> Input
@@ -131,11 +131,12 @@ mT2Solution soltyp input@Input {..} = do
         then return (mT2UnbalSol input)
         else do let (!kLower, !kUpper) =
                         kLowerUpper visible1 mVisible1 mInvisible1 mT2value
+                    deltaK = (kUpper - kLower) / 1.0e+4;
                 case startingPoint kLower (input, kUpper) of
                     Nothing                -> Nothing
                     Just (kx1, ky, !deltaM) -> do
                         let (kSol', _, _) =
-                                execState (mT2BalSol (Input' input kUpper))
+                                execState (mT2BalSol (Input' input kUpper deltaK))
                                 (Just (kx1, ky), ky, deltaM)
                         return kSol'
 
@@ -205,7 +206,7 @@ mT2BalSol :: Input' -> State (Maybe (Double, Double), Double, Mass) ()
 mT2BalSol input@Input' {..} = do
     (k0, ky, deltaM) <- get
     unless (ky > upperBound) $ do
-        let !ky' = ky + scale userInput / 2.0e+5
+        let !ky' = ky + deltaK
         case newkxFrom ky' userInput of
             Nothing           -> put (k0, ky', deltaM)
             Just (kx1a, kx1b) -> do
