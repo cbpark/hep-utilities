@@ -52,7 +52,7 @@ maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
         soltype = if balanced mT2 (vis1', visM1', mX1') (vis2', visM2', mX2')
                   then Balanced
                   else Unbalanced
-        input = Input vis1' vis2' visM1'
+        input = Input vis1' vis2' visM1' visM2'
                       miss' mY1' mY2' mX1' mX2' mT2' s
         (sol1, sol2) = maosMomenta' soltype input
     in (map (fmap (* s)) sol1, map (fmap (* s)) sol2, soltype)
@@ -60,6 +60,7 @@ maosMomenta mT2 (vis1, mY1, mX1) (vis2, mY2, mX2) miss =
 data Input = Input { visible1    :: !FourMomentum
                    , visible2    :: !FourMomentum
                    , mVisible1   :: !Mass
+                   , mVisible2   :: !Mass
                    , missing     :: !TransverseMomentum
                    , mParent1    :: !Mass
                    , mParent2    :: !Mass
@@ -77,14 +78,12 @@ balanced :: Mass
          -> (FourMomentum, Mass, Mass)
          -> (FourMomentum, Mass, Mass)
          -> Bool
-balanced mT2 (vis1, mVis1, mX1) (vis2, mVis2, mX2) =
-    let mMin1 = mVis1 + mX1
-        mMin2 = mVis2 + mX2
-        balanced' vis mVis mX = let (a, b, c) = coeffky vis mVis mX mT2
-                                in b * b - a * c >= 0
-    in if mMin1 < mMin2
-       then balanced' vis1 mVis1 mX1
-       else balanced' vis2 mVis2 mX2
+balanced mT2 (vis1, mVis1, mX1) (vis2, mVis2, mX2)
+    | mVis1 + mX1 < mVis2 + mX2 = balanced' vis1 mVis1 mX1
+    | otherwise                 = balanced' vis2 mVis2 mX2
+  where
+    balanced' vis mVis mX = let (a, b, c) = coeffky vis mVis mX mT2
+                            in b * b - a * c >= 0
 
 -- |
 -- This gives the coefficients of equations, a ky^2 + 2 b ky + c = 0,
@@ -220,11 +219,19 @@ mT2BalSol input@Input' {..} = do
 -- See Eq. (14) in <http://arxiv.org/abs/0711.4526 arXiv:0711.4526>.
 mT2UnbalSol :: Input -> Maybe (Double, Double)
 mT2UnbalSol Input {..}
-    | mVisible1 < eps = Nothing
-    | otherwise       = do let !r = mInvisible1 / mVisible1
-                               (px1, py1) = pxpy visible1
-                           return (r * px1, r * py1)
-
+    | mVisible1 + mInvisible1 > mVisible2 + mInvisible2 =
+          if mVisible1 < eps
+          then Nothing
+          else do let !r = mInvisible1 / mVisible1
+                      (px1, py1) = pxpy visible1
+                  return (r * px1, r * py1)
+    | otherwise =
+          if mVisible2 < eps
+          then Nothing
+          else do let !r = mInvisible2 / mVisible2
+                      (px2, py2) = pxpy visible2
+                      (ptmissx, ptmissy) = pxpy missing
+                  return (ptmissx - r * px2, ptmissy - r * py2)
 -- |
 -- calculates the possible momentum solutions for the decay topology of
 -- parent --> visible invisible, where the longitudinal momentum of invisible
